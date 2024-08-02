@@ -14,6 +14,7 @@ export default function NavLinks() {
       <div className="flex lg:flex-1">
         <Link href="/" className="-m-1.5 p-1.5">
           <span className="sr-only">KitaHub</span>
+          {/* TODO: Replace with Next.js Image component */}
           <img
             alt="KitaHub Logo"
             src="logo-navbar.svg"
