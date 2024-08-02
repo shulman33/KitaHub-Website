@@ -36,15 +36,16 @@ export default function Hero() {
             </div>
           </div>
         </div>
-        <div className="mt-10 lg:-mt-52">
+        <div className="relative mt-10 lg:-mt-52">
           <Image
             src="/HeroImage.png"
             alt="Hero Image"
             layout="responsive"
             width={1500}
             height={500}
-            className="w-full h-auto"
+            className="w-full h-auto z-10 relative"
           />
+          <div className="absolute bottom-0 left-0 w-full h-[14%] bg-white z-0"></div>
         </div>
       </div>
     </div>
