@@ -1,6 +1,6 @@
 import Image from "next/image";
-export default function Hero() {
 
+export default function Hero() {
   return (
     <div className="bg-secondary-color">
       <div className="relative isolate pt-14">
@@ -34,18 +34,17 @@ export default function Hero() {
                 </a>
               </div>
             </div>
-            <div className="mt-16 flow-root sm:mt-24">
-              <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4">
-                <img
-                  alt="App screenshot"
-                  src="https://tailwindui.com/img/component-images/project-app-screenshot.png"
-                  width={2432}
-                  height={1442}
-                  className="rounded-md shadow-2xl ring-1 ring-gray-900/10"
-                />
-              </div>
-            </div>
           </div>
+        </div>
+        <div className="mt-10 lg:-mt-52">
+          <Image
+            src="/HeroImage.png"
+            alt="Hero Image"
+            layout="responsive"
+            width={1500}
+            height={500}
+            className="w-full h-auto"
+          />
         </div>
       </div>
     </div>

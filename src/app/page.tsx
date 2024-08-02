@@ -1,4 +1,4 @@
-import Hero from "./ui/hero";
+import Hero from "@/app/ui/hero";
 
 
 export default function Example() {
