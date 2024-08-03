@@ -24,7 +24,7 @@ export default function Subjects() {
         </div>
         <div className="flex mt-14 items-center justify-center">
           <Button
-            href="/about-us"
+            href="/subjects"
             text="View All Subjects"
             variant="secondary"
             withIcon={true}
