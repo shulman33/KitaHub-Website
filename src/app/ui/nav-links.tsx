@@ -14,8 +14,10 @@ const navigation = [
   { name: "Help", href: "/help" },
 ];
 
-
-export default function NavLinks({ isMobile = false, closeMobileMenu }: NavLinksProps) {
+export default function NavLinks({
+  isMobile = false,
+  closeMobileMenu,
+}: NavLinksProps) {
   return (
     <div
       className={`flex ${
@@ -64,6 +66,7 @@ export default function NavLinks({ isMobile = false, closeMobileMenu }: NavLinks
             className={`block text-base font-normal leading-6 text-gray-900 hover:bg-gray-50 ${
               isMobile ? "-mx-3 rounded-lg px-3 py-2" : ""
             }`}
+            onClick={isMobile ? closeMobileMenu : undefined}
           >
             {item.name}
           </Link>
@@ -95,6 +98,7 @@ export default function NavLinks({ isMobile = false, closeMobileMenu }: NavLinks
           <Link
             href="#"
             className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-normal leading-7 text-gray-900 hover:bg-gray-50"
+            onClick={closeMobileMenu}
           >
             Log in
           </Link>
@@ -102,5 +106,4 @@ export default function NavLinks({ isMobile = false, closeMobileMenu }: NavLinks
       )}
     </div>
   );
-};
-
+}
