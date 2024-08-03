@@ -1,12 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
-
-const stats = [
-  { label: "Founded", value: "2021" },
-  { label: "Employees", value: "37" },
-  { label: "Countries", value: "12" },
-  { label: "Raised", value: "$25M" },
-];
+import Button from "./button";
 
 export default function AboutUs() {
   return (
@@ -16,11 +9,11 @@ export default function AboutUs() {
           <div className="flex flex-col items-start rounded-xl max-w-[584px] max-md:pr-5 lg:mr-5">
             <div className="flex flex-col justify-center items-start pt-5 pl-5 pb-5 rounded-xl bg-blue-600 bg-opacity-10 max-md:max-w-full">
               <Image
-                loading="lazy"
-                src="/AboutUs.png"
+                src="/logo3d.jpg"
                 alt="text"
                 width={564}
                 height={498}
+                className="rounded-xl"
               />
             </div>
           </div>
@@ -55,17 +48,14 @@ export default function AboutUs() {
             </div>
 
             <div className="mt-10 flex">
-              <Link
+              <Button
                 href="/about-us"
-                className="rounded-md bg-white border border-solid border-secondary-2rd-color px-6 py-3 text-sm font-semibold text-secondary-2rd-color shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 whitespace-nowrap"
-              >
-                <div className="flex items-center justify-center gap-x-2">
-                  <span className="text-black font-semibold text-[20px] leading-[24px]">
-                    Read More
-                  </span>
-                  <Image src="/arrow.svg" alt="Arrow" width={28} height={28} />
-                </div>
-              </Link>
+                text="Read More"
+                variant="secondary"
+                withIcon={true}
+                border={true}
+                textColor="black"
+              />
             </div>
           </div>
         </div>

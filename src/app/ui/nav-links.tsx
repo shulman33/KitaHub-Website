@@ -1,4 +1,10 @@
+// components/NavLinks.tsx
+import React from "react";
 import Link from "next/link";
+import Button from "./button";
+import Image from "next/image";
+import { XMarkIcon } from "@heroicons/react/24/outline";
+import { NavLinksProps } from "@/app/lib/types";
 
 const navigation = [
   { name: "Home", href: "/" },
@@ -8,45 +14,93 @@ const navigation = [
   { name: "Help", href: "/help" },
 ];
 
-export default function NavLinks() {
+
+export default function NavLinks({ isMobile = false, closeMobileMenu }: NavLinksProps) {
   return (
-    <>
-      <div className="flex lg:flex-1">
+    <div
+      className={`flex ${
+        isMobile ? "flex-col space-y-6" : "items-center justify-between w-full"
+      }`}
+    >
+      <div
+        className={`flex ${
+          isMobile ? "justify-between items-center" : "flex-1"
+        }`}
+      >
         <Link href="/" className="-m-1.5 p-1.5">
           <span className="sr-only">KitaHub</span>
-          {/* TODO: Replace with Next.js Image component */}
-          <img
+          <Image
             alt="KitaHub Logo"
-            src="logo-navbar.svg"
+            src="/logo-navbar.svg"
             className="h-12 sm:h-11 w-auto"
+            width={150}
+            height={48}
           />
         </Link>
+        {isMobile && (
+          <>
+            <button
+              type="button"
+              className="-m-2.5 rounded-md p-2.5 text-gray-700"
+              aria-label="Close menu"
+              onClick={closeMobileMenu}
+            >
+              <span className="sr-only">Close menu</span>
+              <XMarkIcon aria-hidden="true" className="h-6 w-6" />
+            </button>
+          </>
+        )}
       </div>
-      <div className="hidden lg:flex lg:gap-x-12">
+
+      <div
+        className={`${
+          isMobile ? "space-y-2 py-6" : "hidden lg:flex lg:gap-x-12"
+        }`}
+      >
         {navigation.map((item) => (
-          <a
+          <Link
             key={item.name}
             href={item.href}
-            className="text-base font-normal leading-6 text-gray-900"
+            className={`block text-base font-normal leading-6 text-gray-900 hover:bg-gray-50 ${
+              isMobile ? "-mx-3 rounded-lg px-3 py-2" : ""
+            }`}
           >
             {item.name}
-          </a>
+          </Link>
         ))}
       </div>
-      <div className="hidden lg:flex flex-1 items-center justify-end gap-x-6">
-        <Link
-          href="#"
-          className="rounded-md bg-secondary-2rd-color px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 whitespace-nowrap"
-        >
-          Sign Up
-        </Link>
-        <Link
-          href="#"
-          className="rounded-md bg-white border border-solid border-secondary-2rd-color px-6 py-3 text-sm font-semibold text-secondary-2rd-color shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 whitespace-nowrap"
-        >
-          Log In
-        </Link>
-      </div>
-    </>
+
+      {!isMobile && (
+        <div className="hidden lg:flex flex-1 items-center justify-end gap-x-6">
+          <Button
+            href="#"
+            text="Sign Up"
+            variant="primary"
+            border={false}
+            textSize="text-sm"
+          />
+          <Button
+            href="#"
+            text="Log In"
+            variant="secondary"
+            border={true}
+            textColor="accent-purple"
+            textSize="text-sm"
+          />
+        </div>
+      )}
+
+      {isMobile && (
+        <div className="py-6">
+          <Link
+            href="#"
+            className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-normal leading-7 text-gray-900 hover:bg-gray-50"
+          >
+            Log in
+          </Link>
+        </div>
+      )}
+    </div>
   );
-}
+};
+
