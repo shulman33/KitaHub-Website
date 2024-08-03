@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function HeaderRibbon() {
   return (
-    <div className="hidden lg:flex bg-secondary-color p-3 items-center justify-between">
+    <div className="hidden lg:flex bg-primary p-3 items-center justify-between">
       <div className="contact-info flex items-center space-x-8 ml-32">
         <div className="flex items-center space-x-3">
           <Image src="/telephone.svg" alt="Telephone" width={20} height={20} />

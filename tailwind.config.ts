@@ -5,11 +5,12 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        "primary-color": "var(--primary-color)",
-        "secondary-2rd-color": "var(--secondary-2rd-color)",
-        "secondary-3rd-color": "var(--secondary-3rd-color)",
-        "secondary-4th-color": "var(--secondary-4th-color)",
-        "secondary-color": "var(--secondary-color)",
+        "primary": "rgba(13, 108, 255, 1)",
+        "accent-purple": "rgba(214, 32, 255, 1)",
+        "accent-purple-hover": "rgba(224, 120, 255, 1)",
+        "cool-gray": "rgba(148, 163, 187, 1)",
+        "light-blue": "rgba(226, 232, 240, 1)",
+        "dark-blue": "rgba(17, 23, 41, 1)",
       },
     },
   },

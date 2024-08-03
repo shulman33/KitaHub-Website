@@ -1,8 +1,9 @@
 import Image from "next/image";
+import Button from "./button";
 
 export default function Hero() {
   return (
-    <div className="bg-secondary-color relative isolate pt-14">
+    <div className="bg-primary relative isolate pt-14">
       <div className="absolute inset-0">
         <div
           className="absolute inset-0 bg-no-repeat bg-cover"
@@ -21,17 +22,14 @@ export default function Hero() {
               Academic Performance
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
-              <a
-                href="#"
-                className="rounded-md bg-white w-[188px] h-[60px] px-7 py-4 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              >
-                <div className="flex items-center justify-center gap-x-2">
-                  <span className="text-black font-semibold text-[20px] leading-[24px]">
-                    Join Now
-                  </span>
-                  <Image src="/arrow.svg" alt="Arrow" width={28} height={28} />
-                </div>
-              </a>
+              <Button
+                href="/"
+                text="Join Now"
+                variant="secondary"
+                withIcon={true}
+                border={false}
+                textColor="black"
+              />
             </div>
           </div>
         </div>

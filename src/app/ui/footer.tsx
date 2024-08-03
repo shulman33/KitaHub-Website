@@ -93,7 +93,7 @@ const navigation = {
 
 export default function Footer() {
   return (
-    <footer aria-labelledby="footer-heading" className="bg-primary-color">
+    <footer aria-labelledby="footer-heading" className="bg-dark-blue">
       <h2 id="footer-heading" className="sr-only">
         Footer
       </h2>
@@ -201,7 +201,7 @@ export default function Footer() {
         </div>
         <div className="mt-16 border-t border-white/10 pt-8 sm:mt-20 lg:mt-24">
           <p className="text-xs leading-5 text-gray-400">
-            &copy; 2020 Your Company, Inc. All rights reserved.
+            &copy; 2024 KitaHub, Inc. All rights reserved.
           </p>
         </div>
       </div>
