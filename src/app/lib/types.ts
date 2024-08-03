@@ -25,3 +25,18 @@ export interface SubjectButtonProps {
   icon: string;
   subject: string;
 }
+
+export interface TextFieldProps {
+  label: string;
+  id: string;
+  type: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+export interface DropdownInputProps {
+  label: string;
+  options: string[];
+  selectedOption: string;
+  onOptionSelect: (option: string) => void;
+}

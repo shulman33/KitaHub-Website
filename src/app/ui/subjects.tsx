@@ -1,6 +1,6 @@
 import React from "react";
 import Button from "./button";
-import { cards } from "@/app/lib/placeholder-data";
+import { cards } from "@/app/lib/content";
 import SubjectButton from "./subject-button";
 
 
@@ -9,7 +9,7 @@ export default function Subjects() {
     <div className="bg-off-white py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+          <p className="mt-2 text-3xl font-bold tracking-tight text-midnight-blue sm:text-4xl">
             Explore How KITAHUB Supports Your Studies
           </p>
         </div>
