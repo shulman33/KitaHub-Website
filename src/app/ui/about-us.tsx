@@ -19,7 +19,7 @@ export default function AboutUs() {
           </div>
           <div>
             <div className="text-base leading-7 text-gray-700 lg:max-w-lg">
-              <h1 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-[48px]">
+              <h1 className="mt-2 text-3xl font-bold tracking-tight text-midnight-blue sm:text-[48px]">
                 About Us
               </h1>
               <div className="max-w-xl">
