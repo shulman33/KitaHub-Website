@@ -20,3 +20,8 @@ export interface NavLinksProps {
   isMobile?: boolean;
   closeMobileMenu?: () => void;
 }
+
+export interface SubjectButtonProps {
+  icon: string;
+  subject: string;
+}

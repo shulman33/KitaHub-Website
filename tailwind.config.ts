@@ -11,6 +11,7 @@ const config: Config = {
         "cool-gray": "rgba(148, 163, 187, 1)",
         "light-blue": "rgba(226, 232, 240, 1)",
         "dark-blue": "rgba(17, 23, 41, 1)",
+        "off-white": "#F8F8F8"
       },
     },
   },
