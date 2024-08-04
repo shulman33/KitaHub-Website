@@ -38,7 +38,6 @@ export default function Hero() {
         <Image
           src="/HeroImage.png"
           alt="Hero Image"
-          layout="responsive"
           width={1500}
           height={500}
           className="w-full h-auto z-10 relative"

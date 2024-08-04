@@ -7,6 +7,7 @@ import Footer from "@/app/ui/footer";
 const mont = Montserrat({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://kitahub.io"),
   title: "KitaHub",
   description:
     "Kitahub is an innovative educational platform developed by Yeshiva University students. It streamlines learning through standardized code testing and dynamic collaboration, bridging the gap between education and industry by providing authentic recruitment insights based on genuine academic performance.",
@@ -16,6 +17,17 @@ export const metadata: Metadata = {
       "Kitahub enhances learning with standardized code testing and dynamic collaboration, bridging education and industry by showcasing students' authentic skills and achievements.",
     url: "https://www.kitahub.io",
     type: "website",
+    images: [
+      {
+        url: "/logo-bg-blue.png",
+        width: 4167,
+        height: 4167,
+        alt: "Kitahub Logo",
+      },
+    ],
+  },
+  icons: {
+    icon: "/logo-bg-blue.png",
   },
 };
 
