@@ -105,11 +105,11 @@ export default function Contact() {
           or fill out our{" "}
           <span>
             <Link href="#contact" className="text-primary underline">
-              Contact Form,
+              Contact Form
             </Link>
-          </span>{" "}
-          and we'll get back to you promptly. At Kitahub, we're committed to
-          providing you with the best experience possible.
+          </span>
+          , and we&apos;ll get back to you promptly. At Kitahub, we&apos;re
+          committed to providing you with the best experience possible.
         </p>
       </div>
     </div>

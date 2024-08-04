@@ -28,8 +28,9 @@ export default function AboutUs() {
                   students from Yeshiva University who experienced firsthand the
                   challenges in classroom assignment grading and the recruitment
                   process. We saw how traditional educational tools often failed
-                  to reflect a student's true capabilities and how recruitment
-                  practices relied heavily on artificial assessments.
+                  to reflect a student&apos;s true capabilities and how
+                  recruitment practices relied heavily on artificial
+                  assessments.
                 </p>
                 <p className="mt-6">
                   Driven by a desire to make a meaningful change, we built
@@ -38,11 +39,11 @@ export default function AboutUs() {
                   fosters dynamic collaboration.
                 </p>
                 <p className="mt-6">
-                    Our
-                  mission extends to bridging the gap between academia and
+                  Our mission extends to bridging the gap between academia and
                   industry by providing recruiters with authentic insights into
-                  candidates' academic performance and contributions, making the
-                  path from education to career more transparent and effective.
+                  candidates&apos; academic performance and contributions,
+                  making the path from education to career more transparent and
+                  effective.
                 </p>
               </div>
             </div>
