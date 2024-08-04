@@ -10,7 +10,7 @@ export default function Button({
   withIcon = false,
   border = true,
   textColor,
-  textSize = "text-[20px]", // Default text size
+  textSize = "text-[20px]", 
 }: ButtonProps) {
   // Base classes for all buttons
   let baseClasses =
