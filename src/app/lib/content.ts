@@ -92,3 +92,36 @@ export const contactFields = [
     { label: "Phone", id: "phone", type: "phone" },
     { label: "University", id: "university", type: "text" },
   ];
+
+  export const features = [
+  {
+    name: "Real Time Q&A Board:",
+    description: [
+      "Engage in near real-time interactions with students and educators to facilitate deeper understanding and collaborative learning.",
+      "Connect with professors and peers for immediate support and clarification on complex topics.",
+      "Archive discussions for future reference, making it easy to revisit and learn from past Q&A sessions.",
+    ],
+    href: "#",
+    icon: "/qanda-icon.svg",
+  },
+  {
+    name: "Automated Code Testing",
+    description: [
+      "Ensure fairness and accuracy by testing code in a standardized environment that mirrors the instructor's setup.",
+      "Receive instant results on code submissions, allowing students to learn and improve in real-time.",
+      "Identify and address coding issues early, helping students refine their skills and produce high-quality work.",
+    ],
+    href: "#",
+    icon: "/code-testing-icon.svg",
+  },
+  {
+    name: "Feedback Integration",
+    description: [
+      "Provide detailed feedback on assignments, combining automated insights with personalized comments from instructors.",
+      "Foster open dialogue between students and educators to address specific areas of improvement and celebrate achievements.",
+      "Enable students to track their progress over time, encouraging growth and mastery of course material.",
+    ],
+    href: "#",
+    icon: "/feedback.svg",
+  },
+];
