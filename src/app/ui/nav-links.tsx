@@ -77,15 +77,8 @@ export default function NavLinks({
       {!isMobile && (
         <div className="hidden lg:flex flex-1 items-center justify-end gap-x-6">
           <Button
-            href="#"
-            text="Sign Up"
-            variant="primary"
-            border={false}
-            textSize="text-sm"
-          />
-          <Button
-            href="#"
-            text="Log In"
+            href="/signin"
+            text="Get Started"
             variant="secondary"
             border={true}
             textColor="accent-purple"

@@ -5,7 +5,7 @@ import Contact from "./ui/contact";
 import HowItOperates from "./ui/how-it-operates";
 import AboutUsComponent from "@/app/ui/about-us";
 
-export default function Example() {
+export default function Landing() {
 
   return (
     <main>
