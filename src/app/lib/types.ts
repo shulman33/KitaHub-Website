@@ -40,3 +40,11 @@ export interface DropdownInputProps {
   selectedOption: string;
   onOptionSelect: (option: string) => void;
 }
+
+export interface InfoSectionProps {
+  imagePosition?: "left" | "right";
+  imageSrc?: string;
+  withButton?: boolean;
+  header?: string;
+  content: { paragraph: string }[];
+}
