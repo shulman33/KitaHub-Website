@@ -7,19 +7,27 @@ import { MinusSmallIcon, PlusSmallIcon } from "@heroicons/react/24/outline";
 
 import { faqs } from "@/app/lib/content";
 
-export default function Faq({ bgColor = "bg-primary", textColor = "white",answerColor = "gray-200" }) {
+export default function Faq({
+  bgColor = "bg-primary",
+  textColor = "white",
+  answerColor = "gray-300",
+}) {
   return (
     <div className={bgColor} id="faq">
       <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8 lg:py-40">
         <div className={`mx-auto max-w-4xl divide-y divide-${textColor}/10`}>
-          <h2 className={`text-2xl sm:text-4xl font-bold leading-10 tracking-tight text-${textColor} text-center`}>
+          <h2
+            className={`text-2xl sm:text-4xl font-bold leading-10 tracking-tight text-${textColor} text-center`}
+          >
             Frequently Asked Questions
           </h2>
           <dl className={`mt-10 space-y-6 divide-y divide-${textColor}/10`}>
             {faqs.map((faq) => (
               <Disclosure key={faq.question} as="div" className="pt-6">
                 <dt>
-                  <DisclosureButton className={`group flex w-full items-start justify-between text-left text-${textColor}`}>
+                  <DisclosureButton
+                    className={`group flex w-full items-start justify-between text-left text-${textColor}`}
+                  >
                     <span className="text-lg font-medium leading-7">
                       {faq.question}
                     </span>

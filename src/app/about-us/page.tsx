@@ -12,11 +12,7 @@ export default function AboutUs() {
       <OurMission />
       <WhatWeOffer />
       <OurVision />
-      <Faq
-        bgColor="bg-primary"
-        textColor="white"
-        answerColor="gray-200"
-      />
+      <Faq />
       <Contact />
     </main>
   );
