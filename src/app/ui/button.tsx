@@ -34,7 +34,7 @@ export default function Button({
     : "text-accent-purple";
 
   return (
-    <Link href={href} className={`${baseClasses} ${variantClasses}`}>
+    <Link href={href} className={`${baseClasses} ${variantClasses} z-20`}>
       <span className={`${textClasses} ${textSize} leading-[24px]`}>
         {text}
       </span>
