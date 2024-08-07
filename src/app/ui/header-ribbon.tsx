@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function HeaderRibbon() {
   return (
@@ -20,10 +21,18 @@ export default function HeaderRibbon() {
       </div>
       <div className="follow-us-social flex items-center space-x-3 mr-32">
         <span className="text-white font-medium text-base">Follow us</span>
-        <Image src="/facebook.png" alt="Facebook" width={20} height={20} />
-        <Image src="/twitter.png" alt="Twitter" width={20} height={20} />
-        <Image src="/instagram.png" alt="Instagram" width={20} height={20} />
-        <Image src="/linkedin.png" alt="LinkedIn" width={20} height={20} />
+        <Link href="https://www.facebook.com/share/3LoEDricwdQNYGTj/?mibextid=LQQJ4d">
+          <Image src="/facebook.svg" alt="Facebook" width={20} height={20} />
+        </Link>
+        <Link href="https://x.com/kita_hubIO">
+          <Image src="/twitter.svg" alt="Twitter" width={20} height={20} />
+        </Link>
+        <Link href="https://www.instagram.com/kitahub.io/">
+          <Image src="/instagram.svg" alt="Instagram" width={20} height={20} />
+        </Link>
+        <Link href="/help">
+          <Image src="/linkedin.svg" alt="LinkedIn" width={20} height={20} />
+        </Link>
       </div>
     </div>
   );
