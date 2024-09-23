@@ -77,7 +77,7 @@ export default function NavLinks({
       {!isMobile && (
         <div className="hidden lg:flex flex-1 items-center justify-end gap-x-6">
           <Button
-            href="/signin"
+            href="/api/auth/login?returnTo=/dashboard"
             text="Get Started"
             variant="secondary"
             border={true}
@@ -90,7 +90,7 @@ export default function NavLinks({
       {isMobile && (
         <div className="py-6">
           <Link
-            href="#"
+            href="/api/auth/login?returnTo=/dashboard"
             className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-normal leading-7 text-gray-900 hover:bg-gray-50"
             onClick={closeMobileMenu}
           >

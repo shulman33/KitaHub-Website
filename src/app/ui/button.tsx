@@ -34,13 +34,13 @@ export default function Button({
     : "text-accent-purple";
 
   return (
-    <Link href={href} className={`${baseClasses} ${variantClasses} z-20`}>
+    <a href={href} className={`${baseClasses} ${variantClasses} z-20`}>
       <span className={`${textClasses} ${textSize} leading-[24px]`}>
         {text}
       </span>
       {withIcon && (
         <Image src="/arrow.svg" alt="Arrow" width={28} height={28} />
       )}
-    </Link>
+    </a>
   );
 }
