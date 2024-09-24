@@ -1,13 +1,28 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import HeaderRibbon from "./header-ribbon";
 import NavLinks from "./nav-links"; 
 
 export default function NavBar() {
+  const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const excludedRoutes = [
+    "/onboarding/complete-profile",
+    "/dashboard",
+  ];
+
+  const shouldHideNavBar = excludedRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
+
+  if (shouldHideNavBar) {
+    return null;
+  }
 
   return (
     <header className="bg-white">
