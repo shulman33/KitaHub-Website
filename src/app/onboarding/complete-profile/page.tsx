@@ -109,9 +109,12 @@ const CompleteProfile: React.FC = () => {
       }
 
       // Redirect to /continue endpoint with the original state
-      window.location.href = `https://${process.env.AUTH0_ISSUER_BASE_URL}/continue?state=${encodeURIComponent(
-        state
-      )}`;
+      if (!process.env.NEXT_PUBLIC_AUTH0_ISSUER_BASE_URL) {
+        console.error("NEXT_PUBLIC_AUTH0_ISSUER_BASE_URL is not defined");
+      }
+      window.location.href = `${
+        process.env.NEXT_PUBLIC_AUTH0_ISSUER_BASE_URL
+      }/continue?state=${encodeURIComponent(state)}`;
     } catch (err: any) {
       console.error('Submission error:', err);
       setError(err.message || 'An unexpected error occurred.');

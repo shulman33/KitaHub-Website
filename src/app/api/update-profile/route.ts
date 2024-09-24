@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { getManagementToken } from '@/app/lib/auth'; // Adjust the path as necessary
+import { getManagementToken } from '@/app/lib/auth'; 
 
 interface CompleteProfileRequestBody {
   session_token: string;
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
     }
 
     const response = await fetch(
-      `https://${auth0Domain}/api/v2/users/${encodeURIComponent(userId)}`,
+      `${auth0Domain}/api/v2/users/${encodeURIComponent(userId)}`,
       {
         method: 'PATCH',
         headers: {
