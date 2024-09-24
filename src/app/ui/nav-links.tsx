@@ -5,6 +5,7 @@ import Button from "./button";
 import Image from "next/image";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { NavLinksProps } from "@/app/lib/types";
+import { getSession } from "@auth0/nextjs-auth0";
 
 const navigation = [
   { name: "Home", href: "/" },
@@ -15,10 +16,14 @@ const navigation = [
   { name: "Help", href: "/help" },
 ];
 
-export default function NavLinks({
+export default async function NavLinks({
   isMobile = false,
   closeMobileMenu,
 }: NavLinksProps) {
+
+  const session = await getSession();
+  const buttonText = session ? "My Dashboard" : "Get Started";
+  
   return (
     <div
       className={`flex ${
@@ -78,7 +83,7 @@ export default function NavLinks({
         <div className="hidden lg:flex flex-1 items-center justify-end gap-x-6">
           <Button
             href="/api/auth/login?returnTo=/dashboard"
-            text="Get Started"
+            text={buttonText} 
             variant="secondary"
             border={true}
             textColor="accent-purple"
@@ -94,7 +99,7 @@ export default function NavLinks({
             className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-normal leading-7 text-gray-900 hover:bg-gray-50"
             onClick={closeMobileMenu}
           >
-            Log in
+            {buttonText}
           </Link>
         </div>
       )}
