@@ -16,6 +16,7 @@ export async function getManagementToken() {
   const data = await res.json();
 
   if (!res.ok) {
+    console.error("Failed to obtain management token:", data);
     throw new Error("Failed to obtain management token");
   }
 

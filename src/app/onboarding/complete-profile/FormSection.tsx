@@ -1,5 +1,4 @@
-// components/Form/FormSection.tsx
-import React from "react";
+import React from 'react';
 
 interface FormSectionProps {
   title: string;
