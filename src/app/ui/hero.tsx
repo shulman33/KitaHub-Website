@@ -23,7 +23,7 @@ export default function Hero() {
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
               <Button
-                href="/api/auth/login"
+                href="/api/auth/login?returnTo=/dashboard"
                 text="Join Now"
                 variant="secondary"
                 withIcon={true}

@@ -1,4 +1,7 @@
+"use client";
+
 import { JSX, SVGProps } from "react";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 
 const navigation = {
@@ -66,6 +69,21 @@ const navigation = {
 };
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  const excludedRoutes = [
+    "/onboarding/complete-profile",
+    "/dashboard",
+  ];
+
+  const shouldHideFooter = excludedRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
+
+  if (shouldHideFooter) {
+    return null;
+  }
+  
   return (
     <footer aria-labelledby="footer-heading" className="bg-dark-blue">
       <h2 id="footer-heading" className="sr-only">
