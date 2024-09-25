@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, FormEvent } from 'react';
@@ -36,7 +35,6 @@ const CompleteProfile: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 
-  // Handle input changes
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -48,13 +46,11 @@ const CompleteProfile: React.FC = () => {
     }));
   };
 
-  // Handle form submission
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    // Basic client-side validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.universityEmail)) {
       setError('Please enter a valid university email address.');
@@ -75,7 +71,6 @@ const CompleteProfile: React.FC = () => {
     }
 
     try {
-      // Make API call to /api/complete-profile
       const response = await fetch('/api/update-profile', {
         method: 'POST',
         headers: {
@@ -91,7 +86,6 @@ const CompleteProfile: React.FC = () => {
         }),
       });
 
-      // Check if the response is JSON
       const contentType = response.headers.get('Content-Type');
       if (!contentType || !contentType.includes('application/json')) {
         throw new Error('Received non-JSON response from the server.');
@@ -108,7 +102,6 @@ const CompleteProfile: React.FC = () => {
         throw new Error(data.error || 'Failed to update profile.');
       }
 
-      // Redirect to /continue endpoint with the original state
       if (!process.env.NEXT_PUBLIC_AUTH0_ISSUER_BASE_URL) {
         console.error("NEXT_PUBLIC_AUTH0_ISSUER_BASE_URL is not defined");
       }
@@ -123,7 +116,6 @@ const CompleteProfile: React.FC = () => {
     }
   };
 
-  // If session_token is missing, display an error
   if (!sessionToken) {
     return (
       <div className="bg-gray-50 flex items-center justify-center h-screen">
