@@ -38,7 +38,7 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
             value={option.value}
             checked={value === option.value}
             onChange={onChange}
-            className="h-4 w-4 border-gray-300 text-accent-purple focus:ring-accent-purple"
+            className="h-4 w-4 border-gray-300 accent-accent-purple focus:ring-accent-purple"
             required
           />
           <label

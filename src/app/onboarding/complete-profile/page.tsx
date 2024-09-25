@@ -11,7 +11,6 @@ import { useSearchParams } from 'next/navigation';
 interface FormData {
   firstName: string;
   lastName: string;
-  university: string;
   universityEmail: string;
   role: string;
   agree: boolean;
@@ -26,7 +25,6 @@ const CompleteProfile: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
     lastName: '',
-    university: '',
     universityEmail: '',
     role: '',
     agree: false,
@@ -80,7 +78,7 @@ const CompleteProfile: React.FC = () => {
           session_token: sessionToken,
           firstName: formData.firstName,
           lastName: formData.lastName,
-          university: formData.university,
+          agreeTOS: formData.agree,
           universityEmail: formData.universityEmail,
           isProfessor: formData.role === 'professor',
         }),
@@ -131,7 +129,7 @@ const CompleteProfile: React.FC = () => {
     <div className="bg-gray-50 space-y-10 divide-y divide-gray-900/10">
       <div className="grid grid-cols-1 gap-x-8 gap-y-8 pt-10 md:grid-cols-3">
         <FormSection
-          title="Welcome to KitaHub! Let’s Get to Know You Better"
+          title="Welcome to KitaHub! Let&#39;s Get to Know You Better"
           description="Please fill out the following information to personalize your experience and connect with the community. Your privacy is our priority."
         />
 
@@ -158,33 +156,24 @@ const CompleteProfile: React.FC = () => {
                 value={formData.lastName}
                 onChange={handleChange}
               />
-
-              <TextInput
-                id="university"
-                name="university"
-                label="University"
-                autoComplete="organization"
-                value={formData.university}
-                onChange={handleChange}
-              />
-
-              <TextInput
-                id="uni-email"
-                name="universityEmail"
-                label="University Email"
-                type="email"
-                autoComplete="email"
-                value={formData.universityEmail}
-                onChange={handleChange}
-              />
-
+              <div className="col-span-4">
+                <TextInput
+                  id="uni-email"
+                  name="universityEmail"
+                  label="University Email"
+                  type="email"
+                  autoComplete="email"
+                  value={formData.universityEmail}
+                  onChange={handleChange}
+                />
+              </div>
               <div className="max-w-2xl space-y-10 md:col-span-3">
                 <RadioGroup
                   legend="Join KitaHub as a:"
                   description="Select your role to connect with the right tools and community members."
                   options={[
-                    { id: 'prof', value: 'professor', label: 'Professor' },
-                    { id: 'student', value: 'student', label: 'Student' },
+                    { id: "prof", value: "professor", label: "Professor" },
+                    { id: "student", value: "student", label: "Student" },
                   ]}
                   name="role"
                   value={formData.role}

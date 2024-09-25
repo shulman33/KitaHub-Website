@@ -8,7 +8,7 @@ interface CompleteProfileRequestBody {
   session_token: string;
   firstName: string;
   lastName: string;
-  university: string;
+  acceptedTOS: boolean;
   universityEmail: string;
   isProfessor: boolean;
 }
@@ -19,31 +19,32 @@ interface SessionTokenPayload extends JwtPayload {
 
 export async function POST(req: NextRequest) {
   try {
-    console.log('Received POST request to /api/update-profile');
+    console.log("Received POST request to /api/update-profile");
 
     const body = await req.json();
-    console.log('Request body:', body);
 
     const {
       session_token,
       firstName,
       lastName,
-      university,
+      acceptedTOS,
       universityEmail,
       isProfessor,
     } = body as CompleteProfileRequestBody;
 
     if (!session_token) {
-      console.log('Missing session token.');
-      return NextResponse.json({ error: 'Missing session token.' }, { status: 400 });
+      console.log("Missing session token.");
+      return NextResponse.json(
+        { error: "Missing session token." },
+        { status: 400 }
+      );
     }
 
-    // Verify the session token
     const secret = process.env.REDIRECT_SECRET;
     if (!secret) {
-      console.error('REDIRECT_SECRET is not defined in environment variables.');
+      // console.error("REDIRECT_SECRET is not defined in environment variables.");
       return NextResponse.json(
-        { error: 'Server configuration error.' },
+        { error: "Server configuration error." },
         { status: 500 }
       );
     }
@@ -51,11 +52,11 @@ export async function POST(req: NextRequest) {
     let decoded: SessionTokenPayload;
     try {
       decoded = jwt.verify(session_token, secret) as SessionTokenPayload;
-      console.log('Decoded JWT:', decoded);
+      console.log("Session token verified.");
     } catch (jwtError) {
-      console.error('JWT Verification Error:', jwtError);
+      // console.error("JWT Verification Error:", jwtError);
       return NextResponse.json(
-        { error: 'Invalid or expired session token.' },
+        { error: "Invalid or expired session token." },
         { status: 400 }
       );
     }
@@ -63,20 +64,19 @@ export async function POST(req: NextRequest) {
     const userId = decoded.sub;
 
     if (!userId) {
-      console.log('Invalid token payload. Missing sub.');
-      return NextResponse.json({ error: 'Invalid token payload.' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid token payload." },
+        { status: 400 }
+      );
     }
 
-    // Obtain Management API token
     const managementToken = await getManagementToken();
-    console.log('Obtained Management API token.');
+    console.log("Obtained Management API token.");
 
-    // Update the user's app_metadata
     const auth0Domain = process.env.AUTH0_ISSUER_BASE_URL;
     if (!auth0Domain) {
-      console.error('AUTH0_ISSUER_BASE_URL is not defined in environment variables.');
       return NextResponse.json(
-        { error: 'Server configuration error.' },
+        { error: "Server configuration error." },
         { status: 500 }
       );
     }
@@ -84,9 +84,9 @@ export async function POST(req: NextRequest) {
     const response = await fetch(
       `${auth0Domain}/api/v2/users/${encodeURIComponent(userId)}`,
       {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${managementToken}`,
         },
         body: JSON.stringify({
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
             profileComplete: true,
             firstName,
             lastName,
-            university,
+            acceptedTOS: acceptedTOS,
             universityEmail,
             isProfessor,
           },
@@ -103,16 +103,44 @@ export async function POST(req: NextRequest) {
     );
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Auth0 API Error:', errorData);
+      // const errorData = await response.json();
+      // console.error("Auth0 API Error:", errorData);
       return NextResponse.json(
-        { error: 'Failed to update user profile.' },
+        { error: "Failed to update user profile." },
         { status: response.status }
       );
     }
 
-    console.log('User profile updated successfully.');
-    return NextResponse.json({ message: 'Profile updated successfully.' }, { status: 200 });
+    const role = isProfessor ? "rol_dIwjCpO7h7RGqneb" : "rol_4oBD1Uz01d9AfMMa";
+    const roleResponse = await fetch(
+      `${auth0Domain}/api/v2/users/${encodeURIComponent(userId)}/roles`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${managementToken}`,
+          "cache-control": "no-cache",
+        },
+        body: JSON.stringify({
+          roles: [role],
+        }),
+      }
+    );
+
+    if (!roleResponse.ok) {
+      // const roleErrorData = await roleResponse.json();
+      // console.error("Auth0 Role API Error:", roleErrorData);
+      return NextResponse.json(
+        { error: "Failed to update user roles." },
+        { status: roleResponse.status }
+      );
+    }
+
+    console.log("User profile and role updated successfully.");
+    return NextResponse.json(
+      { message: "Profile and role updated successfully." },
+      { status: 200 }
+    );
   } catch (err) {
     console.error('Error processing profile completion:', err);
     return NextResponse.json(

@@ -30,13 +30,13 @@ const CheckboxInput: React.FC<CheckboxInputProps> = ({
             type="checkbox"
             checked={checked}
             onChange={onChange}
-            className="h-4 w-4 rounded border-gray-300 text-accent-purple focus:ring-accent-purple"
+            className="h-4 w-4 rounded border-gray-300 text-accent-purple focus:ring-accent-purple accent-accent-purple"
             required
           />
         </div>
         <div className="text-sm leading-6">
           <label htmlFor={id} className="font-medium text-gray-900">
-            {label}{' '}
+            {label}{" "}
             <Link className="text-primary underline" href={linkHref}>
               {linkText}
             </Link>
