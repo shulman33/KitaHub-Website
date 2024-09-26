@@ -45,7 +45,7 @@ export default function DashboardLayout({
           setSidebarOpen={setSidebarOpen}
           userNavigation={userNavigation}
         />
-        <main className="py-10">
+        <main className="bg-[#FAFAFA] py-10">
           <div className="px-4 sm:px-6 lg:px-8">{children}</div>
         </main>
       </div>

@@ -34,9 +34,9 @@ export default function DesktopSidebar({ navigation }: Props) {
           <Link href="/dashboard">
             <Image
               alt="KitaHub"
-              width={80}
+              width={8}
               height={48}
-              src="/sidenav-logo.png"
+              src="/white-kh-logo.svg"
               className="h-12 w-20"
             />
           </Link>
