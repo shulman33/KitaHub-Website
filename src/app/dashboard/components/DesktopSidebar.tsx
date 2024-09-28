@@ -1,9 +1,6 @@
-// components/DesktopSidebar.tsx
-
 import Link from "next/link";
 import Image from "next/image";
 import { Cog6ToothIcon } from "@heroicons/react/24/outline";
-import { getSession } from "@auth0/nextjs-auth0";
 
 type NavigationItem = {
   name: string;

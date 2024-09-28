@@ -13,32 +13,30 @@ export default withPageAuthRequired(async function MainDashboard() {
     throw new Error("User is not authenticated");
   }
 
-  const { name } = session.user;
+  const { user } = session;
 
   return (
-    <div>
-      <main>
-        <Header name={name} />
-        <div className="mx-auto max-w-full sm:max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-          <div className="mx-auto grid grid-cols-8 max-w-full sm:max-w-7xl gap-4">
-            <div className="col-span-8 sm:col-span-4 w-full">
-              <UpcomingAssignmentsWidget />
-            </div>
+    <main>
+      <Header name={user.name} />
+      <div className="mx-auto max-w-full sm:max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
+        <div className="mx-auto grid grid-cols-8 max-w-full sm:max-w-7xl gap-4">
+          <div className="col-span-8 sm:col-span-4 w-full">
+            <UpcomingAssignmentsWidget />
+          </div>
 
-            <div className="col-span-8 sm:col-span-4 w-full">
-              <NewDiscussionBoardWidget />
-            </div>
+          <div className="col-span-8 sm:col-span-4 w-full">
+            <NewDiscussionBoardWidget />
+          </div>
 
-            <div className="col-span-8 sm:col-span-3 w-full">
-              <UpcomingDeadline month="September" year={2024} />
-            </div>
+          <div className="col-span-8 sm:col-span-3 w-full">
+            <UpcomingDeadline month="September" year={2024} />
+          </div>
 
-            <div className="col-span-8 sm:col-span-5 w-full">
-              <SubmissionStatusWidget />
-            </div>
+          <div className="col-span-8 sm:col-span-5 w-full">
+            <SubmissionStatusWidget />
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </main>
   );
 });
