@@ -58,7 +58,7 @@ export default function MobileSidebar({
             </div>
           </TransitionChild>
           {/* Sidebar content */}
-          <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-indigo-600 px-6 pb-4">
+          <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-primary px-6 pb-4">
             <div className="flex h-16 shrink-0 items-center">
               <img
                 alt="Your Company"
@@ -76,8 +76,8 @@ export default function MobileSidebar({
                           href={item.href}
                           className={classNames(
                             item.current
-                              ? "bg-indigo-700 text-white"
-                              : "text-indigo-200 hover:bg-indigo-700 hover:text-white",
+                              ? "bg-white text-accent-purple"
+                              : "text-white hover:bg-indigo-700 hover:text-white",
                             "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6"
                           )}
                         >
@@ -85,8 +85,8 @@ export default function MobileSidebar({
                             aria-hidden="true"
                             className={classNames(
                               item.current
-                                ? "text-white"
-                                : "text-indigo-200 group-hover:text-white",
+                                ? "text-accent-purple"
+                                : "text-white group-hover:text-white",
                               "h-6 w-6 shrink-0"
                             )}
                           />
