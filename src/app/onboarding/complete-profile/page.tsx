@@ -7,6 +7,7 @@ import CheckboxInput from './CheckboxInput';
 import FormActions from './FormActions';
 import FormSection from './FormSection';
 import { useSearchParams } from 'next/navigation';
+import { Suspense } from "react";
 
 interface FormData {
   firstName: string;
@@ -14,6 +15,14 @@ interface FormData {
   universityEmail: string;
   role: string;
   agree: boolean;
+}
+
+export function CompleteProfileWrapper() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CompleteProfile />
+    </Suspense>
+  );
 }
 
 const CompleteProfile: React.FC = () => {
@@ -204,4 +213,4 @@ const CompleteProfile: React.FC = () => {
   );
 };
 
-export default CompleteProfile;
+export default CompleteProfileWrapper;
