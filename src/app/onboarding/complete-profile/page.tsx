@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import React, { useState, FormEvent } from 'react';
-import TextInput from './TextInput';
-import RadioGroup from './RadioGroup';
-import CheckboxInput from './CheckboxInput';
-import FormActions from './FormActions';
-import FormSection from './FormSection';
-import { useSearchParams } from 'next/navigation';
+import React, { useState, FormEvent } from "react";
+import TextInput from "./TextInput";
+import RadioGroup from "./RadioGroup";
+import CheckboxInput from "./CheckboxInput";
+import FormActions from "./FormActions";
+import FormSection from "./FormSection";
+import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
 interface FormData {
@@ -17,71 +17,64 @@ interface FormData {
   agree: boolean;
 }
 
-export function CompleteProfileWrapper() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <CompleteProfile />
-    </Suspense>
-  );
-}
-
-const CompleteProfile: React.FC = () => {
+function CompleteProfile() {
   const searchParams = useSearchParams();
 
-  const sessionToken = searchParams.get('session_token') || '';
-  const state = searchParams.get('state') || '';
+  const sessionToken = searchParams.get("session_token") || "";
+  const state = searchParams.get("state") || "";
 
   const [formData, setFormData] = useState<FormData>({
-    firstName: '',
-    lastName: '',
-    universityEmail: '',
-    role: '',
+    firstName: "",
+    lastName: "",
+    universityEmail: "",
+    role: "",
     agree: false,
   });
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string>("");
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value, type } = e.target as HTMLInputElement;
-    const checked = type === 'checkbox' ? (e.target as HTMLInputElement).checked : false;
+    const checked =
+      type === "checkbox" ? (e.target as HTMLInputElement).checked : false;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.universityEmail)) {
-      setError('Please enter a valid university email address.');
+      setError("Please enter a valid university email address.");
       setLoading(false);
       return;
     }
 
     if (!formData.role) {
-      setError('Please select your role.');
+      setError("Please select your role.");
       setLoading(false);
       return;
     }
 
     if (!formData.agree) {
-      setError('You must accept the Terms of Service.');
+      setError("You must accept the Terms of Service.");
       setLoading(false);
       return;
     }
 
     try {
-      const response = await fetch('/api/update-profile', {
-        method: 'POST',
+      const response = await fetch("/api/update-profile", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           session_token: sessionToken,
@@ -89,24 +82,24 @@ const CompleteProfile: React.FC = () => {
           lastName: formData.lastName,
           agreeTOS: formData.agree,
           universityEmail: formData.universityEmail,
-          isProfessor: formData.role === 'professor',
+          isProfessor: formData.role === "professor",
         }),
       });
 
-      const contentType = response.headers.get('Content-Type');
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('Received non-JSON response from the server.');
+      const contentType = response.headers.get("Content-Type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Received non-JSON response from the server.");
       }
 
       const data = await response.json();
 
       if (!response.ok) {
         if (response.status === 400) {
-          setError('Invalid or expired session token. Please log in again.');
+          setError("Invalid or expired session token. Please log in again.");
         } else {
-          setError(data.error || 'Failed to update profile.');
+          setError(data.error || "Failed to update profile.");
         }
-        throw new Error(data.error || 'Failed to update profile.');
+        throw new Error(data.error || "Failed to update profile.");
       }
 
       if (!process.env.NEXT_PUBLIC_AUTH0_ISSUER_BASE_URL) {
@@ -116,8 +109,8 @@ const CompleteProfile: React.FC = () => {
         process.env.NEXT_PUBLIC_AUTH0_ISSUER_BASE_URL
       }/continue?state=${encodeURIComponent(state)}`;
     } catch (err: any) {
-      console.error('Submission error:', err);
-      setError(err.message || 'An unexpected error occurred.');
+      console.error("Submission error:", err);
+      setError(err.message || "An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
@@ -211,6 +204,12 @@ const CompleteProfile: React.FC = () => {
       </div>
     </div>
   );
-};
+}
 
-export default CompleteProfileWrapper;
+export default function CompleteProfileWrapper() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CompleteProfile />
+    </Suspense>
+  );
+}
