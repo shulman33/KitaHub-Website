@@ -8,6 +8,7 @@ import FormActions from "./FormActions";
 import FormSection from "./FormSection";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import LoadingIcon from "@/app/ui/loading-icon";
 
 interface FormData {
   firstName: string;
@@ -206,9 +207,10 @@ function CompleteProfile() {
   );
 }
 
+
 export default function CompleteProfileWrapper() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<LoadingIcon />}>
       <CompleteProfile />
     </Suspense>
   );
