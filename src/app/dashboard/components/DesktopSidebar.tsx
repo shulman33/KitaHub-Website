@@ -1,9 +1,6 @@
-// components/DesktopSidebar.tsx
-
 import Link from "next/link";
 import Image from "next/image";
 import { Cog6ToothIcon } from "@heroicons/react/24/outline";
-import { getSession } from "@auth0/nextjs-auth0";
 
 type NavigationItem = {
   name: string;
@@ -34,9 +31,9 @@ export default function DesktopSidebar({ navigation }: Props) {
           <Link href="/dashboard">
             <Image
               alt="KitaHub"
-              width={80}
+              width={8}
               height={48}
-              src="/sidenav-logo.png"
+              src="/white-kh-logo.svg"
               className="h-12 w-20"
             />
           </Link>

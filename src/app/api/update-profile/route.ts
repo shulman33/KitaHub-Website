@@ -1,5 +1,3 @@
-// src/app/api/update-profile/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { getManagementToken } from '@/app/lib/auth'; 
@@ -19,7 +17,6 @@ interface SessionTokenPayload extends JwtPayload {
 
 export async function POST(req: NextRequest) {
   try {
-    console.log("Received POST request to /api/update-profile");
 
     const body = await req.json();
 
@@ -33,7 +30,6 @@ export async function POST(req: NextRequest) {
     } = body as CompleteProfileRequestBody;
 
     if (!session_token) {
-      console.log("Missing session token.");
       return NextResponse.json(
         { error: "Missing session token." },
         { status: 400 }
@@ -42,7 +38,6 @@ export async function POST(req: NextRequest) {
 
     const secret = process.env.REDIRECT_SECRET;
     if (!secret) {
-      // console.error("REDIRECT_SECRET is not defined in environment variables.");
       return NextResponse.json(
         { error: "Server configuration error." },
         { status: 500 }
@@ -52,9 +47,7 @@ export async function POST(req: NextRequest) {
     let decoded: SessionTokenPayload;
     try {
       decoded = jwt.verify(session_token, secret) as SessionTokenPayload;
-      console.log("Session token verified.");
     } catch (jwtError) {
-      // console.error("JWT Verification Error:", jwtError);
       return NextResponse.json(
         { error: "Invalid or expired session token." },
         { status: 400 }
@@ -71,7 +64,6 @@ export async function POST(req: NextRequest) {
     }
 
     const managementToken = await getManagementToken();
-    console.log("Obtained Management API token.");
 
     const auth0Domain = process.env.AUTH0_ISSUER_BASE_URL;
     if (!auth0Domain) {
@@ -103,8 +95,6 @@ export async function POST(req: NextRequest) {
     );
 
     if (!response.ok) {
-      // const errorData = await response.json();
-      // console.error("Auth0 API Error:", errorData);
       return NextResponse.json(
         { error: "Failed to update user profile." },
         { status: response.status }
@@ -128,21 +118,17 @@ export async function POST(req: NextRequest) {
     );
 
     if (!roleResponse.ok) {
-      // const roleErrorData = await roleResponse.json();
-      // console.error("Auth0 Role API Error:", roleErrorData);
       return NextResponse.json(
         { error: "Failed to update user roles." },
         { status: roleResponse.status }
       );
     }
 
-    console.log("User profile and role updated successfully.");
     return NextResponse.json(
       { message: "Profile and role updated successfully." },
       { status: 200 }
     );
   } catch (err) {
-    console.error('Error processing profile completion:', err);
     return NextResponse.json(
       { error: 'An unexpected error occurred.' },
       { status: 500 }

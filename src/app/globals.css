@@ -12,3 +12,11 @@ all: unset;
 }
 }
 
+
+@media (max-width: 639px) { 
+  .mobile-gradient-bg {
+    background: linear-gradient(5.00deg, #D620FF 3.77%, #0D6CFF 82.28%);
+  }
+}
+
+

@@ -11,8 +11,8 @@ interface RadioGroupProps {
   description: string;
   options: RadioOption[];
   name: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  // value: string;
+  // onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const RadioGroup: React.FC<RadioGroupProps> = ({
@@ -20,8 +20,8 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
   description,
   options,
   name,
-  value,
-  onChange,
+  // value,
+  // onChange,
 }) => (
   <fieldset>
     <legend className="text-sm font-semibold leading-6 text-gray-900">
@@ -36,8 +36,8 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
             name={name}
             type="radio"
             value={option.value}
-            checked={value === option.value}
-            onChange={onChange}
+            // checked={value === option.value}
+            // onChange={onChange}
             className="h-4 w-4 border-gray-300 accent-accent-purple focus:ring-accent-purple"
             required
           />
