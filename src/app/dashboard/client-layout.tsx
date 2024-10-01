@@ -1,4 +1,3 @@
-// app/ClientLayout.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -33,6 +32,25 @@ export default function ClientLayout({
     { name: "Courses", href: "#", icon: AcademicCapIcon, current: false },
   ];
 
+  const mobileNavigation = [
+    { name: "Dashboard", href: "#", icon: HomeIcon, current: true },
+    { name: "Assignments", href: "#", icon: DocumentTextIcon, current: false },
+    {
+      name: "Discussions",
+      href: "#",
+      icon: ChatBubbleLeftRightIcon,
+      current: false,
+    },
+    { name: "Profile", href: "#", icon: UserIcon, current: false },
+    { name: "Courses", href: "#", icon: AcademicCapIcon, current: false },
+    {
+      name: "Logout",
+      href: "/api/auth/logout",
+      icon: UserIcon,
+      current: false,
+    },
+  ];
+
   const userNavigation = [
     { name: "Your profile", href: "#" },
     { name: "Sign out", href: "/api/auth/logout" },
@@ -43,7 +61,7 @@ export default function ClientLayout({
       <MobileSidebar
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
-        navigation={navigation}
+        navigation={mobileNavigation}
       />
       <DesktopSidebar navigation={navigation} />
       <div className="lg:pl-72">
