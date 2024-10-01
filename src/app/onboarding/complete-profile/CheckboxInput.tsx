@@ -7,8 +7,8 @@ interface CheckboxInputProps {
   label: string;
   linkText: string;
   linkHref: string;
-  checked: boolean;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  // checked: boolean;
+  // onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const CheckboxInput: React.FC<CheckboxInputProps> = ({
@@ -17,8 +17,8 @@ const CheckboxInput: React.FC<CheckboxInputProps> = ({
   label,
   linkText,
   linkHref,
-  checked,
-  onChange,
+  // checked,
+  // onChange,
 }) => (
   <fieldset>
     <div className="mt-6 space-y-6">
@@ -28,8 +28,8 @@ const CheckboxInput: React.FC<CheckboxInputProps> = ({
             id={id}
             name={name}
             type="checkbox"
-            checked={checked}
-            onChange={onChange}
+            // checked={checked}
+            // onChange={onChange}
             className="h-4 w-4 rounded border-gray-300 text-accent-purple focus:ring-accent-purple accent-accent-purple"
             required
           />
