@@ -6,6 +6,11 @@ interface SearchParams {
   state: string;
 }
 
+interface StateType {
+  message?: string;
+  redirectUrl?: string;
+}
+
 export default async function CompleteProfilePage({
   searchParams,
 }: {
@@ -26,9 +31,9 @@ export default async function CompleteProfilePage({
   }
 
   async function completeProfileAction(
-    prevState: { message: string },
+    state: StateType,
     formData: FormData
-  ): Promise<{ message?: string; redirectUrl?: string }> {
+  ): Promise<StateType> {
     "use server";
 
     const firstName = formData.get("firstName")?.toString() || "";
@@ -62,7 +67,7 @@ export default async function CompleteProfilePage({
       }
     };
 
-    const url = `${enviromentUrlMapping}/api/update-profile`;
+    const url = `${enviromentUrlMapping()}/api/update-profile`;
 
     try {
       const response = await fetch(url, {

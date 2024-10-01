@@ -9,15 +9,22 @@ import FormSection from "./FormSection";
 import { useFormState, useFormStatus } from "react-dom";
 import { useEffect } from "react";
 
-interface CompleteProfileFormProps {
-  action: (
-    prevState: { message: string },
-    formData: FormData
-  ) => Promise<{ message?: string; redirectUrl?: string }>;
+interface StateType {
+  message?: string;
+  redirectUrl?: string;
 }
 
-export default function CompleteProfileForm({ action }: CompleteProfileFormProps) {
-  const initialState = { message: "", redirectUrl: "" };
+interface CompleteProfileFormProps {
+  action: (
+    state: StateType,
+    formData: FormData
+  ) => StateType | Promise<StateType>;
+}
+
+export default function CompleteProfileForm({
+  action,
+}: CompleteProfileFormProps) {
+  const initialState: StateType = {};
   const [state, formAction] = useFormState(action, initialState);
   const { pending } = useFormStatus();
 
@@ -26,7 +33,6 @@ export default function CompleteProfileForm({ action }: CompleteProfileFormProps
       window.location.href = state.redirectUrl;
     }
   }, [state.redirectUrl]);
-
 
   return (
     <div className="bg-gray-50 space-y-10 divide-y divide-gray-900/10">
