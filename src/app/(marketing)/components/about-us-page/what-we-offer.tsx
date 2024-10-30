@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { features } from "@/app/lib/content";
+import { features } from "@/app/(marketing)/lib/content";
 
 export default function WhatWeOffer() {
   return (
