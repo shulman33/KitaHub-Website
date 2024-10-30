@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { getManagementToken } from '@/app/lib/auth'; 
+import { getManagementToken } from '@/app/(marketing)/lib/auth'; 
 
 interface CompleteProfileRequestBody {
   session_token: string;
