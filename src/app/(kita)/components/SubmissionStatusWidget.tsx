@@ -1,5 +1,5 @@
 import React from "react";
-import EmptyState from "@/app/ui/empty-state";
+import EmptyState from "@/app/(marketing)/components/empty-state";
 
 interface Assignment {
   title: string;

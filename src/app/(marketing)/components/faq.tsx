@@ -5,7 +5,7 @@ import {
 } from "@headlessui/react";
 import { MinusSmallIcon, PlusSmallIcon } from "@heroicons/react/24/outline";
 
-import { faqs } from "@/app/lib/content";
+import { faqs } from "@/app/(marketing)/lib/content";
 
 export default function Faq({
   bgColor = "bg-primary",

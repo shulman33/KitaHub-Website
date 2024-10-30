@@ -1,4 +1,4 @@
-import EmptyState from "@/app/ui/empty-state";
+import EmptyState from "@/app/(marketing)/components/empty-state";
 import React, { useState } from "react";
 import { ChatBubbleLeftIcon } from "@heroicons/react/24/outline";
 

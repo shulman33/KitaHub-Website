@@ -1,6 +1,6 @@
 import React from "react";
 import Button from "./button";
-import { cards } from "@/app/lib/content";
+import { cards } from "@/app/(marketing)/lib/content";
 import SubjectButton from "./subject-button";
 
 

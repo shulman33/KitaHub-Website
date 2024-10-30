@@ -1,4 +1,4 @@
-import { SubjectButtonProps } from "@/app/lib/types";
+import { SubjectButtonProps } from "@/app/(marketing)/lib/types";
 import Image from "next/image";
 
 const SubjectButton: React.FC<SubjectButtonProps> = ({ icon, subject }) => {

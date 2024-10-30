@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import TextField from "@/app/ui/text-field";
+import TextField from "@/app/(marketing)/components/text-field";
 import DropdownInput from "./dropdown";
-import { options, contactFields } from "@/app/lib/content";
+import { options, contactFields } from "@/app/(marketing)/lib/content";
 import { useState } from "react";
 import Link from "next/link";
 

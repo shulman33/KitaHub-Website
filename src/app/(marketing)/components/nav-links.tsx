@@ -4,7 +4,7 @@ import Link from "next/link";
 import Button from "./button";
 import Image from "next/image";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import { NavLinksProps } from "@/app/lib/types";
+import { NavLinksProps } from "@/app/(marketing)/lib/types";
 import { getSession } from "@auth0/nextjs-auth0";
 
 const navigation = [

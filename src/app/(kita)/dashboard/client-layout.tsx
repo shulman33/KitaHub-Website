@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import DesktopSidebar from "./components/DesktopSidebar";
-import MobileSidebar from "./components/MobileSidebar";
-import TopNavBar from "./components/TopNavBar";
+import DesktopSidebar from "@/app/(kita)/components/DesktopSidebar";
+import MobileSidebar from "@/app/(kita)/components/MobileSidebar";
+import TopNavBar from "@/app/(kita)/components/TopNavBar";
 import {
   HomeIcon,
   DocumentTextIcon,

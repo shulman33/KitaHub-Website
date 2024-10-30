@@ -1,4 +1,4 @@
-import SelectMenu from "@/app/ui/select-menu";
+import SelectMenu from "@/app/(marketing)/components/select-menu";
 import {
   ChevronDownIcon,
   MagnifyingGlassIcon,

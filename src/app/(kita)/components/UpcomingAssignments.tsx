@@ -1,4 +1,4 @@
-import EmptyState from "@/app/ui/empty-state";
+import EmptyState from "@/app/(marketing)/components/empty-state";
 import React from "react";
 
 interface CountdownProps {

@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ButtonProps } from "@/app/lib/types";
+import { ButtonProps } from "@/app/(marketing)/lib/types";
 
 export default function Button({
   href,

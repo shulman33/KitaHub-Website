@@ -1,9 +1,9 @@
-import UpcomingDeadline from "./components/UpcomingDeadlineWidget";
-import SubmissionStatusWidget from "./components/SubmissionStatusWidget";
-import UpcomingAssignmentsWidget from "./components/UpcomingAssignmentsWidget";
-import NewDiscussionBoardWidget from "./components/NewDiscussionBoardWidget";
+import UpcomingDeadline from "@/app/(kita)/components/UpcomingDeadlineWidget";
+import SubmissionStatusWidget from "@/app/(kita)/components/SubmissionStatusWidget";
+import UpcomingAssignmentsWidget from "@/app/(kita)/components/UpcomingAssignmentsWidget";
+import NewDiscussionBoardWidget from "@/app/(kita)/components/NewDiscussionBoardWidget";
 import { getSession, withPageAuthRequired } from "@auth0/nextjs-auth0";
-import Header from "./components/Header";
+import Header from "@/app/(kita)/components/Header";
 
 export default withPageAuthRequired(async function MainDashboard() {
   const session = await getSession();

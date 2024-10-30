@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { DropdownInputProps } from "@/app/lib/types";
+import { DropdownInputProps } from "@/app/(marketing)/lib/types";
 
 export default function DropdownInput({
   label,

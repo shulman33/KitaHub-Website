@@ -1,5 +1,5 @@
 import React from "react";
-import { TextFieldProps } from "@/app/lib/types";
+import { TextFieldProps } from "@/app/(marketing)/lib/types";
 
 export default function TextField({
   label,
