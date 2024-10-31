@@ -12,8 +12,10 @@
     "@auth0/nextjs-auth0": "^3.5.0",
     "@headlessui/react": "^2.1.4",
     "@heroicons/react": "^2.1.5",
+    "@prisma/client": "^5.21.1",
     "jsonwebtoken": "^9.0.2",
     "next": "14.2.5",
+    "prisma": "^5.21.1",
     "react": "^18",
     "react-dom": "^18",
     "redis": "^4.7.0"

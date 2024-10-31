@@ -1,0 +1,804 @@
+openapi: 3.0.3
+info:
+  title: KitaHub Management API
+  description: API documentation for the KitaHub Management System
+  version: 1.0.0
+servers:
+  - url: https://api.yourdomain.com/v1
+    description: Production server
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    # Enums
+    Role:
+      type: string
+      enum:
+        - PROFESSOR
+        - STUDENT
+    ResourceType:
+      type: string
+      enum:
+        - SLIDE_DECK
+        - ARTICLE
+        - VIDEO
+        - OTHER
+    # Models
+    University:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+        country:
+          type: string
+        state:
+          type: string
+        city:
+          type: string
+      required:
+        - name
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        universityId:
+          type: integer
+        role:
+          $ref: '#/components/schemas/Role'
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        schoolEmail:
+          type: string
+          format: email
+        profilePicture:
+          type: string
+          format: uri
+        bio:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+        - universityId
+        - role
+        - firstName
+        - lastName
+        - schoolEmail
+    Class:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        universityId:
+          type: integer
+        className:
+          type: string
+        description:
+          type: string
+        code:
+          type: string
+        semester:
+          type: string
+        year:
+          type: integer
+      required:
+        - universityId
+        - className
+        - code
+        - semester
+        - year
+    Assignment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        classId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        dueDate:
+          type: string
+          format: date-time
+        totalPoints:
+          type: number
+      required:
+        - classId
+        - title
+        - dueDate
+        - totalPoints
+    Resource:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        classId:
+          type: integer
+          nullable: true
+        assignmentId:
+          type: integer
+          nullable: true
+        userId:
+          type: integer
+        title:
+          type: string
+        type:
+          $ref: '#/components/schemas/ResourceType'
+        url:
+          type: string
+          format: uri
+        uploadedAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+        - userId
+        - title
+        - type
+        - url
+    Announcement:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        classId:
+          type: integer
+        userId:
+          type: integer
+        title:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+        - classId
+        - userId
+        - title
+        - content
+    Grade:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        assignmentId:
+          type: integer
+        studentId:
+          type: integer
+        score:
+          type: number
+        gradedAt:
+          type: string
+          format: date-time
+          readOnly: true
+        feedback:
+          type: string
+      required:
+        - assignmentId
+        - studentId
+        - score
+    Message:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        classId:
+          type: integer
+        userId:
+          type: integer
+        parentMessageId:
+          type: integer
+          nullable: true
+        title:
+          type: string
+          nullable: true
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+        - classId
+        - userId
+        - content
+    Tag:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+      required:
+        - name
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unauthorized
+paths:
+  /universities:
+    get:
+      summary: Get a list of universities
+      tags:
+        - Universities
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A list of universities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/University'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    post:
+      summary: Create a new university
+      description: Only users with the ADMIN role can create universities.
+      tags:
+        - Universities
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: University object to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/University'
+      responses:
+        '201':
+          description: University created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/University'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /universities/{id}:
+    get:
+      summary: Get a university by ID
+      tags:
+        - Universities
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: University ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: University details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/University'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /users:
+    get:
+      summary: Get a list of users
+      description: Only users with the ADMIN role can retrieve the list of users.
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    post:
+      summary: Create a new user
+      description: User registration endpoint.
+      tags:
+        - Users
+      requestBody:
+        description: User object to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad Request
+  /users/{id}:
+    get:
+      summary: Get a user by ID
+      description: Users can retrieve their own details or must have ADMIN role.
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden
+  /users/{id}/classes:
+    get:
+      summary: Get all classes associated with a user
+      description: Returns a list of classes that the user is enrolled in or teaching.
+      tags:
+        - Users
+        - Classes
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of classes associated with the user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Class'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: You are not authorized to access this resource
+                    
+  /users/{id}/assignments:
+    get:
+      summary: Get all assignments associated with a user
+      description: Returns a list of assignments from classes that the user is enrolled in.
+      tags:
+        - Users
+        - Assignments
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of assignments associated with the user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Assignment'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: You are not authorized to access this resource
+  /users/{id}/messages/recent:
+    get:
+      summary: Get recent messages across all classes associated with a user
+      description: Returns the most recent messages from all classes the user is associated with, limited by the specified parameter.
+      tags:
+        - Users
+        - Messages
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: The maximum number of messages to return
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+      responses:
+        '200':
+          description: A list of recent messages associated with the user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: You are not authorized to access this resource
+  /classes:
+    get:
+      summary: Get a list of classes
+      tags:
+        - Classes
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A list of classes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Class'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    post:
+      summary: Create a new class
+      description: Only users with the PROFESSOR role can create classes.
+      tags:
+        - Classes
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Class object to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Class'
+      responses:
+        '201':
+          description: Class created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Class'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden
+  /classes/{id}:
+    get:
+      summary: Get a class by ID
+      tags:
+        - Classes
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: Class ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Class details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Class'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /assignments:
+    get:
+      summary: Get a list of assignments
+      description: Professors can view all assignments; students can view assignments for their classes.
+      tags:
+        - Assignments
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: classId
+          in: query
+          description: Filter assignments by class ID
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of assignments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Assignment'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    post:
+      summary: Create a new assignment
+      description: Only users with the PROFESSOR role can create assignments.
+      tags:
+        - Assignments
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Assignment object to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Assignment'
+      responses:
+        '201':
+          description: Assignment created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assignment'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden
+  /assignments/{id}:
+    get:
+      summary: Get an assignment by ID
+      description: Accessible to professors and students enrolled in the class.
+      tags:
+        - Assignments
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: Assignment ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Assignment details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assignment'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden
+  /messages:
+    get:
+      summary: Get a list of messages
+      tags:
+        - Messages
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: classId
+          in: query
+          description: Filter messages by class ID
+          required: false
+          schema:
+            type: integer
+        - name: parentMessageId
+          in: query
+          description: Filter messages by parent message ID
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    post:
+      summary: Create a new message
+      description: Users can create messages in classes they are enrolled in.
+      tags:
+        - Messages
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Message object to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Message'
+      responses:
+        '201':
+          description: Message created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden
+  /messages/{id}:
+    get:
+      summary: Get a message by ID
+      tags:
+        - Messages
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: Message ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Message details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden
+  /tags:
+    get:
+      summary: Get a list of tags
+      tags:
+        - Tags
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A list of tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tag'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    post:
+      summary: Create a new tag
+      description: Only users with the PROFESSOR role can create tags.
+      tags:
+        - Tags
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Tag object to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tag'
+      responses:
+        '201':
+          description: Tag created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden
+  /tags/{id}:
+    get:
+      summary: Get a tag by ID
+      tags:
+        - Tags
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: Tag ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Tag details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
