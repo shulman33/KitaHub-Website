@@ -17,8 +17,8 @@ model University {
   id String @id @default(uuid())
   name String @db.VarChar(255)
   country String @db.VarChar(255)
-  state String @db.VarChar(255)
-  city String @db.VarChar(255)
+  alphaTwoCode String @db.VarChar(2)
+  state String? @db.VarChar(255)
 
   classes Class[]
   users User[]
