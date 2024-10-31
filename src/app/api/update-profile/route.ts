@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { getManagementToken } from '@/app/(marketing)/lib/auth'; 
+import { findUniversityByEmail } from '@/app/(kita)/lib/utils';
 
 interface CompleteProfileRequestBody {
   session_token: string;
@@ -32,6 +33,14 @@ export async function POST(req: NextRequest) {
     if (!session_token) {
       return NextResponse.json(
         { error: "Missing session token." },
+        { status: 400 }
+      );
+    }
+
+    const universityObj = findUniversityByEmail(universityEmail);
+    if (!universityObj) {
+      return NextResponse.json(
+        { error: "Invalid university email." },
         { status: 400 }
       );
     }
