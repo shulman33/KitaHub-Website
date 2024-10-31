@@ -20,7 +20,7 @@ model University {
   alphaTwoCode String @db.VarChar(2)
   state String? @db.VarChar(255)
 
-  classes Class[]
+  classes Class[] 
   users User[]
 }
 
