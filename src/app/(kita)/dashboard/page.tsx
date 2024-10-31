@@ -8,7 +8,6 @@ import Header from "@/app/(kita)/components/Header";
 export default withPageAuthRequired(async function MainDashboard() {
   const session = await getSession();
 
-  // Type assertion: Assert that session is not null or undefined to make TypeScript happy
   if (!session || !session.user) {
     throw new Error("User is not authenticated");
   }
@@ -19,20 +18,20 @@ export default withPageAuthRequired(async function MainDashboard() {
     <main>
       <Header name={user.name} />
       <div className="mx-auto max-w-full sm:max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-        <div className="mx-auto grid grid-cols-8 max-w-full sm:max-w-7xl gap-4">
-          <div className="col-span-8 sm:col-span-4 w-full">
+        <div className="grid grid-cols-12 gap-4">
+          <div className="col-span-4 md:col-span-7">
             <UpcomingAssignmentsWidget />
           </div>
 
-          <div className="col-span-8 sm:col-span-4 w-full">
+          <div className="col-span-4 md:col-span-5">
             <NewDiscussionBoardWidget />
           </div>
 
-          <div className="col-span-8 sm:col-span-3 w-full">
+          <div className="col-span-4 md:col-span-5">
             <UpcomingDeadline month="September" year={2024} />
           </div>
 
-          <div className="col-span-8 sm:col-span-5 w-full">
+          <div className="col-span-4 md:col-span-7">
             <SubmissionStatusWidget />
           </div>
         </div>

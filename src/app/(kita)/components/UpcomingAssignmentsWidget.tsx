@@ -27,7 +27,7 @@ const assignments = [
   }
 ];
 
-export default function UpcomingAssignmentsWidget() {
+export default function UpcomingAssignmentsWidget() { 
   return (
     <div className="bg-white rounded-2xl px-4 pt-6 sm:px-6 lg:px-8 border">
       <div className="sm:flex sm:items-center">
