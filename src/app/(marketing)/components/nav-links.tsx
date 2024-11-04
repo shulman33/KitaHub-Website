@@ -1,11 +1,12 @@
-// components/NavLinks.tsx
+// nav-links.tsx
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import Button from "./button";
 import Image from "next/image";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { NavLinksProps } from "@/app/(marketing)/lib/types";
-import { getSession } from "@auth0/nextjs-auth0";
 
 const navigation = [
   { name: "Home", href: "/" },
@@ -16,14 +17,14 @@ const navigation = [
   { name: "Help", href: "/help" },
 ];
 
-export default async function NavLinks({
+export default function NavLinks({
   isMobile = false,
   closeMobileMenu,
-}: NavLinksProps) {
+  session,
+}: NavLinksProps & { session: any }) {
 
-  const session = await getSession();
   const buttonText = session ? "My Dashboard" : "Get Started";
-  
+
   return (
     <div
       className={`flex ${
@@ -83,7 +84,7 @@ export default async function NavLinks({
         <div className="hidden lg:flex flex-1 items-center justify-end gap-x-6">
           <Button
             href="/api/auth/login?returnTo=/dashboard"
-            text={buttonText} 
+            text={buttonText}
             variant="secondary"
             border={true}
             textColor="accent-purple"

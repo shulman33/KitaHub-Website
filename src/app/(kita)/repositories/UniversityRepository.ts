@@ -40,6 +40,21 @@ export class UniversityRepository implements IUniversityRepository {
     }
   }
 
+  async getOrCreateUniversity(
+    data: Prisma.UniversityCreateInput
+  ): Promise<University> {
+    try {
+      return await prisma.university.upsert({
+        where: { name: data.name },
+        update: {},
+        create: data,
+      });
+    } catch (error) {
+      console.error("Error creating or fetching university:", error);
+      throw new Error("Error creating or fetching university");
+    }
+  }
+
   async updateUniversity(
     id: string,
     data: Prisma.UniversityUpdateInput

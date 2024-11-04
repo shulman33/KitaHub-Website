@@ -10,6 +10,6 @@ export interface University {
 export interface UniversityResult {
   name: string;
   country: string;
-  alpha_two_code: string;
-  state_province: string | null;
+  alphaTwoCode: string;
+  stateProvince: string | null;
 }

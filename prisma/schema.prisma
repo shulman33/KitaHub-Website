@@ -15,7 +15,7 @@ datasource db {
 
 model University {
   id String @id @default(uuid())
-  name String @db.VarChar(255)
+  name String @db.VarChar(255) @unique
   country String @db.VarChar(255)
   alphaTwoCode String @db.VarChar(2)
   state String? @db.VarChar(255)

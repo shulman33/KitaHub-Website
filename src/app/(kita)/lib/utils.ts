@@ -12,8 +12,8 @@ export function findUniversityByEmail(email: string): UniversityResult | null {
         return {
           name: university.name,
           country: university.country,
-          alpha_two_code: university.alpha_two_code,
-          state_province: university["state-province"] || null,
+          alphaTwoCode: university.alpha_two_code,
+          stateProvince: university["state-province"] || null,
         };
       }
     }

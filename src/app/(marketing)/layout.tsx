@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "@/app/globals.css";
 import NavBar from "@/app/(marketing)/components/navbar";
+import NavBarWrapper from "./components/NavBarWrapper";
 import Footer from "@/app/(marketing)/components/footer";
 import { UserProvider } from "@auth0/nextjs-auth0/client";
 
@@ -41,7 +42,7 @@ export default function RootLayout({
     <html lang="en">
       <UserProvider>
         <body className={mont.className}>
-          <NavBar />
+          <NavBarWrapper />
           {children}
           <Footer />
         </body>
