@@ -1,4 +1,8 @@
-import { PrismaClient, University, Prisma } from "@prisma/client";
+import {
+  PrismaClient,
+  University,
+  Prisma,
+} from "@prisma/client";
 import { IUniversityRepository } from "../interfaces/IUniversityRepository";
 
 const prisma = new PrismaClient();
