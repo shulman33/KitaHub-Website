@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { getManagementToken } from "@/app/(marketing)/lib/auth";
 import { findUniversityByEmail } from "@/app/(kita)/lib/utils";
+import { UserRepository } from "@/app/(kita)/repositories/UserRepository";
+import { UniversityRepository } from "@/app/(kita)/repositories/UniversityRepository";
 
 interface CompleteProfileRequestBody {
   session_token: string;
@@ -19,6 +21,8 @@ interface SessionTokenPayload extends JwtPayload {
 export async function POST(req: NextRequest) {
   try {
 
+    const userRepository = new UserRepository();
+    const universityRepository = new UniversityRepository();
     const body = await req.json();
 
     const {
@@ -30,12 +34,17 @@ export async function POST(req: NextRequest) {
       isProfessor,
     } = body as CompleteProfileRequestBody;
 
+    console.log("Received request to update user profile.");
+
     if (!session_token) {
       return NextResponse.json(
         { error: "Missing session token." },
         { status: 400 }
       );
     }
+
+    console.log("Session token provided.");
+    console.log("Validating university email.", universityEmail);
 
     const universityObj = findUniversityByEmail(universityEmail);
     if (!universityObj) {
@@ -45,6 +54,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    console.log("University email is valid.");
+
     const secret = process.env.REDIRECT_SECRET;
     if (!secret) {
       return NextResponse.json(
@@ -52,6 +63,8 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       );
     }
+
+    console.log("Decoding session token.");
 
     let decoded: SessionTokenPayload;
     try {
@@ -62,7 +75,7 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-
+    console.log("Session token decoded.");
     const userId = decoded.sub;
 
     if (!userId) {
@@ -71,6 +84,33 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    console.log("Finding or creating a university in Prisma.");
+    const universityData = await universityRepository.getOrCreateUniversity({
+      name: universityObj.name,
+      country: universityObj.country,
+      alphaTwoCode: universityObj.alphaTwoCode,
+      state: universityObj.stateProvince,
+    });
+
+    await userRepository.createUser({
+      id: userId,
+      firstName,
+      lastName,
+      role: isProfessor ? "PROFESSOR" : "STUDENT",
+      schoolEmail: universityEmail,
+      university: {
+        connect: { id: universityData.id },
+      },
+      bio: null,
+      phoneNumber: null,
+      email: null,
+      prefix: null,
+      profilePicture: null,
+      dataSharingOptIn: false,
+    });
+
+    console.log("User profile created in Prisma.");
 
     const managementToken = await getManagementToken();
 
@@ -133,6 +173,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    console.log("User profile and role updated successfully in Auth0.");
     return NextResponse.json(
       { message: "Profile and role updated successfully." },
       { status: 200 }

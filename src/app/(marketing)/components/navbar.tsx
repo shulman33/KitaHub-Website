@@ -4,9 +4,9 @@ import { useState } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import HeaderRibbon from "./header-ribbon";
-import NavLinks from "./nav-links"; 
+import NavLinks from "./nav-links";
 
-export default function NavBar() {
+export default function NavBar({ session }: { session: any }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -15,8 +15,8 @@ export default function NavBar() {
       <nav
         aria-label="Global"
         className="mx-auto flex max-w-7xl items-center justify-between gap-x-6 p-4 lg:px-8"
-      > 
-        <NavLinks />
+      >
+        <NavLinks session={session} /> {/* Pass session to NavLinks */}
         <div className="flex lg:hidden">
           <button
             type="button"
@@ -39,6 +39,7 @@ export default function NavBar() {
           <NavLinks
             isMobile={true}
             closeMobileMenu={() => setMobileMenuOpen(false)}
+            session={session}
           />
         </DialogPanel>
       </Dialog>
