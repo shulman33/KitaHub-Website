@@ -1,4 +1,4 @@
-import { getSession } from "@auth0/nextjs-auth0";
+import { getSession } from "@auth0/nextjs-auth0"; 
 
 export async function getServerSession() {
   const session = await getSession();
