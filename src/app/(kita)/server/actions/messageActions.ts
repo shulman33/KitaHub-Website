@@ -7,9 +7,13 @@ import {
   classTable,
   InsertMessage,
   SelectMessage,
+  classEnrollment
 } from "@/app/db/schema";
 import { eq, sql } from "drizzle-orm";
-import { ExtendedMessage } from "../../lib/types";
+import { ExtendedMessage, ExtendedSelectMessage } from "../../lib/types";
+import { isEnrolledInClass } from "../../lib/utils";
+import { desc } from "drizzle-orm";
+import { formatDistanceToNow } from "date-fns";
 
 
 export async function getMessagesByClassId(classId: string): Promise<SelectMessage[]> {
@@ -26,6 +30,87 @@ export async function getMessagesByClassId(classId: string): Promise<SelectMessa
   } catch (error) {
     console.error("Error fetching messages by class ID:", error);
     throw new Error("Could not fetch messages");
+  }
+}
+
+/**
+ * Fetches all messages from classes the current user is enrolled in,
+ * along with the author's first name, last name, profile picture, and class name.
+ *
+ * @returns {Promise<SelectMessage[]>} An array of messages with additional fields.
+ */
+
+// enable filter messages by classId if filter param is passed
+export async function getMessagesByCurrentUser(): Promise<
+  ExtendedSelectMessage[]
+> {
+  try {
+    // Use dbAuth to ensure the query is executed in the context of the authenticated user
+    const messages = await dbAuth(async (db) => {
+      // Build the query
+      const result = await db
+        .select({
+          // Selecting fields from the Message table
+          id: message.id,
+          classId: message.classId,
+          userId: message.userId,
+          parentMessageId: message.parentMessageId,
+          title: message.title,
+          content: message.content,
+          createdAt: message.createdAt,
+          updatedAt: message.updatedAt,
+
+          // Selecting additional fields from the User table
+          userFirstName: user.firstName,
+          userLastName: user.lastName,
+          userProfilePicture: user.profilePicture,
+
+          // Selecting additional field from the Class table
+          className: classTable.className,
+        })
+        .from(message)
+        // Join with ClassEnrollment to ensure enrollment
+        .innerJoin(
+          classEnrollment,
+          eq(message.classId, classEnrollment.classId)
+        )
+        // Join with User to get author details
+        .innerJoin(user, eq(message.userId, user.id))
+        // Join with Class table to get className
+        .innerJoin(classTable, eq(message.classId, classTable.id))
+        // Apply the enrollment filter using the updated helper
+        .where(isEnrolledInClass(message.classId))
+        // Optional: Order messages by creation date descending
+        .orderBy(desc(message.createdAt))
+        .limit(4);
+
+      // Map the result to the ExtendedSelectMessage type
+      const selectMessages: ExtendedSelectMessage[] = result.map((msg) => ({
+        id: msg.id,
+        classId: msg.classId,
+        userId: msg.userId,
+        parentMessageId: msg.parentMessageId,
+        title: msg.title,
+        content: msg.content,
+        createdAt: msg.createdAt,
+        createdAtRelative: formatDistanceToNow(new Date(msg.createdAt), {
+          addSuffix: true,
+        }),
+        updatedAt: msg.updatedAt,
+        userFirstName: msg.userFirstName,
+        userLastName: msg.userLastName,
+        userProfilePicture: msg.userProfilePicture,
+        className: msg.className,
+      }));
+
+      console.log("Fetched Messages:", selectMessages);
+      return selectMessages;
+    });
+
+    return messages;
+  } catch (error) {
+    console.error("Error fetching messages for current user:", error);
+    throw new Error("Failed to fetch messages.");
   }
 }
 

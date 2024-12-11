@@ -1,5 +1,6 @@
 import universities from "./universities.json"
 import { University, UniversityResult } from "./types"
+import { AnyColumn, sql } from "drizzle-orm";
 
 export function findUniversityByEmail(email: string): UniversityResult | null {
   const emailDomain = email.split("@")[1].toLowerCase();
@@ -20,3 +21,26 @@ export function findUniversityByEmail(email: string): UniversityResult | null {
   }
   return null;
 }
+
+export const currentUserId = sql`(
+    SELECT u.id
+    FROM "user" u
+    WHERE u."auth0UserId" = auth.user_id()
+  )`;
+
+export const currentUserRole = sql`
+  (
+    SELECT u.role
+    FROM "user" u
+    WHERE u."auth0UserId" = auth.user_id()
+  )
+`;
+
+export const isEnrolledInClass = (classIdColumn: AnyColumn) => sql`
+  EXISTS (
+    SELECT 1
+    FROM "class_enrollment" ce
+    WHERE ce."classId" = ${classIdColumn}
+      AND ce."userId" = ${currentUserId}
+  )
+`;

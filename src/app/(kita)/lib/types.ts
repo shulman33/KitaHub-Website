@@ -53,6 +53,14 @@ export interface Message {
   profilePic?: string;
 }
 
+export type ExtendedSelectMessage = SelectMessage & {
+  userFirstName: string;
+  userLastName: string;
+  userProfilePicture: string | null;
+  className: string;
+  createdAtRelative: string;
+};
+
 export interface ExtendedMessage {
   id: string;
   classId: string;
@@ -71,7 +79,7 @@ export interface ExtendedMessage {
 }
 
 export interface MessageWidgetProps {
-  messages: ExtendedMessage[];
+  messages: ExtendedSelectMessage[];
 }
 
 

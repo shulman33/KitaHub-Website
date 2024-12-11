@@ -4,8 +4,8 @@ import Header from "@/app/(kita)/components/Header";
 import Grid from "@mui/material/Grid2";
 import UpcomingAssignmentsStudent from "../components/UpcomingAssignments";
 import CoursesWidget from "./CoursesWidget";
-import { getClassesByUserId } from "../server/actions/ClassActions";
-import { getMessagesByUserId } from "../server/actions/MessageActions";
+import { getClassesForCurrentUser } from "../server/actions/classActions";
+import { getMessagesByCurrentUser, getMessagesByUserId } from "../server/actions/messageActions";
 
 interface StudentDashboardProps {
   name: string;
@@ -14,11 +14,9 @@ interface StudentDashboardProps {
 
 
 const StudentDashboard = async ({ name }: StudentDashboardProps) => {
-  const messages = await getMessagesByUserId(
-    "321c5abe-d519-48fa-8ed3-54f5263b5990"
-  );
+  const messages = await getMessagesByCurrentUser();
   console.log("messages", messages);
-  const courses = await getClassesByUserId();
+  const courses = await getClassesForCurrentUser();
   console.log("courses", courses);
   return (
     <>
