@@ -4,8 +4,8 @@ import Header from "@/app/(kita)/components/Header";
 import Grid from "@mui/material/Grid2";
 import UpcomingAssignmentsStudent from "../components/UpcomingAssignments";
 import CoursesWidget from "./CoursesWidget";
-import { getClassesByUserId } from "../server/actions/ClassActions";
-import { getMessagesByUserId } from "../server/actions/MessageActions";
+import { getClassesByUserId } from "../server/actions/classActions";
+import { getMessagesByUserId } from "../server/actions/messageActions";
 
 interface StudentDashboardProps {
   name: string;
