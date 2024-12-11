@@ -1,0 +1,188 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js" 
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model University {
+  id String @id @default(uuid())
+  name String @db.VarChar(255) @unique
+  country String @db.VarChar(255)
+  alphaTwoCode String @db.VarChar(2)
+  state String? @db.VarChar(255)
+
+  classes Class[] 
+  users User[]
+}
+
+model User {
+  id String @id @default(uuid())
+  university University @relation(fields: [universityId], references: [id])
+  universityId String
+  firstName String @db.VarChar(255)
+  lastName String @db.VarChar(255)
+  bio String? @db.VarChar(255)
+  role Role
+  prefix String? @db.VarChar(255)
+  profilePicture String? @db.VarChar(255)
+  phoneNumber String? @db.VarChar(255) @unique
+  email String? @db.VarChar(255) @unique
+  schoolEmail String @db.VarChar(255) @unique
+  gender Gender?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  dataSharingOptIn Boolean @default(false)
+  
+  classEnrollments ClassEnrollment[]
+  grades           Grade[]
+  messages         Message[]         @relation("UserMessages")
+  announcements    Announcement[]
+  resources        Resource[]        @relation("UserResources")
+}
+
+// Join table for many to many relationship between User and Class
+model ClassEnrollment {
+  id String @id @default(uuid())
+  user User @relation(fields: [userId], references: [id])
+  userId String
+  class Class @relation(fields: [classId], references: [id])
+  classId String
+  role Role
+
+  @@unique([userId, classId]) // Prevent duplicate enrollments
+}
+
+model Class {
+  id String @id @default(uuid())
+  univserity University @relation(fields: [universityId], references: [id])
+  universityId String
+  className String @db.VarChar(255)
+  descripton String? @db.VarChar(255)
+  code Int
+  semester SemeesterEnum
+  year Int
+  isActive Boolean @default(true)
+
+  classEnrollments ClassEnrollment[]
+  assignments      Assignment[]
+  resources        Resource[]
+  announcements    Announcement[]
+  messages         Message[]
+}
+
+model Assignment {
+  id String @id @default(uuid())
+  class Class @relation(fields: [classId], references: [id])
+  classId String
+  title String @db.VarChar(255)
+  description String? @db.VarChar(255)
+  dueDate DateTime
+  totalPoints Float // Total points for the assignment
+  isUploded Boolean @default(false)
+  url String? @db.VarChar(255) // URL to the assignment
+  isGraded Boolean @default(false)
+  isPubished Boolean @default(false)
+
+  grades    Grade[]
+  resources Resource[]
+}
+
+model Grade {
+  id String @id @default(uuid())
+  assignment Assignment @relation(fields: [assignmentId], references: [id])
+  assignmentId String
+  student User @relation(fields: [studentId], references: [id])
+  studentId String
+  score Float
+  gradedAt DateTime @default(now())
+  feedBack String? @db.VarChar(255)
+}
+
+model Resource {
+  id String @id @default(uuid())
+  class Class? @relation(fields: [classId], references: [id])
+  classId String?
+  assignment Assignment? @relation(fields: [assignmentId], references: [id])
+  assignmentId String?
+  user User? @relation("UserResources", fields: [userId], references: [id])
+  userId String?
+  title String @db.VarChar(255)
+  type ResourceType
+  url String @db.VarChar(255)
+  uploaedAt DateTime @default(now())
+
+  tags Tag[] @relation("TagsOnResources")
+}
+
+model Announcement {
+  id String @id @default(uuid())
+  class Class @relation(fields: [classId], references: [id])
+  classId String
+  user User @relation(fields: [userId], references: [id])
+  userId String
+  title String @db.VarChar(255)
+  content String @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Message {
+  id String @id @default(uuid())
+  class Class @relation(fields: [classId], references: [id])
+  classId String
+  user User @relation("UserMessages", fields: [userId], references: [id])
+  userId String
+  parentMessage Message? @relation("MessageReplies", fields: [parentMessageId], references: [id])
+  parentMessageId String?
+  title String? @db.VarChar(255)
+  content String @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  replies Message[] @relation("MessageReplies")
+  tags Tag[] @relation("TagsOnMessages")
+}
+
+model Tag {
+  id String @id @default(uuid())
+  name String @db.VarChar(255) @unique
+
+  messages  Message[]  @relation("TagsOnMessages")
+  resources Resource[] @relation("TagsOnResources")
+}
+
+
+enum Role {
+  STUDENT
+  PROFESSOR
+}
+
+enum ResourceType {
+  SLIDE_DECK
+  ARTICLE
+  VIDEO
+  OTHER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum SemeesterEnum {
+  FALL
+  WINTER
+  SPRING
+  SUMMER
+}
+
