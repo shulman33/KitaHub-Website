@@ -29,7 +29,16 @@ export default function ClientLayout({
       current: false,
     },
     { name: "Profile", href: "#", icon: UserIcon, current: false },
-    { name: "Courses", href: "#", icon: AcademicCapIcon, current: false },
+    {
+      name: "Courses",
+      href: "#",
+      icon: AcademicCapIcon,
+      current: false,
+      children: [
+        { name: "Introduction to Algorithms", href: "/dashboard/classes/34554", current: false },
+        { name: "Systems Programming", href: "#", current: false },
+      ],
+    },
   ];
 
   const mobileNavigation = [

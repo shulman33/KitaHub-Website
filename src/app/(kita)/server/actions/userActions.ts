@@ -1,19 +1,19 @@
 "use server";
 
-import { UserRepository } from "../../repositories/UserRepository";
-import { getServerSession, userHasRole } from "../../lib/auth";
-import { Prisma } from "@prisma/client";
+import { db } from "@/app/db/drizzle";
+import { user, InsertUser, SelectUser } from "@/app/db/schema";
+import { eq } from "drizzle-orm";
 
-const userRepo = new UserRepository();
 
 // Get a user by ID (accessible to authenticated users)
-export async function getUserById(userId: string) {
+export async function getUserById(userId: string): Promise<SelectUser | null> {
   try {
-    const session = await getServerSession();
-    if (session.userId !== userId) {
-      await userHasRole("professor");
-    }
-    return await userRepo.getUserById(userId);
+    const result = await db
+      .selectDistinct()
+      .from(user)
+      .where(eq(user.id, userId));
+
+    return result[0];
   } catch (error) {
     console.error("Error fetching user by ID:", error);
     throw new Error("Could not fetch user");
@@ -21,24 +21,39 @@ export async function getUserById(userId: string) {
 }
 
 // Get a user by email (accessible to authenticated users)
-export async function getUserByEmail(email: string) {
+export async function getUserByEmail(email: string): Promise<SelectUser | null> {
   try {
-    const session = await getServerSession();
-    if (session.email !== email) {
-      await userHasRole("professor");
-    }
-    return await userRepo.getUserByEmail(email);
+    const result = await db
+      .selectDistinct()
+      .from(user)
+      .where(eq(user.email, email));
+
+    return result[0];
   } catch (error) {
     console.error("Error fetching user by email:", error);
     throw new Error("Could not fetch user");
   }
 }
 
+export async function getUserBySchoolEmail(schoolEmail: string): Promise<SelectUser | null> {
+    const result = await db
+      .selectDistinct()
+      .from(user)
+      .where(eq(user.schoolEmail, schoolEmail));
+    return result[0];
+  }
+
+  export async function getAllUsers(): Promise<SelectUser[]> {
+    const result = await db.selectDistinct().from(user);
+    return result;
+  }
+
 // Create a user (accessible to authenticated users)
-export async function createUser(data: Prisma.UserCreateInput) {
+export async function createUser(data: InsertUser): Promise<SelectUser> {
   try {
-    const session = await getServerSession();
-    return await userRepo.createUser(data);
+    const result = await db.insert(user).values(data).returning();
+    // await redis.hset(`user:${result[0].id}`, JSON.stringify(result[0]));
+    return result[0];
   } catch (error) {
     console.error("Error creating user:", error);
     throw new Error("Could not create user");
@@ -46,13 +61,14 @@ export async function createUser(data: Prisma.UserCreateInput) {
 }
 
 // Update a user (restricted to professor role or user themselves if specified)
-export async function updateUser(id: string, data: Prisma.UserUpdateInput) {
+export async function updateUser(id: string, data: InsertUser): Promise<SelectUser> {
   try {
-    const session = await getServerSession();
-    if (id !== session.userId) {
-      await userHasRole("professor");
-    }
-    return await userRepo.updateUser(id, data);
+    const result = await db
+      .update(user)
+      .set(data)
+      .where(eq(user.id, id))
+      .returning();
+    return result[0];
   } catch (error) {
     console.error("Error updating user:", error);
     throw new Error("Could not update user");
@@ -62,11 +78,7 @@ export async function updateUser(id: string, data: Prisma.UserUpdateInput) {
 // Delete a user (restricted to professor role or admins if specified)
 export async function deleteUser(id: string) {
   try {
-    const session = await getServerSession();
-    if (id !== session.userId) {
-      await userHasRole("professor");
-    }
-    await userRepo.deleteUser(id);
+    await db.delete(user).where(eq(user.id, id));
   } catch (error) {
     console.error("Error deleting user:", error);
     throw new Error("Could not delete user");

@@ -1,74 +1,103 @@
 "use server";
 
-import { GradeRepository } from "../../repositories/GradeRepository";
-import { getServerSession, userHasRole } from "../../lib/auth";
-import { Prisma } from "@prisma/client";
+import { dbAuth } from "@/app/db/drizzle";
+import {
+  grade,
+  InsertGrade,
+  SelectGrade,
+} from "@/app/db/schema";
+import { eq } from "drizzle-orm";
 
-const gradeRepo = new GradeRepository();
-
-// Get a grade by ID (accessible to authenticated users)
-export async function getGradeById(gradeId: string) {
+export async function getGradeById(
+  gradeId: string
+): Promise<SelectGrade | null> {
   try {
-    const session = await getServerSession();
-    return await gradeRepo.getGradeById(gradeId);
+    const result = await dbAuth(async (db) => {
+      const grades = await db.select().from(grade).where(eq(grade.id, gradeId));
+
+      return grades;
+    });
+
+    return result[0] || null;
   } catch (error) {
     console.error("Error fetching grade by ID:", error);
     throw new Error("Could not fetch grade");
   }
 }
 
-// Get grades by assignment ID (accessible to authenticated users)
-export async function getGradesByAssignmentId(assignmentId: string) {
+export async function getGradesByAssignmentId(
+  assignmentId: string
+): Promise<SelectGrade[]> {
   try {
-    await userHasRole("professor");
-    return await gradeRepo.getGradesByAssignmentId(assignmentId);
+    const result = await dbAuth(async (db) => {
+      const grades = await db
+        .select()
+        .from(grade)
+        .where(eq(grade.assignmentId, assignmentId));
+
+      return grades;
+    });
+
+    return result;
   } catch (error) {
     console.error("Error fetching grades by assignment ID:", error);
     throw new Error("Could not fetch grades");
   }
 }
 
-// Get grades by student ID (accessible to authenticated users)
 export async function getGradesByStudentId(studentId: string) {
   try {
-    const session = await getServerSession();
-    if (session.userId !== studentId) {
-      throw new Error("You are not authorized to view these grades");
-    }
-    return await gradeRepo.getGradesByStudentId(studentId);
+    const result = await dbAuth(async (db) => {
+      const grades = await db
+        .select()
+        .from(grade)
+        .where(eq(grade.studentId, studentId));
+
+      return grades;
+    });
+
+    return result;
   } catch (error) {
     console.error("Error fetching grades by student ID:", error);
     throw new Error("Could not fetch grades");
   }
 }
 
-// Create a grade (professor role required)
-export async function createGrade(data: Prisma.GradeCreateInput) {
+export async function createGrade(data: InsertGrade): Promise<SelectGrade> {
   try {
-    await userHasRole("professor");
-    return await gradeRepo.createGrade(data);
+    const result = await dbAuth(async (db) => {
+      const newGrade = await db.insert(grade).values(data).returning();
+      return newGrade[0];
+    });
+    return result;
   } catch (error) {
     console.error("Error creating grade:", error);
     throw new Error("Could not create grade");
   }
 }
 
-// Update a grade (professor role required)
-export async function updateGrade(id: string, data: Prisma.GradeUpdateInput) {
+export async function updateGrade(id: string, data: InsertGrade): Promise<SelectGrade> {
   try {
-    await userHasRole("professor");
-    return await gradeRepo.updateGrade(id, data);
+    const result = await dbAuth(async (db) => {
+      const updatedGrade = await db
+        .update(grade)
+        .set(data)
+        .where(eq(grade.id, id))
+        .returning();
+      return updatedGrade[0];
+    })
+    return result;
   } catch (error) {
     console.error("Error updating grade:", error);
     throw new Error("Could not update grade");
   }
 }
 
-// Delete a grade (professor role required)
-export async function deleteGrade(id: string) {
+export async function deleteGrade(id: string): Promise<void> {
   try {
-    await userHasRole("professor");
-    await gradeRepo.deleteGrade(id);
+    await dbAuth(async (db) => {
+      await db.delete(grade).where(eq(grade.id, id));
+    });
   } catch (error) {
     console.error("Error deleting grade:", error);
     throw new Error("Could not delete grade");

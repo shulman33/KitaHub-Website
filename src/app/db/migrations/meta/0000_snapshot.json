@@ -1,0 +1,1287 @@
+{
+  "id": "3195af21-f6cb-4995-88d8-19afec55df9c",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.Announcement": {
+      "name": "Announcement",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "classId": {
+          "name": "classId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "content": {
+          "name": "content",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "Announcement_classId_Class_id_fk": {
+          "name": "Announcement_classId_Class_id_fk",
+          "tableFrom": "Announcement",
+          "tableTo": "Class",
+          "columnsFrom": [
+            "classId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "Announcement_userId_User_id_fk": {
+          "name": "Announcement_userId_User_id_fk",
+          "tableFrom": "Announcement",
+          "tableTo": "User",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "announcement_select_policy": {
+          "name": "announcement_select_policy",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        \"Announcement\".\"userId\" = (\n          SELECT u.id\n          FROM \"User\" u\n          WHERE u.\"auth0UserId\" = auth.user_id()\n        )\n        AND EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          WHERE ce.\"userId\" = \"Announcement\".\"userId\"\n            AND ce.\"classId\" = \"Announcement\".\"classId\"\n        )\n      ",
+          "withCheck": ""
+        },
+        "announcement_insert_policy": {
+          "name": "announcement_insert_policy",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        \"Announcement\".\"userId\" = (\n          SELECT u.id\n          FROM \"User\" u\n          WHERE u.\"auth0UserId\" = auth.user_id()\n        )\n        AND EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          WHERE ce.\"userId\" = \"Announcement\".\"userId\"\n            AND ce.\"classId\" = \"Announcement\".\"classId\"\n        )\n      ",
+          "withCheck": ""
+        },
+        "announcement_update_policy": {
+          "name": "announcement_update_policy",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        \"Announcement\".\"userId\" = (\n          SELECT u.id\n          FROM \"User\" u\n          WHERE u.\"auth0UserId\" = auth.user_id()\n        )\n        AND EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          WHERE ce.\"userId\" = \"Announcement\".\"userId\"\n            AND ce.\"classId\" = \"Announcement\".\"classId\"\n        )\n      ",
+          "withCheck": ""
+        },
+        "announcement_delete_policy": {
+          "name": "announcement_delete_policy",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        \"Announcement\".\"userId\" = (\n          SELECT u.id\n          FROM \"User\" u\n          WHERE u.\"auth0UserId\" = auth.user_id()\n        )\n        AND EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          WHERE ce.\"userId\" = \"Announcement\".\"userId\"\n            AND ce.\"classId\" = \"Announcement\".\"classId\"\n        )\n      ",
+          "withCheck": ""
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.Assignment": {
+      "name": "Assignment",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "classId": {
+          "name": "classId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dueDate": {
+          "name": "dueDate",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "totalPoints": {
+          "name": "totalPoints",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "isUploaded": {
+          "name": "isUploaded",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "url": {
+          "name": "url",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "isGraded": {
+          "name": "isGraded",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "isPublished": {
+          "name": "isPublished",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "Assignment_classId_Class_id_fk": {
+          "name": "Assignment_classId_Class_id_fk",
+          "tableFrom": "Assignment",
+          "tableTo": "Class",
+          "columnsFrom": [
+            "classId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "assignment_select_policy": {
+          "name": "assignment_select_policy",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          WHERE ce.\"classId\" = \"Assignment\".classId\n            AND u.\"auth0UserId\" = auth.user_id()\n        )\n      ",
+          "withCheck": ""
+        },
+        "assignment_insert_policy": {
+          "name": "assignment_insert_policy",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          WHERE ce.\"classId\" = \"Assignment\".classId\n            AND u.\"auth0UserId\" = auth.user_id()\n            AND u.\"role\" = 'PROFESSOR'\n        )\n      ",
+          "withCheck": ""
+        },
+        "assignment_update_policy": {
+          "name": "assignment_update_policy",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          WHERE ce.\"classId\" = \"Assignment\".classId\n            AND u.\"auth0UserId\" = auth.user_id()\n            AND u.\"role\" = 'PROFESSOR'\n        )\n      ",
+          "withCheck": ""
+        },
+        "assignment_delete_policy": {
+          "name": "assignment_delete_policy",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          WHERE ce.\"classId\" = \"Assignment\".classId\n            AND u.\"auth0UserId\" = auth.user_id()\n            AND u.\"role\" = 'PROFESSOR'\n        )\n      ",
+          "withCheck": ""
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ClassEnrollment": {
+      "name": "ClassEnrollment",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "userId": {
+          "name": "userId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "classId": {
+          "name": "classId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "class_enrollment_user_class_unique": {
+          "name": "class_enrollment_user_class_unique",
+          "columns": [
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "classId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "ClassEnrollment_userId_User_id_fk": {
+          "name": "ClassEnrollment_userId_User_id_fk",
+          "tableFrom": "ClassEnrollment",
+          "tableTo": "User",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "ClassEnrollment_classId_Class_id_fk": {
+          "name": "ClassEnrollment_classId_Class_id_fk",
+          "tableFrom": "ClassEnrollment",
+          "tableTo": "Class",
+          "columnsFrom": [
+            "classId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.Class": {
+      "name": "Class",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "universityId": {
+          "name": "universityId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "className": {
+          "name": "className",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "code": {
+          "name": "code",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "semester": {
+          "name": "semester",
+          "type": "semester",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "year": {
+          "name": "year",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "isActive": {
+          "name": "isActive",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "Class_universityId_University_id_fk": {
+          "name": "Class_universityId_University_id_fk",
+          "tableFrom": "Class",
+          "tableTo": "University",
+          "columnsFrom": [
+            "universityId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "class_select_policy": {
+          "name": "class_select_policy",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          WHERE ce.\"classId\" = \"Class\".id\n            AND u.\"auth0UserId\" = auth.user_id()\n        )\n      ",
+          "withCheck": ""
+        },
+        "class_insert_policy": {
+          "name": "class_insert_policy",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          WHERE ce.\"classId\" = \"Class\".id\n            AND u.\"auth0UserId\" = auth.user_id() AND u.\"role\" = 'PROFESSOR'\n        )\n      ",
+          "withCheck": ""
+        },
+        "class_update_policy": {
+          "name": "class_update_policy",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          WHERE ce.\"classId\" = \"Class\".id\n            AND u.\"auth0UserId\" = auth.user_id() AND u.\"role\" = 'PROFESSOR'\n        )\n      ",
+          "withCheck": ""
+        },
+        "class_delete_policy": {
+          "name": "class_delete_policy",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          WHERE ce.\"classId\" = \"Class\".id\n            AND u.\"auth0UserId\" = auth.user_id() AND u.\"role\" = 'PROFESSOR'\n        )\n      ",
+          "withCheck": ""
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.Grade": {
+      "name": "Grade",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "assignmentId": {
+          "name": "assignmentId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "studentId": {
+          "name": "studentId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "score": {
+          "name": "score",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "gradedAt": {
+          "name": "gradedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "feedback": {
+          "name": "feedback",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "Grade_assignmentId_Assignment_id_fk": {
+          "name": "Grade_assignmentId_Assignment_id_fk",
+          "tableFrom": "Grade",
+          "tableTo": "Assignment",
+          "columnsFrom": [
+            "assignmentId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "Grade_studentId_User_id_fk": {
+          "name": "Grade_studentId_User_id_fk",
+          "tableFrom": "Grade",
+          "tableTo": "User",
+          "columnsFrom": [
+            "studentId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "grade_select_policy": {
+          "name": "grade_select_policy",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        \"Grade\".\"studentId\" = (\n          SELECT u.id\n          FROM \"User\" u\n          WHERE u.\"auth0UserId\" = auth.user_id()\n        )\n        AND EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          WHERE ce.\"userId\" = \"Grade\".\"studentId\"\n            AND ce.\"classId\" = (\n              SELECT \"classId\"\n              FROM \"Assignment\"\n              WHERE \"Assignment\".id = \"Grade\".\"assignmentId\"\n            )\n        )\n      ",
+          "withCheck": ""
+        },
+        "grade_insert_policy": {
+          "name": "grade_insert_policy",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          JOIN \"Assignment\" a ON ce.\"classId\" = a.\"classId\"\n          WHERE a.id = \"Grade\".\"assignmentId\"\n            AND u.\"auth0UserId\" = auth.user_id()\n            AND u.\"role\" = 'PROFESSOR'\n        )\n      ",
+          "withCheck": ""
+        },
+        "grade_update_policy": {
+          "name": "grade_update_policy",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          JOIN \"Assignment\" a ON ce.\"classId\" = a.\"classId\"\n          WHERE a.id = \"Grade\".\"assignmentId\"\n            AND u.\"auth0UserId\" = auth.user_id()\n            AND u.\"role\" = 'PROFESSOR'\n        )\n      ",
+          "withCheck": ""
+        },
+        "grade_delete_policy": {
+          "name": "grade_delete_policy",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          JOIN \"Assignment\" a ON ce.\"classId\" = a.\"classId\"\n          WHERE a.id = \"Grade\".\"assignmentId\"\n            AND u.\"auth0UserId\" = auth.user_id()\n            AND u.\"role\" = 'PROFESSOR'\n        )\n      ",
+          "withCheck": ""
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.message": {
+      "name": "message",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "classId": {
+          "name": "classId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentMessageId": {
+          "name": "parentMessageId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "content": {
+          "name": "content",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "message_classId_Class_id_fk": {
+          "name": "message_classId_Class_id_fk",
+          "tableFrom": "message",
+          "tableTo": "Class",
+          "columnsFrom": [
+            "classId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "message_userId_User_id_fk": {
+          "name": "message_userId_User_id_fk",
+          "tableFrom": "message",
+          "tableTo": "User",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "parentMessageId": {
+          "name": "parentMessageId",
+          "tableFrom": "message",
+          "tableTo": "message",
+          "columnsFrom": [
+            "parentMessageId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.MessageTags": {
+      "name": "MessageTags",
+      "schema": "",
+      "columns": {
+        "messageId": {
+          "name": "messageId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tagId": {
+          "name": "tagId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "MessageTags_messageId_message_id_fk": {
+          "name": "MessageTags_messageId_message_id_fk",
+          "tableFrom": "MessageTags",
+          "tableTo": "message",
+          "columnsFrom": [
+            "messageId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "MessageTags_tagId_Tag_id_fk": {
+          "name": "MessageTags_tagId_Tag_id_fk",
+          "tableFrom": "MessageTags",
+          "tableTo": "Tag",
+          "columnsFrom": [
+            "tagId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "MessageTags_messageId_tagId_pk": {
+          "name": "MessageTags_messageId_tagId_pk",
+          "columns": [
+            "messageId",
+            "tagId"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.Resource": {
+      "name": "Resource",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "classId": {
+          "name": "classId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "assignmentId": {
+          "name": "assignmentId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "userId": {
+          "name": "userId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "resource_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "url": {
+          "name": "url",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "uploadedAt": {
+          "name": "uploadedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "Resource_classId_Class_id_fk": {
+          "name": "Resource_classId_Class_id_fk",
+          "tableFrom": "Resource",
+          "tableTo": "Class",
+          "columnsFrom": [
+            "classId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "Resource_assignmentId_Assignment_id_fk": {
+          "name": "Resource_assignmentId_Assignment_id_fk",
+          "tableFrom": "Resource",
+          "tableTo": "Assignment",
+          "columnsFrom": [
+            "assignmentId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "Resource_userId_User_id_fk": {
+          "name": "Resource_userId_User_id_fk",
+          "tableFrom": "Resource",
+          "tableTo": "User",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "resource_select_policy": {
+          "name": "resource_select_policy",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          WHERE ce.\"classId\" = \"Resource\".classId\n            AND u.\"auth0UserId\" = auth.user_id()\n        )\n      ",
+          "withCheck": ""
+        },
+        "resource_insert_policy": {
+          "name": "resource_insert_policy",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          WHERE ce.\"classId\" = \"Resource\".classId\n            AND u.\"auth0UserId\" = auth.user_id()\n            AND u.\"role\" = 'PROFESSOR'\n        )\n      ",
+          "withCheck": ""
+        },
+        "resource_update_policy": {
+          "name": "resource_update_policy",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          WHERE ce.\"classId\" = \"Resource\".classId\n            AND u.\"auth0UserId\" = auth.user_id()\n            AND u.\"role\" = 'PROFESSOR'\n        )\n      ",
+          "withCheck": ""
+        },
+        "resource_delete_policy": {
+          "name": "resource_delete_policy",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          WHERE ce.\"classId\" = \"Resource\".classId\n            AND u.\"auth0UserId\" = auth.user_id()\n            AND u.\"role\" = 'PROFESSOR'\n        )\n      ",
+          "withCheck": ""
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ResourceTags": {
+      "name": "ResourceTags",
+      "schema": "",
+      "columns": {
+        "resourceId": {
+          "name": "resourceId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tagId": {
+          "name": "tagId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "ResourceTags_resourceId_Resource_id_fk": {
+          "name": "ResourceTags_resourceId_Resource_id_fk",
+          "tableFrom": "ResourceTags",
+          "tableTo": "Resource",
+          "columnsFrom": [
+            "resourceId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "ResourceTags_tagId_Tag_id_fk": {
+          "name": "ResourceTags_tagId_Tag_id_fk",
+          "tableFrom": "ResourceTags",
+          "tableTo": "Tag",
+          "columnsFrom": [
+            "tagId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "ResourceTags_resourceId_tagId_pk": {
+          "name": "ResourceTags_resourceId_tagId_pk",
+          "columns": [
+            "resourceId",
+            "tagId"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.Tag": {
+      "name": "Tag",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "tag_name_unique": {
+          "name": "tag_name_unique",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.University": {
+      "name": "University",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "country": {
+          "name": "country",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "alphaTwoCode": {
+          "name": "alphaTwoCode",
+          "type": "varchar(2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "state": {
+          "name": "state",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "University_name_index": {
+          "name": "University_name_index",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.User": {
+      "name": "User",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "auth0UserId": {
+          "name": "auth0UserId",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "universityId": {
+          "name": "universityId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "firstName": {
+          "name": "firstName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lastName": {
+          "name": "lastName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "bio": {
+          "name": "bio",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "role": {
+          "name": "role",
+          "type": "role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "prefix": {
+          "name": "prefix",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "profilePicture": {
+          "name": "profilePicture",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "phoneNumber": {
+          "name": "phoneNumber",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "schoolEmail": {
+          "name": "schoolEmail",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "gender": {
+          "name": "gender",
+          "type": "gender",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "dataSharingOptIn": {
+          "name": "dataSharingOptIn",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {
+        "user_phone_number_unique": {
+          "name": "user_phone_number_unique",
+          "columns": [
+            {
+              "expression": "phoneNumber",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "user_email_unique": {
+          "name": "user_email_unique",
+          "columns": [
+            {
+              "expression": "email",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "user_school_email_unique": {
+          "name": "user_school_email_unique",
+          "columns": [
+            {
+              "expression": "schoolEmail",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "User_universityId_University_id_fk": {
+          "name": "User_universityId_University_id_fk",
+          "tableFrom": "User",
+          "tableTo": "University",
+          "columnsFrom": [
+            "universityId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.gender": {
+      "name": "gender",
+      "schema": "public",
+      "values": [
+        "MALE",
+        "FEMALE",
+        "OTHER"
+      ]
+    },
+    "public.resource_type": {
+      "name": "resource_type",
+      "schema": "public",
+      "values": [
+        "SLIDE_DECK",
+        "ARTICLE",
+        "VIDEO",
+        "OTHER"
+      ]
+    },
+    "public.role": {
+      "name": "role",
+      "schema": "public",
+      "values": [
+        "STUDENT",
+        "PROFESSOR"
+      ]
+    },
+    "public.semester": {
+      "name": "semester",
+      "schema": "public",
+      "values": [
+        "FALL",
+        "WINTER",
+        "SPRING",
+        "SUMMER"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

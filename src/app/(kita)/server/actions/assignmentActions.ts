@@ -1,49 +1,85 @@
 "use server";
 
-import { Prisma } from "@prisma/client";
-import { AssignmentRepository } from "../../repositories/AssignmentRepository";
-import { userHasRole, getServerSession } from "../../lib/auth";
+import { dbAuth } from "@/app/db/drizzle";
+import {
+  InsertAssignment,
+  SelectAssignment,
+  assignment,
+  classEnrollment,
+} from "@/app/db/schema";
+import { eq, and } from "drizzle-orm";
 
-const assignmentRepo = new AssignmentRepository();
-
-// Get assignments by class ID (accessible to authenticated users)
-export async function getAssignmentsByClassId(classId: string) {
+export async function getAssignmentsByClassId(classId: string): Promise<SelectAssignment[]> {
   try {
-    const session = await getServerSession();
-    return await assignmentRepo.getAssignmentsByClassId(classId);
+    const result = await dbAuth(async (db) => {
+      const assignments = await db
+        .select()
+        .from(assignment)
+        .where(eq(assignment.classId, classId));
+
+      return assignments;
+    })
+    return result;
   } catch (error) {
     console.error("Error fetching assignments:", error);
     throw new Error("Could not fetch assignments");
   }
 }
 
-// Create an assignment (professor role required)
-export async function createAssignment(data: Prisma.AssignmentCreateInput) {
+export async function getAllUserAssignments(id: string) {
   try {
-    await userHasRole("professor");
-    return await assignmentRepo.createAssignment(data);
+    const result = await dbAuth(async (db) => {
+      const assignments = await db
+        .select()
+        .from(assignment)
+        .innerJoin(classEnrollment, eq(assignment.classId, classEnrollment.classId))
+        .where(eq(classEnrollment.userId, id));
+
+      return assignments;
+    })
+    return result;
+  } catch (error) {
+    console.error("Error fetching assignments:", error);
+    throw new Error("Could not fetch assignments");
+  }
+} 
+
+export async function createAssignment(data: InsertAssignment): Promise<SelectAssignment> {
+  try {
+    const result = await dbAuth(async (db) => {
+      const newAssignment = await db.insert(assignment).values(data).returning();
+      return newAssignment[0];
+    })
+    return result;
   } catch (error) {
     console.error("Error creating assignment:", error);
     throw new Error("Could not create assignment");
   }
 }
 
-// Update an assignment (professor role required)
-export async function updateAssignment(id: string, data: Prisma.AssignmentUpdateInput) {
+export async function updateAssignment(id: string, data: InsertAssignment): Promise<SelectAssignment> {
   try {
-    await userHasRole("professor");
-    return await assignmentRepo.updateAssignment(id, data);
+    const result = await dbAuth(async (db) => {
+      const updatedAssignment = await db
+        .update(assignment)
+        .set(data)
+        .where(eq(assignment.id, id))
+        .returning();
+
+      return updatedAssignment[0];
+    })
+    return result;
   } catch (error) {
     console.error("Error updating assignment:", error);
     throw new Error("Could not update assignment");
   }
 }
 
-// Delete an assignment (professor role required)
-export async function deleteAssignment(id: string) {
+export async function deleteAssignment(id: string): Promise<void> {
   try {
-    await userHasRole("professor");
-    await assignmentRepo.deleteAssignment(id);
+    await dbAuth(async (db) => {
+      await db.delete(assignment).where(eq(assignment.id, id));
+    })
   } catch (error) {
     console.error("Error deleting assignment:", error);
     throw new Error("Could not delete assignment");

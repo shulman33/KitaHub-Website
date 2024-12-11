@@ -77,6 +77,8 @@ export async function POST(req: NextRequest) {
     }
     console.log("Session token decoded.");
     const userId = decoded.sub;
+    const profilePicture = decoded.picture;
+    const personalEmail = decoded.email;
 
     if (!userId) {
       return NextResponse.json(
@@ -85,32 +87,33 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log("Finding or creating a university in Prisma.");
-    const universityData = await universityRepository.getOrCreateUniversity({
+    console.log("Finding or creating a university in Drizzle.");
+    const { id } = await universityRepository.getOrCreateUniversity({
       name: universityObj.name,
       country: universityObj.country,
       alphaTwoCode: universityObj.alphaTwoCode,
       state: universityObj.stateProvince,
     });
 
+    console.log("University created in Drizzle.");
+
+    console.log("Creating user profile in Drizzle.");
     await userRepository.createUser({
-      id: userId,
+      auth0UserId: userId,
       firstName,
       lastName,
       role: isProfessor ? "PROFESSOR" : "STUDENT",
       schoolEmail: universityEmail,
-      university: {
-        connect: { id: universityData.id },
-      },
+      universityId: id,
       bio: null,
       phoneNumber: null,
-      email: null,
+      email: personalEmail,
       prefix: null,
-      profilePicture: null,
+      profilePicture: profilePicture,
       dataSharingOptIn: false,
     });
 
-    console.log("User profile created in Prisma.");
+    console.log("User profile created in Drizzle.");
 
     const managementToken = await getManagementToken();
 
