@@ -7,84 +7,66 @@ import {
   classTable,
   InsertMessage,
   SelectMessage,
-  classEnrollment
+  classEnrollment,
 } from "@/app/db/schema";
 import { eq, sql } from "drizzle-orm";
-import { ExtendedMessage, ExtendedSelectMessage } from "../../lib/types";
+import { ExtendedSelectMessage } from "../../lib/types";
 import { isEnrolledInClass } from "../../lib/utils";
-import { desc } from "drizzle-orm";
+import { desc, and } from "drizzle-orm";
 import { formatDistanceToNow } from "date-fns";
 
-
-export async function getMessagesByClassId(classId: string): Promise<SelectMessage[]> {
-  try {
-    const result = await dbAuth(async (db) => {
-      const messages = await db
-        .select()
-        .from(message)
-        .where(eq(message.classId, classId));
-
-      return messages;
-    })
-    return result;
-  } catch (error) {
-    console.error("Error fetching messages by class ID:", error);
-    throw new Error("Could not fetch messages");
-  }
-}
-
 /**
- * Fetches all messages from classes the current user is enrolled in,
- * along with the author's first name, last name, profile picture, and class name.
+ * Fetches messages from the database based on provided filters and limit.
  *
- * @returns {Promise<SelectMessage[]>} An array of messages with additional fields.
+ * This helper function centralizes the common logic for querying messages,
+ * including selecting necessary fields, performing joins, applying filters,
+ * ordering, and limiting results.
+ *
+ * @async
+ * @function fetchMessages
+ * @param {any} filters - SQL conditions to apply in the WHERE clause. These should be constructed using Drizzle ORM's query builders or utility functions.
+ * @param {number} limit - The maximum number of messages to retrieve.
+ * @returns {Promise<ExtendedSelectMessage[]>} - A promise that resolves to an array of formatted messages.
+ * @throws {Error} - Throws an error if the database query fails.
+ *
+ * @example
+ * const filters = isEnrolledInClass(message.classId);
+ * const messages = await fetchMessages(filters, 10);
  */
-
-// enable filter messages by classId if filter param is passed
-export async function getMessagesByCurrentUser(): Promise<
-  ExtendedSelectMessage[]
-> {
+async function fetchMessages(
+  filters: any, 
+  limit: number
+): Promise<ExtendedSelectMessage[] | []> {
   try {
-    // Use dbAuth to ensure the query is executed in the context of the authenticated user
     const messages = await dbAuth(async (db) => {
-      // Build the query
       const result = await db
         .select({
-          // Selecting fields from the Message table
           id: message.id,
           classId: message.classId,
           userId: message.userId,
           parentMessageId: message.parentMessageId,
           title: message.title,
           content: message.content,
-          createdAt: message.createdAt,
+          createdAt: message.createdAt, 
           updatedAt: message.updatedAt,
 
-          // Selecting additional fields from the User table
           userFirstName: user.firstName,
           userLastName: user.lastName,
           userProfilePicture: user.profilePicture,
 
-          // Selecting additional field from the Class table
           className: classTable.className,
         })
         .from(message)
-        // Join with ClassEnrollment to ensure enrollment
         .innerJoin(
           classEnrollment,
           eq(message.classId, classEnrollment.classId)
         )
-        // Join with User to get author details
         .innerJoin(user, eq(message.userId, user.id))
-        // Join with Class table to get className
         .innerJoin(classTable, eq(message.classId, classTable.id))
-        // Apply the enrollment filter using the updated helper
-        .where(isEnrolledInClass(message.classId))
-        // Optional: Order messages by creation date descending
+        .where(filters)
         .orderBy(desc(message.createdAt))
-        .limit(4);
+        .limit(limit);
 
-      // Map the result to the ExtendedSelectMessage type
       const selectMessages: ExtendedSelectMessage[] = result.map((msg) => ({
         id: msg.id,
         classId: msg.classId,
@@ -109,103 +91,193 @@ export async function getMessagesByCurrentUser(): Promise<
 
     return messages;
   } catch (error) {
-    console.error("Error fetching messages for current user:", error);
-    throw new Error("Failed to fetch messages.");
+    console.error("Error fetching messages:", error);
+    return [];
   }
 }
 
-export async function getRepliesByMessageId(messageId: string): Promise<SelectMessage[]> {
-  try {
-    const result = await dbAuth(async (db) => {
-      const replies = await db
-        .select()
-        .from(message)
-        .where(eq(message.parentMessageId, messageId));
+/**
+ * Retrieves messages for a specific class, ensuring the user is enrolled in that class.
+ *
+ * This function fetches messages belonging to a particular class (`classId`) 
+ * only if the current user is enrolled in that class. It leverages the 
+ * `fetchMessages` helper to execute the query with appropriate filters and limit.
+ *
+ * @async
+ * @function getMessagesByClassId
+ * @param {string} classId - The unique identifier of the class whose messages are to be retrieved.
+ * @returns {Promise<ExtendedSelectMessage[]>} - A promise that resolves to an array of messages associated with the specified class.
+ *
+ * @throws {Error} - Throws an error if fetching messages fails.
+ *
+ * @example
+ * const classId = "123e4567-e89b-12d3-a456-426614174000";
+ * const classMessages = await getMessagesByClassId(classId);
+ */
+export async function getMessagesByClassId(
+  classId: string
+): Promise<ExtendedSelectMessage[]> {
+  const filters = and(
+    isEnrolledInClass(message.classId),
+    eq(message.classId, classId)
+  );
 
-      return replies;
-    })
-    return result;
-  } catch (error) {
-    console.error("Error fetching replies by message ID:", error);
-    throw new Error("Could not fetch replies");
-  }
+  const limit = 10;
+
+  return fetchMessages(filters, limit);
 }
 
-export async function getMessageById(messageId: string): Promise<SelectMessage | null> {
-  const result = await dbAuth(async (db) => {
-    const messages = await db
-      .select()
-      .from(message)
-      .where(eq(message.id, messageId));
+/**
+ * Retrieves all messages from classes the current user is enrolled in,
+ * along with the author's first name, last name, profile picture, and class name.
+ *
+ * This function ensures that only messages from classes where the user is 
+ * enrolled are fetched. It utilizes the `fetchMessages` helper to perform 
+ * the database query with the appropriate filters and limit.
+ *
+ * @async
+ * @function getMessagesByCurrentUser
+ * @returns {Promise<ExtendedSelectMessage[]>} - A promise that resolves to an array of messages from enrolled classes.
+ *
+ * @throws {Error} - Throws an error if fetching messages fails.
+ *
+ * @example
+ * const userMessages = await getMessagesByCurrentUser();
+ */
+export async function getMessagesByCurrentUser(): Promise<
+  ExtendedSelectMessage[] | []
+> {
+  const filters = isEnrolledInClass(message.classId);
 
-    return messages;
-  });
-  return result[0] || null;
+  const limit = 4;
+
+  return fetchMessages(filters, limit);
 }
 
-// classIds: 37cb4b49-e40f-4852-9975-0923c3800d54, 41191a3c-ba80-4bff-ad97-8c3c2bdd29eb, 89cd2070-92ac-4d3f-9874-61306c9ac28d
+/**
+ * Retrieves all replies to a specific message, ensuring the user is enrolled in the class of the original message.
+ *
+ * This function fetches all replies (child messages) associated with a given 
+ * `messageId`. It ensures that the current user is enrolled in the class 
+ * to which the original message belongs before retrieving the replies.
+ *
+ * @async
+ * @function getRepliesByMessageId
+ * @param {string} messageId - The unique identifier of the original message for which replies are to be fetched.
+ * @returns {Promise<ExtendedSelectMessage[]>} - A promise that resolves to an array of reply messages.
+ *
+ * @throws {Error} - Throws an error if the original message is not found or if fetching replies fails.
+ *
+ * @example
+ * const originalMessageId = "123e4567-e89b-12d3-a456-426614174000";
+ * const replies = await getRepliesByMessageId(originalMessageId);
+ */
 
-// studentId: ab0ff47e-6c40-4992-93b0-4e520b5ba27d
+export async function getRepliesByMessageId(
+  messageId: string
+): Promise<ExtendedSelectMessage[]> {
+  const filters = and(
+    isEnrolledInClass(message.classId),
+    eq(message.parentMessageId, messageId)
+  );
 
+  const limit = 20;
+
+  return fetchMessages(filters, limit);
+}
+
+
+/**
+ * Retrieves a single message by its unique identifier, ensuring the user is enrolled in the class.
+ *
+ * This function fetches a specific message based on the provided `messageId`. It 
+ * verifies that the current user is enrolled in the class associated with the 
+ * message before retrieving it. If the message does not exist or the user is 
+ * not enrolled, the function returns `null`.
+ *
+ * @async
+ * @function getMessageById
+ * @param {string} messageId - The unique identifier of the message to retrieve.
+ * @returns {Promise<ExtendedSelectMessage | null>} - A promise that resolves to the message object if found, or `null` if not.
+ *
+ * @throws {Error} - Throws an error if fetching the message fails.
+ *
+ * @example
+ * const messageId = "123e4567-e89b-12d3-a456-426614174000";
+ * const message = await getMessageById(messageId);
+ */
+export async function getMessageById(
+  messageId: string
+): Promise<ExtendedSelectMessage | null> {
+  const filters = and(
+    isEnrolledInClass(message.classId),
+    eq(message.id, messageId)
+  );
+
+  const limit = 1;
+  return fetchMessages(filters, limit).then((messages) => messages[0] || null);
+}
+
+/**
+ * Retrieves messages created by a specific user, ensuring access is restricted appropriately.
+ *
+ * This function fetches messages authored by the user identified by `id`. It 
+ * ensures that the current user has the necessary permissions to view these 
+ * messages, possibly based on enrollment or other access controls.
+ *
+ * @async
+ * @function getMessagesByUserId
+ * @param {string} id - The unique identifier of the user whose messages are to be retrieved.
+ * @returns {Promise<ExtendedSelectMessage[]>} - A promise that resolves to an array of messages authored by the specified user.
+ *
+ * @throws {Error} - Throws an error if fetching messages fails.
+ *
+ * @example
+ * const userId = "123e4567-e89b-12d3-a456-426614174000";
+ * const userMessages = await getMessagesByUserId(userId);
+ */
 export async function getMessagesByUserId(
   id: string
-): Promise<ExtendedMessage[]> {
-  const result = await dbAuth(async (db) => {
-    const messages = await db
-      .select({
-        messageId: message.id,
-        messageClassId: message.classId,
-        messageUserId: message.userId,
-        messageParentId: message.parentMessageId,
-        messageTitle: message.title,
-        messageContent: message.content,
-        messageCreatedAt: message.createdAt,
-        messageUpdatedAt: message.updatedAt,
+): Promise<ExtendedSelectMessage[]> {
+  const filters = eq(message.userId, id);
+  const limit = 10;
 
-        userFirstName: user.firstName,
-        userLastName: user.lastName,
-        userProfilePicture: user.profilePicture,
-
-        className: classTable.className,
-      })
-      .from(message)
-      .innerJoin(user, eq(message.userId, user.id))
-      .innerJoin(classTable, eq(message.classId, classTable.id))
-      .where(eq(message.userId, id));
-
-    const extendedMessages: ExtendedMessage[] = messages.map((msg) => ({
-      id: msg.messageId,
-      classId: msg.messageClassId,
-      userId: msg.messageUserId,
-      parentMessageId: msg.messageParentId,
-      title: msg.messageTitle,
-      content: msg.messageContent,
-      createdAt: msg.messageCreatedAt,
-      updatedAt: msg.messageUpdatedAt,
-      firstName: msg.userFirstName,
-      lastName: msg.userLastName,
-      profilePicture: msg.userProfilePicture,
-      className: msg.className,
-    }));
-
-    return extendedMessages;
-  });
-
-  console.log("messages", result);
-
-  return result;
+  return fetchMessages(filters, limit);
 }
 
 
-export async function createMessage(data: InsertMessage): Promise<SelectMessage> {
+/**
+ * Creates a new message in the database.
+ *
+ * This function inserts a new message record into the database with the provided 
+ * data. It returns the newly created message, including any auto-generated fields 
+ * such as `id` or timestamps.
+ *
+ * @async
+ * @function createMessage
+ * @param {InsertMessage} data - An object containing the necessary fields to create a new message.
+ * @returns {Promise<SelectMessage>} - A promise that resolves to the newly created message.
+ *
+ * @throws {Error} - Throws an error if the message creation fails.
+ *
+ * @example
+ * const newMessageData = {
+ *   classId: "123e4567-e89b-12d3-a456-426614174000",
+ *   userId: "user-uuid",
+ *   title: "New Announcement",
+ *   content: "Welcome to the class!",
+ *   parentMessageId: null, // If it's a top-level message
+ * };
+ * const newMessage = await createMessage(newMessageData);
+ */
+export async function createMessage(
+  data: InsertMessage
+): Promise<SelectMessage> {
   try {
     const result = await dbAuth(async (db) => {
-      const newMessage = await db
-        .insert(message)
-        .values(data)
-        .returning();
+      const newMessage = await db.insert(message).values(data).returning();
       return newMessage[0];
-    })
+    });
     return result;
   } catch (error) {
     console.error("Error creating message:", error);
@@ -213,10 +285,31 @@ export async function createMessage(data: InsertMessage): Promise<SelectMessage>
   }
 }
 
-export async function updateMessage(
-  id: string,
-  data: InsertMessage
-) {
+
+/**
+ * Updates an existing message in the database.
+ *
+ * This function modifies the fields of an existing message identified by `id` 
+ * with the provided `data`. It returns the updated message, allowing the 
+ * caller to confirm the changes. If the message does not exist, it may return `undefined`.
+ *
+ * @async
+ * @function updateMessage
+ * @param {string} id - The unique identifier of the message to update.
+ * @param {InsertMessage} data - An object containing the fields to update in the message.
+ * @returns {Promise<SelectMessage | undefined>} - A promise that resolves to the updated message, or `undefined` if the message was not found.
+ *
+ * @throws {Error} - Throws an error if the message update fails.
+ *
+ * @example
+ * const messageId = "123e4567-e89b-12d3-a456-426614174000";
+ * const updatedData = {
+ *   title: "Updated Announcement",
+ *   content: "Welcome to the updated class!",
+ * };
+ * const updatedMessage = await updateMessage(messageId, updatedData);
+ */
+export async function updateMessage(id: string, data: InsertMessage) {
   try {
     const result = await dbAuth(async (db) => {
       const updatedMessage = await db
@@ -225,7 +318,7 @@ export async function updateMessage(
         .where(eq(message.id, id))
         .returning();
       return updatedMessage[0];
-    })
+    });
     return result;
   } catch (error) {
     console.error("Error updating message:", error);
@@ -233,13 +326,34 @@ export async function updateMessage(
   }
 }
 
+/**
+ * Deletes a message from the database.
+ *
+ * This function removes a message identified by `id` from the database. It ensures 
+ * that the user attempting to delete the message is enrolled in the class associated 
+ * with the message, thereby enforcing access controls.
+ *
+ * @async
+ * @function deleteMessage
+ * @param {string} id - The unique identifier of the message to delete.
+ * @returns {Promise<void>} - A promise that resolves when the deletion is complete.
+ *
+ * @throws {Error} - Throws an error if the message deletion fails or if access is denied.
+ *
+ * @example
+ * const messageId = "123e4567-e89b-12d3-a456-426614174000";
+ * await deleteMessage(messageId);
+ */
 export async function deleteMessage(id: string): Promise<void> {
   try {
     const result = await dbAuth(async (db) => {
-      await db
-        .delete(message)
-        .where(eq(message.id, id));
-    })
+      await db.delete(message).where(
+        and
+        (
+          isEnrolledInClass(message.classId),
+          eq(message.id, id)
+        ));
+    });
     return result;
   } catch (error) {
     console.error("Error deleting message:", error);

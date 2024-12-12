@@ -98,7 +98,7 @@ export async function getClassesForCurrentUser(): Promise<ExtendedClass[]> {
     return result;
   } catch (error) {
     console.error("Error fetching classes for current user:", error);
-    throw new Error("Failed to fetch classes.");
+    return [];
   }
 }
 
