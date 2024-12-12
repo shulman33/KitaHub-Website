@@ -10,6 +10,7 @@ import {
 } from "@/app/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { ExtendedClass } from "../../lib/types";
+import { currentUserId, currentUserRole, isEnrolledInClass } from "../../lib/utils";
 
 export async function getClassById(id: string): Promise<SelectClass | null> {
   try {
@@ -29,23 +30,10 @@ export async function getClassById(id: string): Promise<SelectClass | null> {
   }
 }
 
-export async function getClassesByUserId(): Promise<ExtendedClass[]> {
+export async function getClassesForCurrentUser(): Promise<ExtendedClass[]> {
   try {
     const result = await dbAuth(async (db) => {
-      const { rows: check } = await db.execute(
-        sql`SELECT u."id", u."auth0UserId" FROM "User" u WHERE u."auth0UserId" = auth.user_id();`
-      );
-      console.log("check", check);
-
-
-      const { rows: enrollments } = await db.execute(sql`
-        SELECT ce."id", ce."userId", ce."classId"
-        FROM "ClassEnrollment" ce
-        JOIN "User" u ON ce."userId" = u.id
-        WHERE u."auth0UserId" = auth.user_id();
-      `);
-      console.log("User's enrollments:", enrollments);
-
+      // Fetch classes where the current user is enrolled
       const classes = await db
         .select({
           // Selecting fields from the Class table
@@ -61,31 +49,32 @@ export async function getClassesByUserId(): Promise<ExtendedClass[]> {
           // Selecting fields from the Professor's User table using subqueries
           professorFirstName: sql`(
             SELECT u."firstName"
-            FROM "ClassEnrollment" ce
-            JOIN "User" u ON ce."userId" = u.id
-            WHERE ce."classId" = "Class"."id" AND u."role" = 'PROFESSOR'
+            FROM "class_enrollment" ce
+            JOIN "user" u ON ce."userId" = u.id
+            WHERE ce."classId" = "class"."id" AND u."role" = 'PROFESSOR'
             LIMIT 1
           )`,
 
           professorLastName: sql`(
             SELECT u."lastName"
-            FROM "ClassEnrollment" ce
-            JOIN "User" u ON ce."userId" = u.id
-            WHERE ce."classId" = "Class"."id" AND u."role" = 'PROFESSOR'
+            FROM "class_enrollment" ce
+            JOIN "user" u ON ce."userId" = u.id
+            WHERE ce."classId" = "class"."id" AND u."role" = 'PROFESSOR'
             LIMIT 1
           )`,
 
           professorProfilePicture: sql`(
             SELECT u."profilePicture"
-            FROM "ClassEnrollment" ce
-            JOIN "User" u ON ce."userId" = u.id
-            WHERE ce."classId" = "Class"."id" AND u."role" = 'PROFESSOR'
+            FROM "class_enrollment" ce
+            JOIN "user" u ON ce."userId" = u.id
+            WHERE ce."classId" = "class"."id" AND u."role" = 'PROFESSOR'
             LIMIT 1
           )`,
         })
         .from(classTable)
-        .innerJoin(classEnrollment, eq(classTable.id, classEnrollment.classId));
-      // No .where(...) clause needed, RLS will handle filtering
+        .innerJoin(classEnrollment, eq(classTable.id, classEnrollment.classId))
+        // **Important:** Filter classes where the current user is enrolled
+        .where(sql`class_enrollment."userId" = ${currentUserId}`);
 
       // Map the result to the ExtendedClass type
       const extendedClasses: ExtendedClass[] = classes.map((cls) => ({
@@ -108,8 +97,8 @@ export async function getClassesByUserId(): Promise<ExtendedClass[]> {
 
     return result;
   } catch (error) {
-    console.error("Error fetching classes by user ID:", error);
-    throw new Error("Failed to fetch classes.");
+    console.error("Error fetching classes for current user:", error);
+    return [];
   }
 }
 

@@ -1,4 +1,4 @@
-import { SelectMessage, SelectClass } from "@/app/db/schema";
+import { SelectMessage, SelectClass, SelectAssignment } from "@/app/db/schema";
 
 export interface University {
   name: string;
@@ -53,6 +53,25 @@ export interface Message {
   profilePic?: string;
 }
 
+export type ExtendedSelectMessage = SelectMessage & {
+  userFirstName: string;
+  userLastName: string;
+  userProfilePicture: string | null;
+  className: string;
+  createdAtRelative: string;
+};
+
+export interface TimeUntilDeadline {
+  days: number;
+  hours: number;
+  minutes: number;
+}
+
+export type ExtendedSelectAssignment = SelectAssignment & {
+  className: string;
+  timeToDeadlineObject: TimeUntilDeadline;
+};
+
 export interface ExtendedMessage {
   id: string;
   classId: string;
@@ -71,7 +90,7 @@ export interface ExtendedMessage {
 }
 
 export interface MessageWidgetProps {
-  messages: ExtendedMessage[];
+  messages: ExtendedSelectMessage[];
 }
 
 

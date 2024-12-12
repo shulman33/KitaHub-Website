@@ -13,7 +13,7 @@ import EmptyState from "@/app/(marketing)/components/empty-state";
 import { MessageWidgetProps } from "@/app/(kita)/lib/types";
 import CustomBadge from "./Badge";
 import { SelectMessage } from "@/app/db/schema";
-import { ExtendedMessage } from "@/app/(kita)/lib/types";
+import { ExtendedMessage, ExtendedSelectMessage } from "@/app/(kita)/lib/types";
 
 const emptyProfilePic = () => {
   return (
@@ -94,25 +94,25 @@ const DiscussionBoardWidget: React.FC<MessageWidgetProps> = ({ messages }) => {
           <List
             sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
           >
-            {messages.map((message: ExtendedMessage) => (
+            {messages.map((message: ExtendedSelectMessage) => (
               <>
                 <ListItem alignItems="flex-start">
                   <ListItemAvatar>
-                    {message.profilePicture ? (
+                    {message.userProfilePicture ? (
                       <Avatar
-                        alt={message.profilePicture}
-                        src={message.profilePicture}
+                        alt={message.userProfilePicture}
+                        src={message.userProfilePicture}
                       />
                     ) : (
                       emptyProfilePic()
                     )}
                   </ListItemAvatar>
                   <ListItemText
-                    primary={`${message.firstName} ${message.lastName}`}
+                    primary={`${message.userFirstName} ${message.userLastName}`}
                     secondary={
                       <>
                         <CustomBadge text={message.className} />
-                        {"    (" + message.createdAt + ")"}
+                        {"    (" + message.createdAtRelative + ")"}
                         <br />
                         {message.content}
                       </>
