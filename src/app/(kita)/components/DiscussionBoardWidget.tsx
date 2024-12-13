@@ -14,7 +14,11 @@ import { MessageWidgetProps } from "@/app/(kita)/lib/types";
 import CustomBadge from "./Badge";
 import { SelectMessage } from "@/app/db/schema";
 import { ExtendedMessage, ExtendedSelectMessage } from "@/app/(kita)/lib/types";
-
+;
+import SearchBar from "./StudentComponents/SearchBar";
+import DropdownMenu from "./StudentComponents/DropDown";
+import Image from "next/image";
+import DiscussionCard from "./StudentComponents/DiscussionCard";
 const emptyProfilePic = () => {
   return (
     <span className="inline-block size-10 overflow-hidden rounded-full bg-gray-100">
@@ -50,81 +54,32 @@ const BlankPaperIcon = () => {
 
 const DiscussionBoardWidget: React.FC<MessageWidgetProps> = ({ messages }) => {
   return (
-    <Box
-      component="div"
-      sx={{
-        bgcolor: "#FFFFFF",
-        border: 1,
-        borderColor: "#EAEFF0",
-        borderRadius: "16px",
-      }}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          p: 2,
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          <Typography sx={{ fontSize: "16px", fontWeight: 700, ml: 1 }}>
-            💬 Discussion Board
-          </Typography>
-        </Box>
-        <Box>
-          <Button
-            disableElevation
-            sx={{ color: "#74759A", fontSize: "14px" }}
-            startIcon={<AddIcon />}
-          >
-            New Discussion
-          </Button>
-        </Box>
-      </Box>
-      <Box sx={{ p: 2 }}>
-        {messages.length === 0 ? (
-          <EmptyState
-            icon={<BlankPaperIcon />}
-            title="No Discussions Yet"
-            text="Get started by creating a new discussion"
-            buttonText="New Discussion"
-          />
-        ) : (
-          <List
-            sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
-          >
-            {messages.map((message: ExtendedSelectMessage) => (
-              <>
-                <ListItem alignItems="flex-start">
-                  <ListItemAvatar>
-                    {message.userProfilePicture ? (
-                      <Avatar
-                        alt={message.userProfilePicture}
-                        src={message.userProfilePicture}
-                      />
-                    ) : (
-                      emptyProfilePic()
-                    )}
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={`${message.userFirstName} ${message.userLastName}`}
-                    secondary={
-                      <>
-                        <CustomBadge text={message.className} />
-                        {"    (" + message.createdAtRelative + ")"}
-                        <br />
-                        {message.content}
-                      </>
-                    }
-                  />
-                </ListItem>
-              </>
-            ))}
-          </List>
-        )}
-      </Box>
-    </Box>
+    <div className="p-[24px] max-h-[378px] overflow-y-auto bg-white">
+
+      {/* Header section */}
+
+      <div className="flex justify-between  items-center">
+        <div className="text-secondary text-[16px] leading-[19px] font-bold">
+          <p className="text-[14px]  leading-[19px] font-bold  ">💬 Discussion Board</p>
+        </div>
+        <div>
+          <p className="text-[#74759A] text-[14px] ">+ New Discussion</p>
+        </div>
+
+      </div>
+      {/* search bar section */}
+      <div className=" flex py-[20px] justify-between gap-4">
+        <SearchBar />
+
+        <DropdownMenu />
+
+      </div>
+
+     <DiscussionCard index={0}/>
+     <DiscussionCard index={1}/>
+
+
+    </div>
   );
 };
 
