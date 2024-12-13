@@ -6,6 +6,7 @@ import UpcomingAssignmentsStudent from "../components/UpcomingAssignments";
 import CoursesWidget from "./CoursesWidget";
 import { getClassesForCurrentUser } from "../server/actions/classActions";
 import { getMessagesByCurrentUser, getMessagesByUserId } from "../server/actions/messageActions";
+import CalendarComponent from "./StudentComponents/CalendarComponent";
 
 interface StudentDashboardProps {
   name: string;
@@ -29,12 +30,14 @@ const StudentDashboard = async ({ name }: StudentDashboardProps) => {
           <Grid size={{ xs: 12, sm: 5 }}>
             <DiscussionBoardWidget messages={messages} />
           </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <SubmissionStatusWidget />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 8 }}>
-            <UpcomingAssignmentsStudent />
-          </Grid>
+          <div className="flex  w-full  gap-[40px]">
+
+         
+            <CalendarComponent/>
+          
+          
+            <SubmissionStatusWidget/>
+            </div>
         </Grid>
       </div>
     </>
