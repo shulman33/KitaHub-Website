@@ -1,6 +1,9 @@
 import React from "react";
 import EmptyState from "@/app/(marketing)/components/empty-state";
-
+import CalendarComponent from "./StudentComponents/CalendarComponent";
+import CourseRow from "./StudentComponents/CourseRow";
+import SubmissionStatusButton from "./StudentComponents/SubmissionStatusButton";
+import AssigmentRow from "./StudentComponents/AssigmentRow";
 interface Assignment {
   title: string;
   dueDate: string;
@@ -92,60 +95,27 @@ const AssignmentRow: React.FC<AssignmentRowProps> = ({
 
 const SubmissionStatusWidget: React.FC = () => {
   return (
-    <section className="flex flex-col justify-center p-6 bg-white rounded-2xl shadow-[0px_4px_45px_rgba(13,108,255,0.08)] max-md:px-5">
-      <div className="flex flex-col w-full max-md:max-w-full">
-        <header className="flex flex-wrap gap-5 justify-between w-full font-semibold rounded-lg max-md:max-w-full">
-          <StatusButton />
-          <button className="my-auto text-sm text-slate-500">View All</button>
-        </header>
-        <div className="flex flex-col mt-6 w-full max-md:max-w-full">
-          {assignments.length > 0 && (
-            <div className="flex flex-wrap gap-10 items-center pb-4 w-full text-base font-semibold border-b border-blue-600 border-opacity-10 max-w-[667px] text-slate-900 max-md:max-w-full">
-              <div className="flex gap-10 items-center self-stretch my-auto min-w-[240px] max-md:max-w-full">
-                <div className="flex gap-10 items-center self-stretch my-auto whitespace-nowrap min-w-[240px] w-[280px]">
-                  <div className="self-stretch my-auto">Assignments</div>
-                  <div className="self-stretch my-auto">Title</div>
-                </div>
-                <div className="self-stretch my-auto">Due Date</div>
-              </div>
-              <div className="self-stretch my-auto">Status</div>
-            </div>
-          )}
-          <div className="flex flex-col mt-4 w-full max-md:max-w-full">
-            {/* {assignments.map((assignment, index) => (
-              <AssignmentRow key={index} {...assignment} />
-            ))} */}
-            {assignments.length > 0 ? (
-              assignments.map((assignment, index) => (
-                <AssignmentRow key={index} {...assignment} />
-              ))
-            ) : (
-              <EmptyState
-                title="No Assignments Yet!"
-                text="Need to join a class?"
-                buttonText="Join a Class"
-                icon={
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="mx-auto h-12 w-12 text-gray-400"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
-                    />
-                  </svg>
-                }
-              />
-            )}
-          </div>
-        </div>
+   <>
+
+<div className='bg-white p-[24px] w-full h-full rounded-[16px]  overflow-y-auto'>
+      <div className="flex justify-between items-center">
+        <SubmissionStatusButton/>
+        <button className='text-[14px] leading-[17px] text-[#74759A] font-semibold'>View All</button>
       </div>
-    </section>
+      <div className=' flex w-full justify-between max-w-full border-b-[1px] border-[#2165FF]/8 gap-[30px] py-[16px]  font-semibold  text-[16px] text-secondary leading-[19.5px]'>
+         <p>Assignments</p>
+         <p>Title</p>
+         <p>Due Date</p>
+         <p>Status</p>
+
+       
+    </div>
+    <AssigmentRow/>
+    <AssigmentRow/>
+    <AssigmentRow/>
+    <AssigmentRow/>
+    </div>
+   </>
   );
 };
 
