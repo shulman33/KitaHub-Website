@@ -3,7 +3,24 @@
 import { db } from "@/app/db/drizzle";
 import { user, InsertUser, SelectUser } from "@/app/db/schema";
 import { eq } from "drizzle-orm";
+import { pusherServer } from "../../lib/pusher/pusher";
+import { getChannelNames, EVENT_TYPES } from "../../lib/pusher/pusher";
 
+export async function sendUserNotification(
+  userId: string,
+  notification: {
+    type: string;
+    title: string;
+    message: string;
+    link?: string;
+  }
+) {
+  await pusherServer.trigger(
+    getChannelNames.userNotifications(userId),
+    EVENT_TYPES.NOTIFICATION,
+    notification
+  );
+}
 
 // Get a user by ID (accessible to authenticated users)
 export async function getUserById(userId: string): Promise<SelectUser | null> {
@@ -21,7 +38,9 @@ export async function getUserById(userId: string): Promise<SelectUser | null> {
 }
 
 // Get a user by email (accessible to authenticated users)
-export async function getUserByEmail(email: string): Promise<SelectUser | null> {
+export async function getUserByEmail(
+  email: string
+): Promise<SelectUser | null> {
   try {
     const result = await db
       .selectDistinct()
@@ -35,18 +54,20 @@ export async function getUserByEmail(email: string): Promise<SelectUser | null> 
   }
 }
 
-export async function getUserBySchoolEmail(schoolEmail: string): Promise<SelectUser | null> {
-    const result = await db
-      .selectDistinct()
-      .from(user)
-      .where(eq(user.schoolEmail, schoolEmail));
-    return result[0];
-  }
+export async function getUserBySchoolEmail(
+  schoolEmail: string
+): Promise<SelectUser | null> {
+  const result = await db
+    .selectDistinct()
+    .from(user)
+    .where(eq(user.schoolEmail, schoolEmail));
+  return result[0];
+}
 
-  export async function getAllUsers(): Promise<SelectUser[]> {
-    const result = await db.selectDistinct().from(user);
-    return result;
-  }
+export async function getAllUsers(): Promise<SelectUser[]> {
+  const result = await db.selectDistinct().from(user);
+  return result;
+}
 
 // Create a user (accessible to authenticated users)
 export async function createUser(data: InsertUser): Promise<SelectUser> {
@@ -61,7 +82,10 @@ export async function createUser(data: InsertUser): Promise<SelectUser> {
 }
 
 // Update a user (restricted to professor role or user themselves if specified)
-export async function updateUser(id: string, data: InsertUser): Promise<SelectUser> {
+export async function updateUser(
+  id: string,
+  data: InsertUser
+): Promise<SelectUser> {
   try {
     const result = await db
       .update(user)

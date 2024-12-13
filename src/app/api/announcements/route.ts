@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { pusherServer } from "@/app/(kita)/lib/pusher";
+import { pusherServer } from "@/app/(kita)/lib/pusher/pusher";
 import { getSession, withApiAuthRequired } from "@auth0/nextjs-auth0";
 import { AnnouncementRepository } from "@/app/(kita)/repositories/AnnouncementRepository";
 
@@ -17,7 +17,6 @@ export const POST = withApiAuthRequired(async function POST(req: Request) {
   const userId = user.sub; // Adjust based on how Auth0 provides the user ID
   console.log("User ID:", userId);
   const role = user.role; // Adjust based on how Auth0 provides the user role
-
 
   const data = {
     title,

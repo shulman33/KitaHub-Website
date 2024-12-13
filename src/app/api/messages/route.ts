@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { pusherServer } from "@/app/(kita)/lib/pusher";
+import { pusherServer } from "@/app/(kita)/lib/pusher/pusher";
 import { getSession, withApiAuthRequired } from "@auth0/nextjs-auth0";
 import { MessageRepository } from "@/app/(kita)/repositories/MessageRepository";
 
