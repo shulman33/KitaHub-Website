@@ -14,6 +14,9 @@ import { ExtendedSelectMessage } from "../../lib/types";
 import { isEnrolledInClass } from "../../lib/utils";
 import { desc, and } from "drizzle-orm";
 import { formatDistanceToNow } from "date-fns";
+import { revalidatePath } from "next/cache";
+import { pusherServer } from "../../lib/pusher/pusher";
+import { EVENT_TYPES, getChannelNames } from "../../lib/pusher/pusher";
 
 /**
  * Fetches messages from the database based on provided filters and limit.
@@ -34,7 +37,7 @@ import { formatDistanceToNow } from "date-fns";
  * const messages = await fetchMessages(filters, 10);
  */
 async function fetchMessages(
-  filters: any, 
+  filters: any,
   limit: number
 ): Promise<ExtendedSelectMessage[] | []> {
   try {
@@ -47,7 +50,7 @@ async function fetchMessages(
           parentMessageId: message.parentMessageId,
           title: message.title,
           content: message.content,
-          createdAt: message.createdAt, 
+          createdAt: message.createdAt,
           updatedAt: message.updatedAt,
 
           userFirstName: user.firstName,
@@ -99,8 +102,8 @@ async function fetchMessages(
 /**
  * Retrieves messages for a specific class, ensuring the user is enrolled in that class.
  *
- * This function fetches messages belonging to a particular class (`classId`) 
- * only if the current user is enrolled in that class. It leverages the 
+ * This function fetches messages belonging to a particular class (`classId`)
+ * only if the current user is enrolled in that class. It leverages the
  * `fetchMessages` helper to execute the query with appropriate filters and limit.
  *
  * @async
@@ -131,8 +134,8 @@ export async function getMessagesByClassId(
  * Retrieves all messages from classes the current user is enrolled in,
  * along with the author's first name, last name, profile picture, and class name.
  *
- * This function ensures that only messages from classes where the user is 
- * enrolled are fetched. It utilizes the `fetchMessages` helper to perform 
+ * This function ensures that only messages from classes where the user is
+ * enrolled are fetched. It utilizes the `fetchMessages` helper to perform
  * the database query with the appropriate filters and limit.
  *
  * @async
@@ -157,8 +160,8 @@ export async function getMessagesByCurrentUser(): Promise<
 /**
  * Retrieves all replies to a specific message, ensuring the user is enrolled in the class of the original message.
  *
- * This function fetches all replies (child messages) associated with a given 
- * `messageId`. It ensures that the current user is enrolled in the class 
+ * This function fetches all replies (child messages) associated with a given
+ * `messageId`. It ensures that the current user is enrolled in the class
  * to which the original message belongs before retrieving the replies.
  *
  * @async
@@ -186,13 +189,12 @@ export async function getRepliesByMessageId(
   return fetchMessages(filters, limit);
 }
 
-
 /**
  * Retrieves a single message by its unique identifier, ensuring the user is enrolled in the class.
  *
- * This function fetches a specific message based on the provided `messageId`. It 
- * verifies that the current user is enrolled in the class associated with the 
- * message before retrieving it. If the message does not exist or the user is 
+ * This function fetches a specific message based on the provided `messageId`. It
+ * verifies that the current user is enrolled in the class associated with the
+ * message before retrieving it. If the message does not exist or the user is
  * not enrolled, the function returns `null`.
  *
  * @async
@@ -221,8 +223,8 @@ export async function getMessageById(
 /**
  * Retrieves messages created by a specific user, ensuring access is restricted appropriately.
  *
- * This function fetches messages authored by the user identified by `id`. It 
- * ensures that the current user has the necessary permissions to view these 
+ * This function fetches messages authored by the user identified by `id`. It
+ * ensures that the current user has the necessary permissions to view these
  * messages, possibly based on enrollment or other access controls.
  *
  * @async
@@ -245,12 +247,11 @@ export async function getMessagesByUserId(
   return fetchMessages(filters, limit);
 }
 
-
 /**
  * Creates a new message in the database.
  *
- * This function inserts a new message record into the database with the provided 
- * data. It returns the newly created message, including any auto-generated fields 
+ * This function inserts a new message record into the database with the provided
+ * data. It returns the newly created message, including any auto-generated fields
  * such as `id` or timestamps.
  *
  * @async
@@ -278,6 +279,19 @@ export async function createMessage(
       const newMessage = await db.insert(message).values(data).returning();
       return newMessage[0];
     });
+    await pusherServer.trigger(
+      getChannelNames.classDiscussion(result.classId),
+      EVENT_TYPES.NEW_MESSAGE,
+      result
+    );
+
+    if (result.parentMessageId) {
+      await pusherServer.trigger(
+        getChannelNames.messageThread(result.parentMessageId),
+        EVENT_TYPES.NEW_MESSAGE,
+        result
+      );
+    }
     return result;
   } catch (error) {
     console.error("Error creating message:", error);
@@ -285,12 +299,11 @@ export async function createMessage(
   }
 }
 
-
 /**
  * Updates an existing message in the database.
  *
- * This function modifies the fields of an existing message identified by `id` 
- * with the provided `data`. It returns the updated message, allowing the 
+ * This function modifies the fields of an existing message identified by `id`
+ * with the provided `data`. It returns the updated message, allowing the
  * caller to confirm the changes. If the message does not exist, it may return `undefined`.
  *
  * @async
@@ -329,8 +342,8 @@ export async function updateMessage(id: string, data: InsertMessage) {
 /**
  * Deletes a message from the database.
  *
- * This function removes a message identified by `id` from the database. It ensures 
- * that the user attempting to delete the message is enrolled in the class associated 
+ * This function removes a message identified by `id` from the database. It ensures
+ * that the user attempting to delete the message is enrolled in the class associated
  * with the message, thereby enforcing access controls.
  *
  * @async
@@ -347,12 +360,9 @@ export async function updateMessage(id: string, data: InsertMessage) {
 export async function deleteMessage(id: string): Promise<void> {
   try {
     const result = await dbAuth(async (db) => {
-      await db.delete(message).where(
-        and
-        (
-          isEnrolledInClass(message.classId),
-          eq(message.id, id)
-        ));
+      await db
+        .delete(message)
+        .where(and(isEnrolledInClass(message.classId), eq(message.id, id)));
     });
     return result;
   } catch (error) {
