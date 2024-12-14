@@ -54,7 +54,7 @@ const BlankPaperIcon = () => {
 
 const DiscussionBoardWidget: React.FC<MessageWidgetProps> = ({ messages }) => {
   return (
-    <div className="p-[24px] max-h-[378px] overflow-y-auto bg-white">
+    <div className="p-[24px] rounded-[16px] max-h-[378px] overflow-y-auto bg-white">
 
       {/* Header section */}
 

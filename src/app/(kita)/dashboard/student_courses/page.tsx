@@ -6,12 +6,18 @@ import DiscussionBoardWidget from '../../components/DiscussionBoardWidget'
 import Annoucemnets from '../../components/StudentComponents/courses/Annoucemnets'
 import Assigments from '../../components/StudentComponents/courses/Assignments'
 import Resources from '../../components/StudentComponents/courses/Resources'
+import InstructorInformation from '../../components/StudentComponents/courses/InstructorInformation'
 
 const page = () => {
   return (
    <>
+
+   <div className='grid grid-cols-[60%,auto] gap-[30px]'>
+   <Header/>
+   <InstructorInformation/>
+   </div>
  
-    <Header/>
+    
  {/* Dsicussion and Annoucements  */}
 
 <div className='grid gap-[30px] mt-[30px] grid-cols-2'>
