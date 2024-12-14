@@ -1,18 +1,3 @@
-<<<<<<< HEAD
-import ClientLayout from "./client-layout";
-
-export default function NotFound() {
-  return (
-    
-    <ClientLayout>
-    <div>
-      page not foundjdjsnda
-    </div>
-    </ClientLayout>
-    
-  );
-}
-=======
 export default function NotFound() {
   return (
     <>
@@ -41,4 +26,3 @@ export default function NotFound() {
     </>
   );
 }
->>>>>>> 17e58c277143578bc44b3b7cd8d75b6ea97232ca
