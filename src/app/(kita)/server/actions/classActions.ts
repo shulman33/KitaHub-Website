@@ -51,7 +51,7 @@ export async function getClassesForCurrentUser(): Promise<ExtendedClass[]> {
             SELECT u."firstName"
             FROM "class_enrollment" ce
             JOIN "user" u ON ce."userId" = u.id
-            WHERE ce."classId" = "class"."id" AND u."role" = 'PROFESSOR'
+            WHERE ce."classId" = "class"."id" AND ce."role" = 'PROFESSOR'
             LIMIT 1
           )`,
 
@@ -59,7 +59,7 @@ export async function getClassesForCurrentUser(): Promise<ExtendedClass[]> {
             SELECT u."lastName"
             FROM "class_enrollment" ce
             JOIN "user" u ON ce."userId" = u.id
-            WHERE ce."classId" = "class"."id" AND u."role" = 'PROFESSOR'
+            WHERE ce."classId" = "class"."id" AND ce."role" = 'PROFESSOR'
             LIMIT 1
           )`,
 
@@ -67,7 +67,7 @@ export async function getClassesForCurrentUser(): Promise<ExtendedClass[]> {
             SELECT u."profilePicture"
             FROM "class_enrollment" ce
             JOIN "user" u ON ce."userId" = u.id
-            WHERE ce."classId" = "class"."id" AND u."role" = 'PROFESSOR'
+            WHERE ce."classId" = "class"."id" AND ce."role" = 'PROFESSOR'
             LIMIT 1
           )`,
         })
