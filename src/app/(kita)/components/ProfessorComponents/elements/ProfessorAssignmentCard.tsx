@@ -1,38 +1,57 @@
-import React from 'react'
-import Image from 'next/image'
-const ProfessorAssignmentCard = () => {
-  return (
-    <div className=' border border-[#0D6CFF14] rounded-[8px] mt-[16px] p-[10px]'>
-    <div className='flex justify-between items-center'>
-        <p className=' text-[10px] font-medium leading-[12px]'>Assignment 4: Answer Writing</p>
-        <Image src="/dots2.svg" width={20} height={4} alt='' />
-    </div>
-    <div>
-        <div className='mt-[5px] flex justify-between'>
+import React from 'react';
+import Image from 'next/image';
 
-            <div>
-
-
-                <p className='font-medium text-[16px] leading-[19px]'>Medieval History</p>
-                <ul className='text-[8px] leading-[12px] text-lightGray mt-[8px] font-normal'>
-                    <li>Write a 5-page essay analyzing the key factors that led to.</li>
-                    <li>Include at least three scholarly sources.</li>
-                    <li>Follow the MLA format.</li>
-                </ul>
-            </div>
-
-            <div>
-                <span className='text-lightGray text-[8px] leading-[9px]'>Due Date:</span>
-                <p className='font-medium text-[12px] leading-[24px]'>August 20, 2024</p>
-            </div>
-          
-        </div>
-        <button className='text-[#0B0B2C] mt-[10px] bg-[#EEEEEE] p-[5px] rounded-[4px] text-[8px] leading-[9px]'>Pending Grading</button>
-
-    </div>
-
-</div>
-  )
+interface ProfessorAssignmentCardProps {
+  title: string;
+  course: string;
+  description: string[];
+  dueDate: string;
+  status: string;
 }
 
-export default ProfessorAssignmentCard
+const ProfessorAssignmentCard: React.FC<ProfessorAssignmentCardProps> = ({
+  title,
+  course,
+  description,
+  dueDate,
+  status,
+}) => {
+  return (
+    <div className="border border-[#0D6CFF14] rounded-[8px] mt-[16px] p-[10px]">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <p className="text-[10px] font-medium leading-[12px]">{title}</p>
+        <Image src="/dots2.svg" width={20} height={4} alt="menu" />
+      </div>
+
+      {/* Course and Description */}
+      <div>
+        <div className="mt-[5px] gap-[50px] flex justify-between">
+          <div>
+            <p className="font-medium text-[16px] leading-[19px]">{course}</p>
+            <ul className="text-[8px] leading-[12px] text-lightGray mt-[8px] font-normal">
+              {description.map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Due Date */}
+          <div>
+            <span className="text-lightGray text-[7px] sm:text-[8px] leading-[9px]">Due Date:</span>
+            <p className="font-medium text-[10px] sm:text-[12px] leading-[12px] sm:leading-[24px]">
+              {dueDate}
+            </p>
+          </div>
+        </div>
+
+        {/* Status */}
+        <button className="text-[#0B0B2C] mt-[10px] bg-[#EEEEEE] p-[5px] rounded-[4px] text-[8px] leading-[9px]">
+          {status}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default ProfessorAssignmentCard;

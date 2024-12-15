@@ -7,10 +7,10 @@ import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 export default function CalendarComponent() {
   return (
     <>
-     <div className='p-[24px] h-full bg-white rounded-[16px]'>
+     <div className='p-[24px] h-[420px] bg-white rounded-[16px]'>
 
      <p className='text-[16px] leading-[19.5px] font-bold'>📅 Upcoming Deadline</p>
-    <div className='border border-[#0D6CFF14] rounded-[10px] mt-[24px]'>
+    <div className='border h-fit border-[#0D6CFF14] rounded-[10px] mt-[24px]'>
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <DateCalendar />
     </LocalizationProvider>
