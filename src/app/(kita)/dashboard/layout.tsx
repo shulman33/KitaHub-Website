@@ -1,13 +1,8 @@
-import React from "react";
-import ClientLayout from "./client-layout";
-import { Montserrat } from "next/font/google";
-import { UserProvider } from "@auth0/nextjs-auth0/client";
+// app/(kita)/dashboard/layout.tsx
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../theme";
-import "@/app/globals.css";
-
-const mont = Montserrat({ subsets: ["latin"], variable: "--font-montserrat" });
+import ClientLayout from "./client-layout";
 
 export default function DashboardLayout({
   children,
@@ -15,16 +10,10 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <UserProvider>
-        <body className={mont.className}>
-          <AppRouterCacheProvider>
-            <ThemeProvider theme={theme}>
-              <ClientLayout>{children}</ClientLayout>
-            </ThemeProvider>
-          </AppRouterCacheProvider>
-        </body>
-      </UserProvider>
-    </html>
+    <AppRouterCacheProvider>
+      <ThemeProvider theme={theme}>
+        <ClientLayout>{children}</ClientLayout>
+      </ThemeProvider>
+    </AppRouterCacheProvider>
   );
 }

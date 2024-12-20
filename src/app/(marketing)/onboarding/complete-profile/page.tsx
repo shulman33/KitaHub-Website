@@ -1,5 +1,10 @@
+"use client";
+
 import React from "react";
 import CompleteProfileForm from "./CompleteProfileForm";
+import { useSetAtom } from "jotai";
+import { userAtom } from "@/app/atoms/userAtom";
+
 
 interface SearchParams {
   session_token: string;
@@ -16,6 +21,7 @@ export default async function CompleteProfilePage({
 }: {
   searchParams: SearchParams;
 }) {
+  const setUser = useSetAtom(userAtom);
   const sessionToken = searchParams.session_token || "";
   const stateParam = searchParams.state || "";
 
@@ -104,6 +110,10 @@ export default async function CompleteProfilePage({
 
       if (!process.env.AUTH0_ISSUER_BASE_URL) {
         console.error("AUTH0_ISSUER_BASE_URL is not defined");
+      }
+
+      if (data.user) {
+        setUser(data.user);
       }
 
       const redirectUrl = `${

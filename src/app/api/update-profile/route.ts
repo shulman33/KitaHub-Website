@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
     console.log("University created in Drizzle.");
 
     console.log("Creating user profile in Drizzle.");
-    await userRepository.createUser({
+    const createUserResult = await userRepository.createUser({
       auth0UserId: userId,
       firstName,
       lastName,
@@ -112,6 +112,7 @@ export async function POST(req: NextRequest) {
       profilePicture: profilePicture,
       dataSharingOptIn: false,
     });
+    
 
     console.log("User profile created in Drizzle.");
 
@@ -178,7 +179,17 @@ export async function POST(req: NextRequest) {
 
     console.log("User profile and role updated successfully in Auth0.");
     return NextResponse.json(
-      { message: "Profile and role updated successfully." },
+      {
+        message: "Profile and role updated successfully.",
+        user: {
+          id: createUserResult.id,
+          auth0UserId: createUserResult.auth0UserId,
+          firstName,
+          lastName,
+          role: isProfessor ? "PROFESSOR" : "STUDENT",
+          schoolEmail: universityEmail,
+        },
+      },
       { status: 200 }
     );
   } catch (err) {

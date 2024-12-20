@@ -21,9 +21,8 @@ export default function NavLinks({
   isMobile = false,
   closeMobileMenu,
   session,
-}: NavLinksProps & { session: any }) {
-
-  const buttonText = session ? "My Dashboard" : "Get Started";
+}: NavLinksProps) {
+  const buttonText = session?.isAuthenticated ? "My Dashboard" : "Get Started";
 
   return (
     <div

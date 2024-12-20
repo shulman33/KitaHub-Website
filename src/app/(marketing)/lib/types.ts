@@ -5,6 +5,24 @@ export interface StepItemProps {
   imageUrl: string;
   alignment: "left" | "right";
 }
+// app/(marketing)/lib/types.ts
+export interface SerializedUser {
+  name?: string;
+  email?: string;
+  picture?: string;
+  sub?: string;
+}
+
+export interface SerializedSession {
+  user?: SerializedUser;
+  isAuthenticated: boolean;
+}
+
+export interface NavLinksProps {
+  isMobile?: boolean;
+  closeMobileMenu?: () => void;
+  session: SerializedSession | null;
+}
 
 export interface ButtonProps {
   href: string;

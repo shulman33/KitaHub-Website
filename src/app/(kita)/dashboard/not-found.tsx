@@ -1,28 +1,15 @@
+import Image from "next/image";
+
 export default function NotFound() {
   return (
-    <>
-      <main className="grid min-h-full place-items-center bg-white px-6 py-24 sm:py-32 lg:px-8">
-        <div className="text-center">
-          <p className="text-base font-semibold text-accent-purple">404</p>
-          <h1 className="mt-4 text-3xl font-bold tracking-tight text-midnight-blue sm:text-5xl">
-            Page not found
-          </h1>
-          <p className="mt-6 text-base leading-7 text-gray-600">
-            Sorry, we couldn&apos;t find the page you&apos;re looking for.
-          </p>
-          <div className="mt-10 flex items-center justify-center gap-x-6">
-            <a
-              href="/"
-              className="rounded-md bg-accent-purple px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-accent-purple-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-purple"
-            >
-              Go back home
-            </a>
-            <a href="/#contact" className="text-sm font-semibold text-midnight-blue">
-              Contact support <span aria-hidden="true">&rarr;</span>
-            </a>
-          </div>
-        </div>
-      </main>
-    </>
+    <div className="flex justify-center items-center flex-col">
+      <Image src="/Opps.svg" width={353} height={156} alt="" />
+      <p className="mb-[50px] mt-[10px]">Page Not Found</p>
+      <Image src="/OBJECTS.svg" width={797} height={423} alt="" />
+
+      <button className="bg-[#0D6CFF] mt-[70px] rounded-[4px] text-[16px] py-[16px] px-[32px] text-white">
+        Go To Homepage
+      </button>
+    </div>
   );
 }

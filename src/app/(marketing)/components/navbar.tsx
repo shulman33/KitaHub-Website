@@ -5,8 +5,13 @@ import { Dialog, DialogPanel } from "@headlessui/react";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import HeaderRibbon from "./header-ribbon";
 import NavLinks from "./nav-links";
+import { SerializedSession } from "@/app/(marketing)/lib/types";
 
-export default function NavBar({ session }: { session: any }) {
+interface NavBarProps {
+  session: SerializedSession | null;
+}
+
+export default function NavBar({ session }: NavBarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
