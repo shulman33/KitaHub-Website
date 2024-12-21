@@ -1,6 +1,7 @@
 import { getSession, withPageAuthRequired } from "@auth0/nextjs-auth0";
 import StudentDashboard from "@/app/(kita)/components/StudentDashboard";
-import ProfessorDashboard from "../components/ProfDashboard";
+import ProfessorDashboard from "../components/ProfessorDashboard";
+import { getUserRole } from "../lib/auth";
 
 export default withPageAuthRequired(async function MainDashboard() {
   const session = await getSession();
@@ -10,11 +11,13 @@ export default withPageAuthRequired(async function MainDashboard() {
   }
 
   const { name } = session.user;
-  const role = "student";
+  const role = await getUserRole(session.user.sub);
+ 
+  const isStudent = role === "Student";
 
   return (
     <main>
-      {role === "student" ? (
+      {isStudent ? (
         <StudentDashboard name={name} />
       ) : (
         <ProfessorDashboard name={name} />

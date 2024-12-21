@@ -1,17 +1,14 @@
 export async function getManagementToken() {
-  const res = await fetch(
-    `${process.env.AUTH0_ISSUER_BASE_URL}/oauth/token`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        client_id: process.env.AUTH0_CLIENT_ID,
-        client_secret: process.env.AUTH0_CLIENT_SECRET,
-        audience: `${process.env.AUTH0_ISSUER_BASE_URL}/api/v2/`,
-        grant_type: "client_credentials",
-      }),
-    }
-  );
+  const res = await fetch(`${process.env.AUTH0_ISSUER_BASE_URL}/oauth/token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      client_id: process.env.AUTH0_CLIENT_ID,
+      client_secret: process.env.AUTH0_CLIENT_SECRET,
+      audience: `${process.env.AUTH0_ISSUER_BASE_URL}/api/v2/`,
+      grant_type: "client_credentials",
+    }),
+  });
 
   const data = await res.json();
 
@@ -22,3 +19,5 @@ export async function getManagementToken() {
 
   return data.access_token;
 }
+
+
