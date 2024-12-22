@@ -3,20 +3,20 @@ import Image from 'next/image';
 
 interface StudentContactCardProps {
   name: string;
-  performance: string;
-  grade: string;
+  // performance: string;
+  // grade: string;
 }
 
-const StudentContactCard: React.FC<StudentContactCardProps> = ({ name, performance, grade }) => {
+const StudentContactCard: React.FC<StudentContactCardProps> = ({ name }) => {
   return (
     <div className="flex mb-[16px] justify-between items-center">
       <div className="flex items-center gap-2">
         <Image src="/avatar.svg" width={50} height={50} alt="avatar" />
         <div>
           <p className="text-[16px] font-semibold leading-[19px]">{name}</p>
-          <p className="text-[10px] leading-[12px] text-lightGray font-medium">
+          {/* <p className="text-[10px] leading-[12px] text-lightGray font-medium">
             Performance: {performance} / {grade}
-          </p>
+          </p> */}
         </div>
       </div>
       <div className="flex items-center gap-[12px]">

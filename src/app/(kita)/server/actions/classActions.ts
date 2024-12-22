@@ -7,9 +7,10 @@ import {
   InsertClass,
   SelectClass,
   classEnrollment,
+  SelectUser,
 } from "@/app/db/schema";
 import { eq, sql } from "drizzle-orm";
-import { ExtendedClass, ExtendedInstructor } from "../../lib/types";
+import { ExtendedClass, ExtendedInstructor, ExtendedStudent } from "../../lib/types";
 import {
   currentUserId,
   currentUserRole,
@@ -186,6 +187,40 @@ export async function getInstructorsByClassId(
   } catch (error) {
     console.error("Error fetching instructors for class:", error);
     throw new Error("Error fetching instructors for class");
+  }
+}
+
+
+// this function fetches all students for a class
+// it should return the first name, last name, email, and profile picture from user table
+// it should only return the students for a class if the current user is enrolled in it
+export async function getStudentsByClassId(
+  classId: string
+): Promise<ExtendedStudent[]> {
+  try {
+    const result = await dbAuth(async (db) => {
+      const students = await db
+        .select({
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          profilePicture: user.profilePicture,
+        })
+        .from(classEnrollment)
+        .innerJoin(user, eq(classEnrollment.userId, user.id))
+        .where(
+          sql`${classEnrollment.classId} = ${classId} 
+              AND ${classEnrollment.role} = 'STUDENT'
+              AND ${isEnrolledInClass(classEnrollment.classId)}`
+        );
+
+      return students;
+    });
+
+    return result;
+  } catch (error) {
+    console.error("Error fetching students for class:", error);
+    throw new Error("Error fetching students for class");
   }
 }
 

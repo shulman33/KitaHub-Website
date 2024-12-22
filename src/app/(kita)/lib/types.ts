@@ -102,6 +102,12 @@ export interface ExtendedInstructor {
   className: string;
 }
 
+export interface ExtendedStudent {
+  firstName: string;
+  lastName: string;
+  email: string | null;
+  profilePicture: string | null;
+}
 
 
 

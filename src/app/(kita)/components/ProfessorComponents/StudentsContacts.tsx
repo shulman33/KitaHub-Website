@@ -1,14 +1,10 @@
 import React from 'react';
 import StudentContactCard from './elements/StudentContactCard';
+import { ExtendedStudent } from '../../lib/types';
 
-interface Student {
-  name: string;
-  performance: string;
-  grade: string;
-}
 
 interface StudentsContactsProps {
-  students: Student[];
+  students: ExtendedStudent[];
 }
 
 const StudentsContacts: React.FC<StudentsContactsProps> = ({ students }) => {
@@ -28,9 +24,9 @@ const StudentsContacts: React.FC<StudentsContactsProps> = ({ students }) => {
       {students.map((student, index) => (
         <StudentContactCard
           key={index}
-          name={student.name}
-          performance={student.performance}
-          grade={student.grade}
+          name={`${student.firstName} ${student.lastName}`}
+          // performance={student.performance}
+          // grade={student.grade}
         />
       ))}
     </div>

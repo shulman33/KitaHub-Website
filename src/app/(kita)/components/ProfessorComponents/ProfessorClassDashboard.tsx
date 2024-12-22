@@ -10,6 +10,7 @@ import React from 'react'
 import { ExtendedClass } from '@/app/(kita)/lib/types'
 import { getAssignmentsByClassId } from '../../server/actions/assignmentActions'
 import { getMessagesByClassId } from '../../server/actions/messageActions'
+import { getStudentsByClassId } from '../../server/actions/classActions'
 const assignmentsData = [
   {
     title: 'Assignment 4: Answer Writing',
@@ -88,37 +89,50 @@ const resourceData = [
     downloadLink: '/slides/week3.pdf',
   },
 ];
-const announcementsData = [
-  {
-    date: 'August 15, 2024',
-    professor: 'Dr. Emily Davis',
-    description: 'The lecture on August 25 has been rescheduled to September 1.',
-  },
-  {
-    date: 'August 18, 2024',
-    professor: 'Prof. John Smith',
-    description: 'Submit your assignments by August 20 to avoid penalties.',
-  },
+interface Announcement {
+  date: string;
+  professor: string;
+  description: string;
+}
+
+const announcementsData: Announcement[] = [
+  // {
+  //   date: 'August 15, 2024',
+  //   professor: 'Dr. Emily Davis',
+  //   description: 'The lecture on August 25 has been rescheduled to September 1.',
+  // },
+  // {
+  //   date: 'August 18, 2024',
+  //   professor: 'Prof. John Smith',
+  //   description: 'Submit your assignments by August 20 to avoid penalties.',
+  // },
 ];
 
-const examsData = [
-  { date: 'August 25, 2024', details: 'Midterm Exam covering Chapters 1-5.' },
-  { date: 'September 10, 2024', details: 'Final Exam covering all chapters.' },
+const examsData: { date: string; details: string }[] = [
+  // { date: 'August 25, 2024', details: 'Midterm Exam covering Chapters 1-5.' },
+  // { date: 'September 10, 2024', details: 'Final Exam covering all chapters.' },
 ];
 
-const instructorsData = [
-  {
-    date: 'August 15, 2024',
-    name: 'Prof. Jane Doe',
-    email: 'jane.doe@university.edu',
-    officeHours: 'Mondays & Wednesdays, 2:00 PM - 4:00 PM, Room 101',
-  },
-  {
-    date: 'August 20, 2024',
-    name: 'Prof. John Smith',
-    email: 'john.smith@university.edu',
-    officeHours: 'Tuesdays & Thursdays, 10:00 AM - 12:00 PM, Room 202',
-  },
+interface Instructor {
+  date: string;
+  name: string;
+  email: string;
+  officeHours: string;
+}
+
+const instructorsData: Instructor[] = [
+  // {
+  //   date: 'August 15, 2024',
+  //   name: 'Prof. Jane Doe',
+  //   email: 'jane.doe@university.edu',
+  //   officeHours: 'Mondays & Wednesdays, 2:00 PM - 4:00 PM, Room 101',
+  // },
+  // {
+  //   date: 'August 20, 2024',
+  //   name: 'Prof. John Smith',
+  //   email: 'john.smith@university.edu',
+  //   officeHours: 'Tuesdays & Thursdays, 10:00 AM - 12:00 PM, Room 202',
+  // },
 ];
 const studentsData = [
   { name: 'John Doe', performance: 'A-', grade: '90%' },
@@ -158,6 +172,7 @@ export default async function ProfessorClassDashboard({
 }: ProfessorClassDashboardProps) {
   const assignments = await getAssignmentsByClassId(classData.id);
   const messages = await getMessagesByClassId(classData.id);
+  const students = await getStudentsByClassId(classData.id);
   return (
     <div>
       <Header name={name} />
@@ -170,7 +185,7 @@ export default async function ProfessorClassDashboard({
         />
         <ProfessorAssignments assignments={assignments} />
         <DiscussionBoardWidget messages={messages} />
-        <StudentsContacts students={studentsData} />
+        <StudentsContacts students={students} />
         <Calendar dates={dates} events={events} />
         <Resources resources={resourceData} />
       </div>
