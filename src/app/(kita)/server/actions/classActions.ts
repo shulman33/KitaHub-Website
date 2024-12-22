@@ -10,26 +10,76 @@ import {
 } from "@/app/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { ExtendedClass } from "../../lib/types";
-import { currentUserId, currentUserRole, isEnrolledInClass } from "../../lib/utils";
+import {
+  currentUserId,
+  currentUserRole,
+  isEnrolledInClass,
+} from "../../lib/utils";
 
-export async function getClassById(id: string): Promise<SelectClass | null> {
+// This function fetches a class by its ID
+// it should return all the fields from the class table
+// and the professor's first name, last name, and profile picture
+// it should only return the class if the current user is enrolled in it
+export async function getClassById(id: string): Promise<ExtendedClass | null> {
   try {
     const result = await dbAuth(async (db) => {
       const classes = await db
-        .select()
+        .select({
+          id: classTable.id,
+          universityId: classTable.universityId,
+          className: classTable.className,
+          description: classTable.description,
+          code: classTable.code,
+          semester: classTable.semester,
+          year: classTable.year,
+          isActive: classTable.isActive,
+          professorFirstName: sql<string>`(
+            SELECT u."firstName"
+            FROM "class_enrollment" ce
+            JOIN "user" u ON ce."userId" = u.id
+            WHERE ce."classId" = ${id} AND ce."role" = 'PROFESSOR'
+            LIMIT 1
+          )`,
+          professorLastName: sql<string>`(
+            SELECT u."lastName"
+            FROM "class_enrollment" ce
+            JOIN "user" u ON ce."userId" = u.id
+            WHERE ce."classId" = ${id} AND ce."role" = 'PROFESSOR'
+            LIMIT 1
+          )`,
+          professorProfilePicture: sql<string | null>`(
+            SELECT u."profilePicture"
+            FROM "class_enrollment" ce
+            JOIN "user" u ON ce."userId" = u.id
+            WHERE ce."classId" = ${id} AND ce."role" = 'PROFESSOR'
+            LIMIT 1
+          )`,
+        })
         .from(classTable)
-        .where(eq(classTable.id, id));
+        .where(
+          sql`${classTable.id} = ${id} AND ${isEnrolledInClass(classTable.id)}`
+        );
 
-      return classes;
+      if (!classes.length) return null;
+
+      const cls = classes[0];
+      return {
+        ...cls,
+        professorName: `${cls.professorFirstName} ${cls.professorLastName}`,
+      };
     });
 
-    return result[0] || null;
+    return result;
   } catch (error) {
     console.error("Error fetching class by ID:", error);
     throw new Error("Error fetching class by ID");
   }
 }
 
+// This function fetches classes for the current user
+// it should return all the fields from the class table
+// and the professor's first name, last name, and profile picture
+// it should only return the class if the current user is enrolled in it
 export async function getClassesForCurrentUser(): Promise<ExtendedClass[]> {
   try {
     const result = await dbAuth(async (db) => {
@@ -103,6 +153,8 @@ export async function getClassesForCurrentUser(): Promise<ExtendedClass[]> {
   }
 }
 
+// This function fetches all classes for a university
+// it should return all the fields from the class table
 export async function getClassesByUniversityId(
   universityId: string
 ): Promise<SelectClass[]> {
@@ -123,6 +175,7 @@ export async function getClassesByUniversityId(
   }
 }
 
+// This function fetches all active classes
 export async function getActiveClasses(): Promise<SelectClass[]> {
   try {
     const result = await dbAuth(async (db) => {
@@ -141,28 +194,64 @@ export async function getActiveClasses(): Promise<SelectClass[]> {
   }
 }
 
+// This function creates a new class
+// it should return the newly created class
+// it should only allow professors to create classes
+// it should then enroll the professor in the class as a professor
 export async function createClass(data: InsertClass): Promise<SelectClass> {
   try {
     const result = await dbAuth(async (db) => {
-      const newClass = await db.insert(classTable).values(data).returning();
+      // Check if user is a professor
+      const userRole = await db
+        .select({ role: user.role })
+        .from(user)
+        .where(sql`${user.auth0UserId} = auth.user_id()`);
+
+      if (!userRole.length || userRole[0].role !== "PROFESSOR") {
+        throw new Error("Only professors can create classes");
+      }
+
+      // Create the class
+      const [newClass] = await db.insert(classTable).values(data).returning();
+
+      // Enroll the professor
+      await db.insert(classEnrollment).values({
+        userId: currentUserId,
+        classId: newClass.id,
+        role: "PROFESSOR",
+      });
 
       return newClass;
     });
 
-    return result[0];
+    return result;
   } catch (error) {
     console.error("Error creating class:", error);
     throw new Error("Error creating class");
   }
 }
 
+// This function updates a class by its ID
+// it should return the updated class
+// it should only allow professors who are enrolled in the class to update classes
 export async function updateClass(
   id: string,
   data: Partial<InsertClass>
 ): Promise<SelectClass> {
   try {
     const result = await dbAuth(async (db) => {
-      const updatedClass = await db
+      // Check if user is an enrolled professor
+      const enrollment = await db.select().from(classEnrollment).where(sql`
+          ${classEnrollment.classId} = ${id} AND 
+          ${classEnrollment.userId} = ${currentUserId} AND 
+          ${classEnrollment.role} = 'PROFESSOR'
+        `);
+
+      if (!enrollment.length) {
+        throw new Error("Only enrolled professors can update classes");
+      }
+
+      const [updatedClass] = await db
         .update(classTable)
         .set(data)
         .where(eq(classTable.id, id))
@@ -171,16 +260,33 @@ export async function updateClass(
       return updatedClass;
     });
 
-    return result[0];
+    return result;
   } catch (error) {
     console.error("Error updating class:", error);
     throw new Error("Error updating class");
   }
 }
 
+// This function deletes a class by its ID
+// it should only allow professors who are enrolled in the class to delete classes
 export async function deleteClass(id: string): Promise<void> {
   try {
     await dbAuth(async (db) => {
+      // Check if user is an enrolled professor
+      const enrollment = await db.select().from(classEnrollment).where(sql`
+          ${classEnrollment.classId} = ${id} AND 
+          ${classEnrollment.userId} = ${currentUserId} AND 
+          ${classEnrollment.role} = 'PROFESSOR'
+        `);
+
+      if (!enrollment.length) {
+        throw new Error("Only enrolled professors can delete classes");
+      }
+
+      // Delete all related enrollments first
+      await db.delete(classEnrollment).where(eq(classEnrollment.classId, id));
+
+      // Then delete the class
       await db.delete(classTable).where(eq(classTable.id, id));
     });
   } catch (error) {

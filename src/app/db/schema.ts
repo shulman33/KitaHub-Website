@@ -142,6 +142,7 @@ export const classTable = pgTable(
       .references(() => university.id),
     className: varchar({ length: 255 }).notNull(),
     description: varchar({ length: 255 }),
+    enrollmentCode: varchar({ length: 6 }).notNull(),
     code: integer().notNull(),
     semester: semesterEnum().notNull(),
     year: integer().notNull(),

@@ -1,5 +1,6 @@
 import React from "react";
 import EmptyState from "@/app/(marketing)/components/empty-state";
+import { ExtendedClass } from "../lib/types";
 
 
 interface Course {
@@ -9,7 +10,7 @@ interface Course {
 }
 
 interface CoursesWidgetProps {
-  courses: Course[];
+  courses: ExtendedClass[];
 }
 
 const BlankPaperIcon = () => {
@@ -44,14 +45,14 @@ const CoursesWidget: React.FC<CoursesWidgetProps> = ({ courses }) => {
       <div className="flex justify-between items-center mb-6">
         <p className="text-[16px] leading-[19.5px] font-bold">📚 My Courses</p>
         <button className="text-[14px] leading-[17px] text-[#74759A] font-semibold">
-          View All
+          Join a Course
         </button>
       </div>
 
       {courses.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {courses.map((course) => (
-            <CourseCard key={course.id} {...course} />
+            <CourseCard key={course.id} id={course.id} courseName={course.className} instructor={course.professorName} />
           ))}
         </div>
       ) : (
