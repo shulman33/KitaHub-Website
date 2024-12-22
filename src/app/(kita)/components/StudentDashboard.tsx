@@ -116,7 +116,7 @@ const StudentDashboard = async ({ name }: StudentDashboardProps) => {
       <Header name={name} />
       <div className=" py-16">
         <div className="grid md:grid-cols-2 gap-[30px]">
-          {/* <AssignmentWidget courses={dummyCourses} /> */}
+          {/* <AssignmentWidget courses={dummyAssignments} /> */}
           <CoursesWidget courses={dummyCourses} />
           <DiscussionBoardWidget messages={dummyMessages} />
         </div>
