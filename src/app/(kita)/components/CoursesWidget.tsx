@@ -1,6 +1,7 @@
 import React from "react";
 import EmptyState from "@/app/(marketing)/components/empty-state";
 import { ExtendedClass } from "../lib/types";
+import Link from "next/link";
 
 
 interface Course {
@@ -32,9 +33,15 @@ const BlankPaperIcon = () => {
   );
 };
 
-const CourseCard: React.FC<Course> = ({ courseName, instructor }) => (
+const CourseCard: React.FC<Course> = ({ courseName, instructor, id }) => (
   <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-    <h3 className="text-[16px] font-semibold text-gray-900 mb-2">{`📚 ${courseName}`}</h3>
+    {/* <h3 className="text-[16px] font-semibold text-gray-900 mb-2">{`📚 ${courseName}`}</h3> */}
+    <Link
+      href={`/dashboard/${id}`}
+      className="text-[16px] font-semibold text-gray-900 mb-2"
+    >
+      {`📚 ${courseName}`}
+    </Link>
     <p className="text-sm text-gray-500">{`Prof. ${instructor}`}</p>
   </div>
 );

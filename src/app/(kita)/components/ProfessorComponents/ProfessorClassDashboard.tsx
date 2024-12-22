@@ -7,6 +7,9 @@ import ProfessorAssignments from '@/app/(kita)/components/ProfessorComponents/Pr
 import StudentsContacts from '@/app/(kita)/components/ProfessorComponents/StudentsContacts'
 import Resources from '@/app/(kita)/components/StudentComponents/courses/Resources'
 import React from 'react'
+import { ExtendedClass } from '@/app/(kita)/lib/types'
+import { getAssignmentsByClassId } from '../../server/actions/assignmentActions'
+import { getMessagesByClassId } from '../../server/actions/messageActions'
 const assignmentsData = [
   {
     title: 'Assignment 4: Answer Writing',
@@ -143,25 +146,34 @@ const events = [
   { time: '2:00 PM', title: 'Project Discussion', attendeesCount: 8, duration: '2:00 - 3:00', status: 'Pending', date: 17 },
   { time: '2:00 PM', title: 'Project Discussion2', attendeesCount: 8, duration: '2:00 - 3:00', status: 'Pending', date: 17 },
 ];
-const page = () => {
-  return (
-    <div>
-      <Header/>
 
-      <div className='grid md:grid-cols-2 mt-[30px] gap-[30px]'>
-      <ProfessorAnnoucments
-        announcements={announcementsData}
-        exams={examsData}
-        instructors={instructorsData}
-      />
-        <ProfessorAssignments assignments={assignmentsData}/>
-        <DiscussionBoardWidget messages={dummyMessages}/>
-        <StudentsContacts students={studentsData} />
-        <Calendar dates={dates} events={events} /> 
-        <Resources resources={resourceData}/>
-      </div>
-    </div>
-  )
+interface ProfessorClassDashboardProps {
+  classData: ExtendedClass;
+  name: string;
 }
 
-export default page
+export default async function ProfessorClassDashboard({
+  classData,
+  name
+}: ProfessorClassDashboardProps) {
+  const assignments = await getAssignmentsByClassId(classData.id);
+  const messages = await getMessagesByClassId(classData.id);
+  return (
+    <div>
+      <Header name={name} />
+
+      <div className="grid md:grid-cols-2 mt-[30px] gap-[30px]">
+        <ProfessorAnnoucments
+          announcements={announcementsData}
+          exams={examsData}
+          instructors={instructorsData}
+        />
+        <ProfessorAssignments assignments={assignments} />
+        <DiscussionBoardWidget messages={messages} />
+        <StudentsContacts students={studentsData} />
+        <Calendar dates={dates} events={events} />
+        <Resources resources={resourceData} />
+      </div>
+    </div>
+  );
+};

@@ -1,6 +1,7 @@
 import React from 'react';
 import DropdownMenu from '../StudentComponents/DropDown';
 import ProfessorAssignmentCard from './elements/ProfessorAssignmentCard';
+import { ExtendedSelectAssignment } from '../../lib/types';
 
 interface Assignment {
   title: string;
@@ -11,7 +12,7 @@ interface Assignment {
 }
 
 interface ProfessorAssignmentsProps {
-  assignments: Assignment[];
+  assignments: ExtendedSelectAssignment[];
 }
 
 const ProfessorAssignments: React.FC<ProfessorAssignmentsProps> = ({ assignments }) => {

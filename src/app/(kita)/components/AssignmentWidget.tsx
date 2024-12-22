@@ -51,6 +51,7 @@ const AssignmentWidget: React.FC<AssignmentWidgetProps> = ({ courses }) => {
               <CourseRow
                 key={index}
                 courseName={course.className}
+                courseId={course.classId}
                 title={course.title}
                 timeToDeadline={course.timeToDeadlineObject}
               />

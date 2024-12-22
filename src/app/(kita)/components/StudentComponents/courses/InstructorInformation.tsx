@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import InstructorInfoCard from './InstructorInfoCard';
+import { ExtendedInstructor } from '@/app/(kita)/lib/types';
 
 interface Instructor {
   name: string;
@@ -10,7 +11,7 @@ interface Instructor {
 }
 
 interface InstructorInformationProps {
-  instructors: Instructor[];
+  instructors: ExtendedInstructor[];
 }
 
 const InstructorInformation: React.FC<InstructorInformationProps> = ({ instructors }) => {
@@ -28,10 +29,8 @@ const InstructorInformation: React.FC<InstructorInformationProps> = ({ instructo
           instructors.map((instructor, index) => (
             <InstructorInfoCard
               key={index}
-              name={instructor.name}
-              university={instructor.university}
-              phone={instructor.phone}
-              email={instructor.email}
+              name={`${instructor.firstName} ${instructor.lastName}`}
+              email={instructor.email!}
             />
           ))
         ) : (

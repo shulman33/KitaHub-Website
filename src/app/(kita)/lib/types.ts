@@ -94,6 +94,14 @@ export interface MessageWidgetProps {
   messages: ExtendedSelectMessage[];
 }
 
+export interface ExtendedInstructor {
+  firstName: string;
+  lastName: string;
+  email: string | null;
+  profilePicture: string | null;
+  className: string;
+}
+
 
 
 
