@@ -6,6 +6,8 @@ import DiscussionBoardWidget from "./DiscussionBoardWidget";
 import Calendar from "./ProfessorComponents/Calendar";
 import { getMessagesByCurrentUser } from "../server/actions/messageActions";
 import { getCurrentUserAssignment } from "../server/actions/assignmentActions";
+import CoursesWidget from "./CoursesWidget";
+import { getClassesForCurrentUser } from "../server/actions/classActions";
 const dummyMessages = [
   {
     id: 1,
@@ -151,11 +153,12 @@ interface ProfessorDashboardProps {
 const ProfessorDashboard = async ({name}: ProfessorDashboardProps) => {
   const messages = await getMessagesByCurrentUser();
   const assignments = await getCurrentUserAssignment();
+  const courses = await getClassesForCurrentUser();
   return (
     <div>
       <Header name={name}/>
       <div className="grid md:grid-cols-2 mt-[30px] gap-[30px]">
-        <ActiveCourses courses={coursesData} />
+        <CoursesWidget courses={courses} />
         <ProfessorAssignments assignments={assignments} />
         <Calendar dates={dates} events={events} />
 
