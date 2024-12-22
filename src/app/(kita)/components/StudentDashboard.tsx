@@ -9,26 +9,12 @@ import {
 import CalendarComponent from "./StudentComponents/CalendarComponent";
 import AssignmentWidget from "./AssignmentWidget";
 import CoursesWidget from "./CoursesWidget";
+import { getCurrentUserAssignment } from "../server/actions/assignmentActions";
 
 interface StudentDashboardProps {
   name: string;
 }
 
-const dummyAssignments = [
-  {
-    courseName: "Mathematics III",
-    title: "Answer Writing",
-    deadline: "02:40:55",
-  },
-  { courseName: "Physics II", title: "Quiz Preparation", deadline: "01:30:00" },
-  { courseName: "Chemistry I", title: "Lab Report", deadline: "03:45:10" },
-  {
-    courseName: "Computer Science",
-    title: "Project Submission",
-    deadline: "05:20:15",
-  },
-  { courseName: "History II", title: "Essay Submission", deadline: "04:15:00" },
-];
 
 const dummyMessages = [
   {
@@ -77,40 +63,13 @@ const dummyMessages = [
 //   },
 // ];
 
-const dummyCourses = [
-  {
-    id: "1",
-    courseName: "Introduction to Computer Science",
-    instructor: "John Smith",
-  },
-  {
-    id: "2",
-    courseName: "Data Structures and Algorithms",
-    instructor: "Alice Johnson",
-  },
-  {
-    id: "3",
-    courseName: "Software Engineering",
-    instructor: "Bob Williams",
-  },
-  {
-    id: "4",
-    courseName: "Computer Networks",
-    instructor: "Jane Doe",
-  },
-  {
-    id: "5",
-    courseName: "Operating Systems",
-    instructor: "Michael Brown",
-  }
-];
-
 
 const StudentDashboard = async ({ name }: StudentDashboardProps) => {
   const messages = await getMessagesByCurrentUser();
-  console.log("messages", messages);
+  // console.log("messages", messages);
   const courses = await getClassesForCurrentUser();
-  console.log("courses", courses);
+  // console.log("courses", courses);
+  const assignments = await getCurrentUserAssignment();
   return (
     <>
       <Header name={name} />
@@ -123,8 +82,7 @@ const StudentDashboard = async ({ name }: StudentDashboardProps) => {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-[40%,auto] mt-[30px] w-full gap-[30px]">
           <CalendarComponent />
-
-          <AssignmentWidget courses={dummyAssignments} />
+          <AssignmentWidget courses={assignments} />
         </div>
       </div>
     </>

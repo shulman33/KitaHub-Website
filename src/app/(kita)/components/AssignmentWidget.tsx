@@ -1,15 +1,10 @@
 import React from 'react';
 import CourseRow from './StudentComponents/CourseRow';
 import EmptyState from '@/app/(marketing)/components/empty-state';
-
-interface Course {
-  courseName: string;
-  title: string;
- 
-}
+import { ExtendedSelectAssignment } from '../lib/types';
 
 interface AssignmentWidgetProps {
-  courses: Course[];
+  courses: ExtendedSelectAssignment[];
 }
 
 const BlankPaperIcon = () => {
@@ -55,8 +50,9 @@ const AssignmentWidget: React.FC<AssignmentWidgetProps> = ({ courses }) => {
             courses.map((course, index) => (
               <CourseRow
                 key={index}
-                courseName={course.courseName}
+                courseName={course.className}
                 title={course.title}
+                timeToDeadline={course.timeToDeadlineObject}
               />
             ))
           ) : (
