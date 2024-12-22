@@ -88,6 +88,7 @@ export async function getClassesForCurrentUser(): Promise<ExtendedClass[]> {
         isActive: cls.isActive,
         professorFirstName: cls.professorFirstName as string,
         professorLastName: cls.professorLastName as string,
+        professorName: `${cls.professorFirstName} ${cls.professorLastName}`,
         professorProfilePicture: cls.professorProfilePicture as string | null,
       }));
 

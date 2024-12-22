@@ -8,25 +8,71 @@ import FormActions from "./FormActions";
 import FormSection from "./FormSection";
 import { useFormState, useFormStatus } from "react-dom";
 import { useEffect } from "react";
+import { StateType, SearchParams } from "../../lib/types";
+import { validateEmail, validateProfileData } from "@/app/(kita)/lib/utils";
+import { updateProfile } from "@/app/api/updateProfile";
 
-interface StateType {
-  message?: string;
-  redirectUrl?: string;
-}
 
 interface CompleteProfileFormProps {
-  action: (
-    state: StateType,
-    formData: FormData
-  ) => StateType | Promise<StateType>;
+  sessionToken: string;
+  stateParam: string;
 }
 
-export default function CompleteProfileForm({
-  action,
+export function CompleteProfileForm({
+  sessionToken,
+  stateParam,
 }: CompleteProfileFormProps) {
   const initialState: StateType = {};
-  const [state, formAction] = useFormState(action, initialState);
-  const { pending } = useFormStatus();
+
+  async function handleSubmit(
+    state: StateType,
+    formData: FormData
+  ): Promise<StateType> {
+    const firstName = formData.get("firstName")?.toString() || "";
+    const lastName = formData.get("lastName")?.toString() || "";
+    const universityEmail = formData.get("universityEmail")?.toString() || "";
+    const role = formData.get("role")?.toString() || "";
+    const agree = formData.get("agree") === "on";
+
+    // Validate form data
+    const validation = validateProfileData({
+      firstName,
+      lastName,
+      universityEmail,
+      role,
+      agree,
+    });
+
+    if (!validation.isValid) {
+      return { message: validation.error };
+    }
+
+    try {
+      const response = await updateProfile({
+        session_token: sessionToken,
+        firstName,
+        lastName,
+        acceptedTOS: agree,
+        universityEmail,
+        isProfessor: role === "professor",
+      });
+
+      return {
+        redirectUrl: `${
+          process.env.NEXT_PUBLIC_AUTH0_ISSUER_BASE_URL
+        }/continue?state=${encodeURIComponent(stateParam)}`,
+      };
+    } catch (error) {
+      return {
+        message:
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred",
+      };
+    }
+  }
+
+  const [state, formAction] = useFormState(handleSubmit, initialState);
 
   useEffect(() => {
     if (state.redirectUrl) {
@@ -38,8 +84,8 @@ export default function CompleteProfileForm({
     <div className="bg-gray-50 space-y-10 divide-y divide-gray-900/10">
       <div className="grid grid-cols-1 gap-x-8 gap-y-8 pt-10 md:grid-cols-3">
         <FormSection
-          title="Welcome to KitaHub! Let's Get to Know You Better"
-          description="Please fill out the following information to personalize your experience and connect with the community. Your privacy is our priority."
+          title="Complete Your Profile"
+          description="Please provide your information to complete your registration."
         />
 
         <form
@@ -49,52 +95,59 @@ export default function CompleteProfileForm({
           <div className="px-4 py-6 sm:p-8">
             <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
               <TextInput
-                id="first-name"
+                id="firstName"
                 name="firstName"
                 label="First name"
                 autoComplete="given-name"
+                required
               />
 
               <TextInput
-                id="last-name"
+                id="lastName"
                 name="lastName"
                 label="Last name"
                 autoComplete="family-name"
+                required
               />
 
-              <div className="col-span-4">
+              <div className="col-span-full">
                 <TextInput
-                  id="uni-email"
+                  id="universityEmail"
                   name="universityEmail"
                   label="University Email"
                   type="email"
                   autoComplete="email"
+                  required
                 />
               </div>
 
-              <div className="max-w-2xl space-y-10 md:col-span-3">
+              <div className="col-span-full">
                 <RadioGroup
-                  legend="Join KitaHub as a:"
-                  description="Select your role to connect with the right tools and community members."
+                  legend="Join as:"
+                  description="Select your role at the university"
+                  name="role"
                   options={[
-                    { id: "prof", value: "professor", label: "Professor" },
+                    { id: "professor", value: "professor", label: "Professor" },
                     { id: "student", value: "student", label: "Student" },
                   ]}
-                  name="role"
+                  required
                 />
+              </div>
 
+              <div className="col-span-full">
                 <CheckboxInput
                   id="agree"
                   name="agree"
                   label="I accept the"
                   linkText="Terms of Service"
                   linkHref="/terms"
+                  required
                 />
               </div>
             </div>
           </div>
 
-          <FormActions loading={pending} />
+          <FormActions />
 
           {state.message && (
             <div className="px-4 py-2 sm:px-8">

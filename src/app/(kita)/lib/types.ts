@@ -29,6 +29,7 @@ export interface ExtendedClass {
   professorFirstName: string;
   professorLastName: string;
   professorProfilePicture: string | null;
+  professorName: string;
 }
 
 
