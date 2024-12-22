@@ -85,7 +85,7 @@ export default function TopNavBar({ setSidebarOpen, userNavigation }: Props) {
                   aria-hidden="true"
                   className="ml-4 text-sm font-semibold leading-6 text-gray-900"
                 >
-                  {user?.name}
+                  {user?.nickname}
                 </span>
                 <ChevronDownIcon
                   aria-hidden="true"
