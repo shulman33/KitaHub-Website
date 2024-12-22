@@ -58,7 +58,7 @@ const AssignmentWidget: React.FC<AssignmentWidgetProps> = ({ courses }) => {
           ) : (
             <EmptyState
               icon={<BlankPaperIcon />}
-              title="No Courses Available"
+              title="No Assignments Yet"
               text="Get started by enrolling in a new course"
               buttonText="Enroll Now"
             />

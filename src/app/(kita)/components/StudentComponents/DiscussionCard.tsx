@@ -1,19 +1,13 @@
 import React from "react";
 import Image from "next/image";
+import { ExtendedSelectMessage } from "../../lib/types";
 
 interface DiscussionCardProps {
+  message: ExtendedSelectMessage;
   index: number;
-  user: string;
-  message: string;
-  time: string;
 }
 
-const DiscussionCard: React.FC<DiscussionCardProps> = ({
-  index,
-  user,
-  message,
-  time,
-}) => {
+const DiscussionCard: React.FC<DiscussionCardProps> = ({ message, index }) => {
   return (
     <div
       className={`w-full ${
@@ -22,15 +16,15 @@ const DiscussionCard: React.FC<DiscussionCardProps> = ({
     >
       <div className="flex gap-[10px] items-center">
         <Image
-          src="/avatar.svg"
+          src={message.userProfilePicture || "/avatar.svg"}
           width={55}
           height={55}
-          alt="no image"
+          alt={`${message.userFirstName}'s avatar`}
           className="rounded-full"
         />
         <div>
           <p className="text-[16px] leading-[19.5px] pb-[8px] font-semibold">
-            {user}
+            {`${message.userFirstName} ${message.userLastName}`}
           </p>
           <div className="flex gap-[16px]">
             <button
@@ -38,10 +32,10 @@ const DiscussionCard: React.FC<DiscussionCardProps> = ({
                 index % 2 === 0 ? "bg-white" : "bg-lightBlue"
               } text-[12px] px-[6px] py-[3px] roundd font-medium leading-[14px]`}
             >
-              Class 9
+              {message.className}
             </button>
             <span className="text-[12px] px-[6px] py-[3px] roundd font-medium leading-[14px]">
-              ({time})
+              {message.createdAtRelative}
             </span>
           </div>
         </div>
@@ -50,11 +44,11 @@ const DiscussionCard: React.FC<DiscussionCardProps> = ({
           src="/dots.svg"
           width={4}
           height={20}
-          alt="no image"
+          alt="menu"
         />
       </div>
       <p className="text-[14px] mt-[9px] leading-[19.5px] text-[#5C5D73] font-normal">
-        {message}
+        {message.content}
       </p>
     </div>
   );

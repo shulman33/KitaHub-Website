@@ -9,7 +9,7 @@ import {
   SelectMessage,
   classEnrollment,
 } from "@/app/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, inArray } from "drizzle-orm";
 import { ExtendedSelectMessage } from "../../lib/types";
 import { isEnrolledInClass } from "../../lib/utils";
 import { desc, and } from "drizzle-orm";
@@ -17,6 +17,7 @@ import { formatDistanceToNow } from "date-fns";
 import { revalidatePath } from "next/cache";
 import { pusherServer } from "../../lib/pusher/pusher";
 import { EVENT_TYPES, getChannelNames } from "../../lib/pusher/pusher";
+import { currentUserId } from "../../lib/utils";
 
 /**
  * Fetches messages from the database based on provided filters and limit.
@@ -42,6 +43,20 @@ async function fetchMessages(
 ): Promise<ExtendedSelectMessage[] | []> {
   try {
     const messages = await dbAuth(async (db) => {
+      // First get unique message IDs
+      const uniqueMessageIds = await db
+        .select({ id: message.id })
+        .from(message)
+        .innerJoin(
+          classEnrollment,
+          eq(message.classId, classEnrollment.classId)
+        )
+        .where(filters)
+        .groupBy(message.id)
+        .orderBy(desc(message.id))
+        .limit(limit);
+
+      // Then get full message details for these IDs
       const result = await db
         .select({
           id: message.id,
@@ -52,23 +67,21 @@ async function fetchMessages(
           content: message.content,
           createdAt: message.createdAt,
           updatedAt: message.updatedAt,
-
           userFirstName: user.firstName,
           userLastName: user.lastName,
           userProfilePicture: user.profilePicture,
-
           className: classTable.className,
         })
         .from(message)
-        .innerJoin(
-          classEnrollment,
-          eq(message.classId, classEnrollment.classId)
-        )
         .innerJoin(user, eq(message.userId, user.id))
         .innerJoin(classTable, eq(message.classId, classTable.id))
-        .where(filters)
-        .orderBy(desc(message.createdAt))
-        .limit(limit);
+        .where(
+          inArray(
+            message.id,
+            uniqueMessageIds.map((m) => m.id)
+          )
+        )
+        .orderBy(desc(message.createdAt));
 
       const selectMessages: ExtendedSelectMessage[] = result.map((msg) => ({
         id: msg.id,
@@ -88,7 +101,6 @@ async function fetchMessages(
         className: msg.className,
       }));
 
-      console.log("Fetched Messages:", selectMessages);
       return selectMessages;
     });
 
@@ -276,9 +288,28 @@ export async function createMessage(
 ): Promise<SelectMessage> {
   try {
     const result = await dbAuth(async (db) => {
+      // Check if user is enrolled in the class
+      const enrollment = await db
+        .select()
+        .from(classEnrollment)
+        .where(
+          and(
+            eq(classEnrollment.classId, data.classId),
+            eq(classEnrollment.userId, currentUserId)
+          )
+        );
+
+      if (!enrollment.length) {
+        throw new Error(
+          "User must be enrolled in the class to create messages"
+        );
+      }
+
       const newMessage = await db.insert(message).values(data).returning();
       return newMessage[0];
     });
+
+    // Pusher triggers remain the same
     await pusherServer.trigger(
       getChannelNames.classDiscussion(result.classId),
       EVENT_TYPES.NEW_MESSAGE,
@@ -292,6 +323,7 @@ export async function createMessage(
         result
       );
     }
+    // revalidatePath("/api/messages");
     return result;
   } catch (error) {
     console.error("Error creating message:", error);
@@ -325,11 +357,38 @@ export async function createMessage(
 export async function updateMessage(id: string, data: InsertMessage) {
   try {
     const result = await dbAuth(async (db) => {
+      // First get the existing message
+      const existingMessage = await db
+        .select()
+        .from(message)
+        .where(eq(message.id, id));
+
+      if (!existingMessage.length) {
+        throw new Error("Message not found");
+      }
+
+      // Check if user is enrolled and is the author
+      const canUpdate = await db
+        .select()
+        .from(classEnrollment)
+        .where(
+          and(
+            eq(classEnrollment.classId, existingMessage[0].classId),
+            eq(classEnrollment.userId, currentUserId),
+            eq(message.userId, currentUserId)
+          )
+        );
+
+      if (!canUpdate.length) {
+        throw new Error("Not authorized to update this message");
+      }
+
       const updatedMessage = await db
         .update(message)
         .set(data)
         .where(eq(message.id, id))
         .returning();
+
       return updatedMessage[0];
     });
     return result;
@@ -359,12 +418,25 @@ export async function updateMessage(id: string, data: InsertMessage) {
  */
 export async function deleteMessage(id: string): Promise<void> {
   try {
-    const result = await dbAuth(async (db) => {
-      await db
-        .delete(message)
-        .where(and(isEnrolledInClass(message.classId), eq(message.id, id)));
+    await dbAuth(async (db) => {
+      // First get the message to check ownership
+      const existingMessage = await db
+        .select()
+        .from(message)
+        .where(eq(message.id, id));
+
+      if (!existingMessage.length) {
+        throw new Error("Message not found");
+      }
+
+      await db.delete(message).where(
+        and(
+          isEnrolledInClass(message.classId),
+          eq(message.id, id),
+          eq(message.userId, currentUserId) // Ensure user is the author
+        )
+      );
     });
-    return result;
   } catch (error) {
     console.error("Error deleting message:", error);
     throw new Error("Could not delete message");

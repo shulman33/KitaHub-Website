@@ -15,27 +15,6 @@ interface StudentDashboardProps {
   name: string;
 }
 
-
-const dummyMessages = [
-  {
-    id: 1,
-    user: "Maya Thompson",
-    message: "You: List the most recent or active discussion...",
-    time: "12 Minutes",
-  },
-  {
-    id: 2,
-    user: "John Doe",
-    message: "Discussing the new project proposal for Class 9.",
-    time: "5 Minutes",
-  },
-  {
-    id: 3,
-    user: "Alice Johnson",
-    message: "What are the assignment deadlines for this week?",
-    time: "30 Minutes",
-  },
-];
 // const dummyAssignments = [
 //   {
 //     name: "Mathematics III",
@@ -66,7 +45,7 @@ const dummyMessages = [
 
 const StudentDashboard = async ({ name }: StudentDashboardProps) => {
   const messages = await getMessagesByCurrentUser();
-  // console.log("messages", messages);
+  console.log("messages", messages);
   const courses = await getClassesForCurrentUser();
   // console.log("courses", courses);
   const assignments = await getCurrentUserAssignment();
@@ -77,7 +56,7 @@ const StudentDashboard = async ({ name }: StudentDashboardProps) => {
         <div className="grid md:grid-cols-2 gap-[30px]">
           {/* <AssignmentWidget courses={dummyAssignments} /> */}
           <CoursesWidget courses={courses} />
-          <DiscussionBoardWidget messages={dummyMessages} />
+          <DiscussionBoardWidget messages={messages} />
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-[40%,auto] mt-[30px] w-full gap-[30px]">
