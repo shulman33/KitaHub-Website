@@ -66,20 +66,6 @@ export async function getEnrollmentByClassName(id: string, className: string) {
   }
 }
 
-// export async function createEnrollment(data: InsertClassEnrollment): Promise<SelectClassEnrollment> {
-//   try {
-//     console.log("class enrollment data", data);
-//     const result = await dbAuth(async (db) => {
-//       return await db.insert(classEnrollment).values(data).returning();
-//     })
-//     revalidatePath("/dashboard")
-//     return result[0];
-//   } catch (error) {
-//     console.error("Error creating enrollment:", error);
-//     throw new Error("Could not create enrollment");
-//   }
-// }
-
 export async function createEnrollment(data: InsertClassEnrollment): Promise<SelectClassEnrollment> {
   try{
     const result = await db.insert(classEnrollment).values(data).returning();

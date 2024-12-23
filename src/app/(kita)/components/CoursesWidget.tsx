@@ -15,6 +15,8 @@ interface Course {
   id: string;
   courseName: string;
   instructor: string;
+  enrollmentCode?: string;
+  isStudent: boolean;
 }
 
 interface CoursesWidgetProps {
@@ -42,15 +44,27 @@ const BlankPaperIcon = () => {
   );
 };
 
-const CourseCard: React.FC<Course> = ({ courseName, instructor, id }) => (
+const CourseCard: React.FC<Course> = ({
+  courseName,
+  instructor,
+  id,
+  enrollmentCode,
+  isStudent,
+}) => (
   <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
     <Link
       href={`/dashboard/${id}`}
-      className="text-[16px] font-semibold text-gray-900 mb-2"
+      className="text-[16px] font-semibold text-gray-900 mb-2 block"
     >
       {`📚 ${courseName}`}
     </Link>
     <p className="text-sm text-gray-500">{`Prof. ${instructor}`}</p>
+    {!isStudent && enrollmentCode && (
+      <div className="mt-2 text-sm bg-gray-50 p-2 rounded">
+        <span className="font-medium">Enrollment Code: </span>
+        <span className="font-mono">{enrollmentCode}</span>
+      </div>
+    )}
   </div>
 );
 
@@ -327,6 +341,8 @@ const CoursesWidget: React.FC<CoursesWidgetProps> = ({
               id={course.id}
               courseName={course.className}
               instructor={course.professorName}
+              enrollmentCode={course.enrollmentCode}
+              isStudent={isStudent}
             />
           ))}
         </div>

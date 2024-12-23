@@ -18,6 +18,7 @@ import {
   isEnrolledInClass,
 } from "../../lib/utils";
 import { revalidatePath } from "next/cache";
+import { en } from "@faker-js/faker";
 
 // This function fetches a class by its ID
 // it should return all the fields from the class table
@@ -94,6 +95,7 @@ export async function getClassesForCurrentUser(): Promise<ExtendedClass[]> {
           universityId: classTable.universityId,
           className: classTable.className,
           description: classTable.description,
+          enrollmentCode: classTable.enrollmentCode,
           code: classTable.code,
           semester: classTable.semester,
           year: classTable.year,
@@ -136,6 +138,7 @@ export async function getClassesForCurrentUser(): Promise<ExtendedClass[]> {
         className: cls.className,
         description: cls.description,
         code: cls.code,
+        enrollmentCode: cls.enrollmentCode as string | undefined,
         semester: cls.semester,
         year: cls.year,
         isActive: cls.isActive,

@@ -25,6 +25,7 @@ export interface ExtendedClass {
   semester: string;
   year: number;
   isActive: boolean;
+  enrollmentCode?: string;
 
   professorFirstName: string;
   professorLastName: string;
