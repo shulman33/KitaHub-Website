@@ -21,7 +21,8 @@ export interface ExtendedClass {
   universityId: string;
   className: string;
   description: string | null;
-  code: number;
+  code: number | null;
+  courseCode: string | null;
   semester: string;
   year: number;
   isActive: boolean;

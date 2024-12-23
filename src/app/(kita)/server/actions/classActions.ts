@@ -34,6 +34,7 @@ export async function getClassById(id: string): Promise<ExtendedClass | null> {
           className: classTable.className,
           description: classTable.description,
           code: classTable.code,
+          courseCode: classTable.courseCode,
           semester: classTable.semester,
           year: classTable.year,
           isActive: classTable.isActive,
@@ -97,6 +98,7 @@ export async function getClassesForCurrentUser(): Promise<ExtendedClass[]> {
           description: classTable.description,
           enrollmentCode: classTable.enrollmentCode,
           code: classTable.code,
+          courseCode: classTable.courseCode,
           semester: classTable.semester,
           year: classTable.year,
           isActive: classTable.isActive,
@@ -138,6 +140,7 @@ export async function getClassesForCurrentUser(): Promise<ExtendedClass[]> {
         className: cls.className,
         description: cls.description,
         code: cls.code,
+        courseCode: cls.courseCode,
         enrollmentCode: cls.enrollmentCode as string | undefined,
         semester: cls.semester,
         year: cls.year,
@@ -290,7 +293,7 @@ export async function getClassByEnrollmentCode(enrollmentCode: string): Promise<
 export type CreateClassFormData = {
   className: string;
   description?: string | null;
-  code: number;
+  courseCode: string;
   semester: (typeof semesterEnum.enumValues)[number];
   year: number;
 };
@@ -308,7 +311,7 @@ export async function createClass(formData: CreateClassFormData, id: string) {
   try {
     if (
       !formData.className ||
-      !formData.code ||
+      !formData.courseCode ||
       !formData.semester ||
       !formData.year
     ) {
@@ -334,16 +337,19 @@ export async function createClass(formData: CreateClassFormData, id: string) {
 
     const enrollmentCode = generateEnrollmentCode();
 
-    const newClass = await db.insert(classTable).values({
-      className: formData.className,
-      description: formData.description || null,
-      code: formData.code,
-      semester: formData.semester,
-      year: formData.year,
-      universityId: professor.universityId,
-      enrollmentCode,
-      isActive: true,
-    }).returning();
+    const newClass = await db
+      .insert(classTable)
+      .values({
+        className: formData.className,
+        description: formData.description || null,
+        courseCode: formData.courseCode,
+        semester: formData.semester,
+        year: formData.year,
+        universityId: professor.universityId,
+        enrollmentCode,
+        isActive: true,
+      })
+      .returning();
 
     await db.insert(classEnrollment).values({
       userId: professor.id,

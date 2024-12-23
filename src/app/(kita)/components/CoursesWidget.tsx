@@ -79,7 +79,7 @@ interface JoinClassData {
 interface CreateClassData {
   className: string;
   description?: string;
-  code: number;
+  courseCode: string;
   semester: Semester;
   year: number;
 }
@@ -107,7 +107,7 @@ const Modal = ({ isOpen, onClose, isStudent, onSubmit }: ModalProps) => {
   const [formData, setFormData] = useState<CreateClassData>({
     className: "",
     description: "",
-    code: 0,
+    courseCode: "",
     semester: "FALL",
     year: new Date().getFullYear(),
   });
@@ -191,12 +191,12 @@ const Modal = ({ isOpen, onClose, isStudent, onSubmit }: ModalProps) => {
                   Course Code
                 </label>
                 <input
-                  type="number"
-                  name="code"
-                  value={formData.code}
+                  type="text"
+                  name="courseCode"
+                  value={formData.courseCode}
                   onChange={handleInputChange}
                   className="w-full p-2 border rounded-md"
-                  placeholder="Enter course code (e.g., 101)"
+                  placeholder="Enter course code (e.g., COM 4587-123)"
                   required
                 />
               </div>
