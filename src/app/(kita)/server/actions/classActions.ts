@@ -1,6 +1,6 @@
 "use server";
 
-import { dbAuth } from "@/app/db/drizzle";
+import { dbAuth, db } from "@/app/db/drizzle";
 import {
   classTable,
   user,
@@ -8,6 +8,7 @@ import {
   SelectClass,
   classEnrollment,
   SelectUser,
+  semesterEnum
 } from "@/app/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { ExtendedClass, ExtendedInstructor, ExtendedStudent } from "../../lib/types";
@@ -16,6 +17,7 @@ import {
   currentUserRole,
   isEnrolledInClass,
 } from "../../lib/utils";
+import { revalidatePath } from "next/cache";
 
 // This function fetches a class by its ID
 // it should return all the fields from the class table
@@ -265,42 +267,108 @@ export async function getActiveClasses(): Promise<SelectClass[]> {
   }
 }
 
+export async function getClassByEnrollmentCode(enrollmentCode: string): Promise<SelectClass> {
+  try{
+    const classResult = await db.select().from(classTable).where(sql`${classTable.enrollmentCode} = ${enrollmentCode}`); 
+    console.log("classResult", classResult);
+    return classResult[0];
+  }catch(error){
+    console.error("Error fetching class by enrollment code:", error);
+    throw new Error("Error fetching class by enrollment code");
+  }
+}
+
 // This function creates a new class
 // it should return the newly created class
 // it should only allow professors to create classes
 // it should then enroll the professor in the class as a professor
-export async function createClass(data: InsertClass): Promise<SelectClass> {
-  try {
-    const result = await dbAuth(async (db) => {
-      // Check if user is a professor
-      const userRole = await db
-        .select({ role: user.role })
-        .from(user)
-        .where(sql`${user.auth0UserId} = auth.user_id()`);
+// server/actions/classActions.ts
+// In your classActions.ts file
+export type CreateClassFormData = {
+  className: string;
+  description?: string | null;
+  code: number;
+  semester: (typeof semesterEnum.enumValues)[number];
+  year: number;
+};
 
-      if (!userRole.length || userRole[0].role !== "PROFESSOR") {
-        throw new Error("Only professors can create classes");
-      }
-
-      // Create the class
-      const [newClass] = await db.insert(classTable).values(data).returning();
-
-      // Enroll the professor
-      await db.insert(classEnrollment).values({
-        userId: currentUserId,
-        classId: newClass.id,
-        role: "PROFESSOR",
-      });
-
-      return newClass;
-    });
-
-    return result;
-  } catch (error) {
-    console.error("Error creating class:", error);
-    throw new Error("Error creating class");
-  }
+function generateEnrollmentCode(): string {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  return Array.from(
+    { length: 6 },
+    () => chars[Math.floor(Math.random() * chars.length)]
+  ).join("");
 }
+
+export async function createClass(formData: CreateClassFormData, id: string) {
+  console.log("Called createClass with:", formData);
+  try {
+    if (
+      !formData.className ||
+      !formData.code ||
+      !formData.semester ||
+      !formData.year
+    ) {
+      return { error: "Missing required fields", success: false };
+    }
+
+    const userResult = await db.select({
+      id: user.id,
+      role: user.role,
+      universityId: user.universityId,
+    })
+    .from(user)
+    .where(sql`${user.auth0UserId} = ${id}`);
+    
+    if (!userResult.length) {
+      throw new Error("User not found");
+    }
+
+    const professor = userResult[0];
+    if (professor.role !== "PROFESSOR") {
+      throw new Error("Only professors can create classes");
+    }
+
+    const enrollmentCode = generateEnrollmentCode();
+
+    const newClass = await db.insert(classTable).values({
+      className: formData.className,
+      description: formData.description || null,
+      code: formData.code,
+      semester: formData.semester,
+      year: formData.year,
+      universityId: professor.universityId,
+      enrollmentCode,
+      isActive: true,
+    }).returning();
+
+    await db.insert(classEnrollment).values({
+      userId: professor.id,
+      classId: newClass[0].id,
+      role: "PROFESSOR",
+    })
+
+    revalidatePath("/dashboard");
+    revalidatePath(`/dashboard/${newClass[0].id}`);
+
+    return {
+      data: newClass[0],
+      success: true,
+    };
+  } catch (error) {
+    console.error("Error in createClass:", error);
+    if (error instanceof Error) {
+      return {
+        error: error.message,
+        success: false,
+      };
+    }
+    return {
+      error: "Failed to create class. Please try again.",
+      success: false,
+    };
+}}
+
 
 // This function updates a class by its ID
 // it should return the updated class

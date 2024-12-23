@@ -142,50 +142,13 @@ export const classTable = pgTable(
       .references(() => university.id),
     className: varchar({ length: 255 }).notNull(),
     description: varchar({ length: 255 }),
-    enrollmentCode: varchar({ length: 6 }).notNull(),
+    enrollmentCode: varchar({ length: 6 }),
     code: integer().notNull(),
     semester: semesterEnum().notNull(),
     year: integer().notNull(),
     isActive: boolean().default(true).notNull(),
   },
-  (table) => [
-    pgPolicy("class_select_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "select",
-      using: isEnrolledInClass(`"class".id`),
-    }),
-
-    pgPolicy("class_insert_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "insert",
-      using: sql`
-        ${currentUserRole} = 'PROFESSOR'
-      `,
-      withCheck: sql`${currentUserRole} = 'PROFESSOR'`,
-    }),
-
-    pgPolicy("class_update_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "update",
-      using: sql`
-        ${currentUserRole} = 'PROFESSOR'
-      `,
-      withCheck: sql`${currentUserRole} = 'PROFESSOR'`,
-    }),
-
-    pgPolicy("class_delete_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "delete",
-      using: sql`
-        ${currentUserRole} = 'PROFESSOR'
-      `,
-    }),
-  ]
-).enableRLS();
+)
 
 // ClassEnrollment Table (Join Table)
 export const classEnrollment = pgTable(
@@ -201,50 +164,13 @@ export const classEnrollment = pgTable(
     role: roleEnum().notNull(),
   },
   (table) => [
-    pgPolicy("classEnrollment_select_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "select",
-      using: sql`
-        "class_enrollment"."userId" = ${currentUserId}
-      `,
-    }),
-
-    pgPolicy("classEnrollment_insert_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "insert",
-      using: sql`
-        "class_enrollment"."userId" = ${currentUserId}
-      `,
-      withCheck: sql`"class_enrollment"."userId" = ${currentUserId}`,
-    }),
-
-    pgPolicy("classEnrollment_update_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "update",
-      using: sql`
-        "class_enrollment"."userId" = ${currentUserId}
-      `,
-      withCheck: sql`"class_enrollment"."userId" = ${currentUserId}`,
-    }),
-
-    pgPolicy("classEnrollment_delete_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "delete",
-      using: sql`
-        "class_enrollment"."userId" = ${currentUserId}
-      `,
-    }),
 
     uniqueIndex("class_enrollment_user_class_unique").on(
       table.userId,
       table.classId
     ),
   ]
-).enableRLS();
+)
 
 // Assignment Table
 export const assignment = pgTable(
@@ -262,47 +188,8 @@ export const assignment = pgTable(
     url: varchar({ length: 255 }),
     isGraded: boolean().default(false).notNull(),
     isPublished: boolean().default(false).notNull(),
-  },
-  (table) => [
-    pgPolicy("assignment_select_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "select",
-      using: isEnrolledInClass(`"assignment"."classId"`),
-      withCheck: sql``,
-    }),
-    pgPolicy("assignment_insert_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "insert",
-      using: sql`
-        ${currentUserRole} = 'PROFESSOR' AND
-        ${isEnrolledInClass(`"assignment"."classId"`)}
-      `,
-      withCheck: sql``,
-    }),
-    pgPolicy("assignment_update_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "update",
-      using: sql`
-        ${currentUserRole} = 'PROFESSOR' AND
-        ${isEnrolledInClass(`"assignment"."classId"`)}
-      `,
-      withCheck: sql``,
-    }),
-    pgPolicy("assignment_delete_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "delete",
-      using: sql`
-        ${currentUserRole} = 'PROFESSOR' AND
-        ${isEnrolledInClass(`"assignment"."classId"`)}
-      `,
-      withCheck: sql``,
-    }),
-  ]
-).enableRLS();
+  }
+)
 
 // Grade Table
 export const grade = pgTable(
@@ -319,70 +206,7 @@ export const grade = pgTable(
     gradedAt: timestamp().defaultNow().notNull(),
     feedback: varchar({ length: 255 }),
   },
-  (t) => [
-    pgPolicy("grade_select_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "select",
-      using: sql`
-        "Grade"."studentId" = ${currentUserId} AND
-        EXISTS (
-          SELECT 1
-          FROM "assignment"
-          WHERE "assignment".id = "grade"."assignmentId" AND
-                ${isEnrolledInClass(`"assignment"."classId"`)}
-        )
-      `,
-      withCheck: sql``,
-    }),
-    pgPolicy("grade_insert_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "insert",
-      using: sql`
-        ${currentUserRole} = 'PROFESSOR' AND
-        EXISTS (
-          SELECT 1
-          FROM "assignment"
-          WHERE "assignment".id = "grade"."assignmentId" AND
-                ${isEnrolledInClass(`"assignment"."classId"`)}
-        )
-      `,
-      withCheck: sql``,
-    }),
-    // Update Policy
-    pgPolicy("grade_update_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "update",
-      using: sql`
-        ${currentUserRole} = 'PROFESSOR' AND
-        EXISTS (
-          SELECT 1
-          FROM "assignment"
-          WHERE "assignment".id = "grade"."assignmentId" AND
-                ${isEnrolledInClass(`"assignment"."classId"`)}
-        )
-      `,
-      withCheck: sql``,
-    }),
-    pgPolicy("grade_delete_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "delete",
-      using: sql`
-        ${currentUserRole} = 'PROFESSOR' AND
-        EXISTS (
-          SELECT 1
-          FROM "assignment"
-          WHERE "assignment".id = "grade"."assignmentId" AND
-                ${isEnrolledInClass(`"assignment"."classId"`)}
-        )
-      `,
-      withCheck: sql``,
-    }),
-  ]
-).enableRLS();
+)
 
 // Resource Table
 export const resource = pgTable(
@@ -397,57 +221,8 @@ export const resource = pgTable(
     url: varchar({ length: 255 }).notNull(),
     uploadedAt: timestamp().defaultNow().notNull(),
   },
-  (t) => [
-    pgPolicy("resource_select_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "select",
-      using: sql`
-        ${isEnrolledInClass(`"resource"."classId"`)}
-      `,
-      withCheck: sql``,
-    }),
-    pgPolicy("resource_insert_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "insert",
-      using: sql`
-        ${currentUserRole} = 'PROFESSOR' AND
-        ${isEnrolledInClass(`"resource"."classId"`)}
-      `,
-      withCheck: sql`
-        ${currentUserRole} = 'PROFESSOR' AND
-        ${isEnrolledInClass(`"resource"."classId"`)}
-      `,
-    }),
-    pgPolicy("resource_update_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "update",
-      using: sql`
-        ${currentUserRole} = 'PROFESSOR' AND
-        ${isEnrolledInClass(`"resource"."classId"`)}
-      `,
-      withCheck: sql`
-        ${currentUserRole} = 'PROFESSOR' AND
-        ${isEnrolledInClass(`"resource"."classId"`)}
-      `,
-    }),
-    pgPolicy("resource_delete_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "delete",
-      using: sql`
-        ${currentUserRole} = 'PROFESSOR' AND
-        ${isEnrolledInClass(`"resource"."classId"`)}
-      `,
-      withCheck: sql`
-        ${currentUserRole} = 'PROFESSOR' AND
-        ${isEnrolledInClass(`"resource"."classId"`)}
-      `,
-    }),
-  ]
-).enableRLS();
+  
+)
 
 export const announcement = pgTable(
   "announcement",
@@ -464,50 +239,7 @@ export const announcement = pgTable(
     createdAt: timestamp().defaultNow().notNull(),
     updatedAt: timestamp().defaultNow().notNull(),
   },
-  (t) => [
-    pgPolicy("announcement_select_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "select",
-      using: sql`
-        ${isEnrolledInClass(`"announcement"."classId"`)}
-      `,
-      withCheck: sql``,
-    }),
-    pgPolicy("announcement_insert_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "insert",
-      using: sql`
-        "Announcement"."userId" = ${currentUserId} AND
-        ${isEnrolledInClass(`"announcement"."classId"`)}
-      `,
-      withCheck: sql``,
-    }),
-    // Update Policy
-    pgPolicy("announcement_update_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "update",
-      using: sql`
-        "Announcement"."userId" = ${currentUserId} AND
-        ${isEnrolledInClass(`"announcement"."classId"`)}
-      `,
-      withCheck: sql``,
-    }),
-    // Delete Policy
-    pgPolicy("announcement_delete_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "delete",
-      using: sql`
-        "Announcement"."userId" = ${currentUserId} AND
-        ${isEnrolledInClass(`"announcement"."classId"`)}
-      `,
-      withCheck: sql``,
-    }),
-  ]
-).enableRLS();
+)
 
 // Message Table
 export const message = pgTable(
@@ -527,52 +259,13 @@ export const message = pgTable(
     updatedAt: timestamp().defaultNow().notNull(),
   },
   (table) => [
-    pgPolicy("message_select_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "select",
-      using: sql`
-        ${isEnrolledInClass(`"message"."classId"`)}
-      `,
-      withCheck: sql``,
-    }),
-    pgPolicy("message_insert_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "insert",
-      using: sql`
-        "message"."userId" = ${currentUserId} AND
-        ${isEnrolledInClass(`"message"."classId"`)}
-      `,
-      withCheck: sql``,
-    }),
-    pgPolicy("message_update_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "update",
-      using: sql`
-        "message"."userId" = ${currentUserId} AND
-        ${isEnrolledInClass(`"message"."classId"`)}
-      `,
-      withCheck: sql``,
-    }),
-    pgPolicy("message_delete_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "delete",
-      using: sql`
-        "message"."userId" = ${currentUserId} AND
-        ${isEnrolledInClass(`"message"."classId"`)}
-      `,
-      withCheck: sql``,
-    }),
     foreignKey({
       columns: [table.parentMessageId],
       foreignColumns: [table.id],
       name: "parentMessageId",
     }),
   ]
-).enableRLS();
+)
 
 // Tag Table
 export const tag = pgTable(

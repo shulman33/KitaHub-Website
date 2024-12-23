@@ -12,15 +12,14 @@ export default withPageAuthRequired(async function MainDashboard() {
 
   const { name } = session.user;
   const role = await getUserRole(session.user.sub);
- 
   const isStudent = role === "Student";
 
   return (
     <main>
       {isStudent ? (
-        <StudentDashboard name={name} />
+        <StudentDashboard name={name} isStudent={isStudent} />
       ) : (
-        <ProfessorDashboard name={name} />
+        <ProfessorDashboard name={name} isStudent={isStudent} />
       )}
     </main>
   );

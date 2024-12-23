@@ -30,18 +30,6 @@ export async function dbAuth<T>(
     { schema, logger: true }
   );
 
-  const { rows: authUserId } = await db.execute(sql`SELECT auth.user_id();`);
-  console.log("auth.user_id()", authUserId[0]);
-
-  const auth0Field = await db
-    .select({ auth0UserId: user.auth0UserId })
-    .from(user)
-
-  console.log("auth0Field", auth0Field);
-
-  const { rows: role } = await db.execute(sql`SELECT current_user;`);
-  console.log("role", role);
-
 
   return callback(db);
 }

@@ -10,9 +10,11 @@ import CalendarComponent from "./StudentComponents/CalendarComponent";
 import AssignmentWidget from "./AssignmentWidget";
 import CoursesWidget from "./CoursesWidget";
 import { getCurrentUserAssignment } from "../server/actions/assignmentActions";
+import { getSession } from "@auth0/nextjs-auth0";
 
 interface StudentDashboardProps {
   name: string;
+  isStudent: boolean;
 }
 
 // const dummyAssignments = [
@@ -43,19 +45,26 @@ interface StudentDashboardProps {
 // ];
 
 
-const StudentDashboard = async ({ name }: StudentDashboardProps) => {
+const StudentDashboard = async ({ name, isStudent }: StudentDashboardProps) => {
   const messages = await getMessagesByCurrentUser();
-  console.log("messages", messages);
+  // console.log("messages", messages);
   const courses = await getClassesForCurrentUser();
   // console.log("courses", courses);
   const assignments = await getCurrentUserAssignment();
+  const session = await getSession();
+  if (!session || !session.user) {
+    throw new Error("User is not authenticated");
+  }
+
+  const { sub } = session.user;
+  console.log("user id", sub);
   return (
     <>
       <Header name={name} />
       <div className=" py-16">
         <div className="grid md:grid-cols-2 gap-[30px]">
           {/* <AssignmentWidget courses={dummyAssignments} /> */}
-          <CoursesWidget courses={courses} />
+          <CoursesWidget courses={courses} isStudent={isStudent} auth0UserId={sub} />
           <DiscussionBoardWidget messages={messages} />
         </div>
 

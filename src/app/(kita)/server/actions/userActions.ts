@@ -37,6 +37,20 @@ export async function getUserById(userId: string): Promise<SelectUser | null> {
   }
 }
 
+export async function getUserByAuthId(authId: string): Promise<SelectUser | null> {
+  try {
+    const result = await db
+      .selectDistinct()
+      .from(user)
+      .where(eq(user.auth0UserId, authId));
+    console.log("result", result);
+    return result[0];
+  } catch (error) {
+    console.error("Error fetching user by auth ID:", error);
+    throw new Error("Could not fetch user");
+  }
+}
+
 // Get a user by email (accessible to authenticated users)
 export async function getUserByEmail(
   email: string

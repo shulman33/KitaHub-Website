@@ -8,6 +8,7 @@ import { getMessagesByCurrentUser } from "../server/actions/messageActions";
 import { getCurrentUserAssignment } from "../server/actions/assignmentActions";
 import CoursesWidget from "./CoursesWidget";
 import { getClassesForCurrentUser } from "../server/actions/classActions";
+import { getSession } from "@auth0/nextjs-auth0";
 const dummyMessages = [
   {
     id: 1,
@@ -149,16 +150,28 @@ const events = [
 ];
 interface ProfessorDashboardProps {
   name: string;
+  isStudent: boolean;
 }
-const ProfessorDashboard = async ({name}: ProfessorDashboardProps) => {
+const ProfessorDashboard = async ({name, isStudent}: ProfessorDashboardProps) => {
   const messages = await getMessagesByCurrentUser();
   const assignments = await getCurrentUserAssignment();
   const courses = await getClassesForCurrentUser();
+  const session = await getSession();
+  if (!session || !session.user) {
+    throw new Error("User is not authenticated");
+  }
+
+  const { sub } = session.user;
+  console.log("user id", sub);
   return (
     <div>
-      <Header name={name}/>
+      <Header name={name} />
       <div className="grid md:grid-cols-2 mt-[30px] gap-[30px]">
-        <CoursesWidget courses={courses} />
+        <CoursesWidget
+          courses={courses}
+          isStudent={isStudent}
+          auth0UserId={sub}
+        />
         <ProfessorAssignments assignments={assignments} />
         <Calendar dates={dates} events={events} />
 
