@@ -57,9 +57,9 @@ export const TermsOfService: React.FC = () => {
         <section className="mb-12">
           <SectionHeader title="1. Acceptance of Terms" />
           <p className="text-gray-700 mb-6">
-            By accessing or using KitaHub (the "Platform"), you agree to be
-            bound by these Terms of Service. If you disagree with any part of
-            these terms, you do not have permission to access the Platform.
+            By accessing or using KitaHub (the &quot;Platform&quot;), you agree
+            to be bound by these Terms of Service. If you disagree with any part
+            of these terms, you do not have permission to access the Platform.
           </p>
         </section>
 
@@ -173,7 +173,7 @@ export const TermsOfService: React.FC = () => {
           <SubsectionHeader title="4.2 Platform Content" />
           <ul className="list-disc pl-6 mb-6 text-gray-700">
             <li className="mb-2">
-              KitaHub's software, design, and features are protected by
+              KitaHub&apos;s software, design, and features are protected by
               intellectual property laws
             </li>
             <li className="mb-2">
@@ -220,7 +220,8 @@ export const TermsOfService: React.FC = () => {
           <SubsectionHeader title="6.1 Service Availability" />
           <ul className="list-disc pl-6 mb-6 text-gray-700">
             <li className="mb-2">
-              KitaHub is provided "as is" without warranties of any kind
+              KitaHub is provided &quot;as is&quot; without warranties of any
+              kind
             </li>
             <li className="mb-2">
               We do not guarantee uninterrupted or error-free service
