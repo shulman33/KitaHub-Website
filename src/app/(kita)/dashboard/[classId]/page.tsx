@@ -1,4 +1,4 @@
-import { getSession } from "@auth0/nextjs-auth0/edge";
+import { getSession } from "@auth0/nextjs-auth0";
 import StudentClassDashboard from "../../components/StudentComponents/StudentClassDashboard";
 import ProfessorClassDashboard from "../../components/ProfessorComponents/ProfessorClassDashboard";
 import { getUserRole } from "../../lib/auth";
