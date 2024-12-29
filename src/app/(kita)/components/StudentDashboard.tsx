@@ -1,4 +1,3 @@
-import SubmissionStatusWidget from "@/app/(kita)/components/SubmissionStatusWidget";
 import DiscussionBoardWidget from "@/app/(kita)/components/DiscussionBoardWidget";
 import Header from "@/app/(kita)/components/Header";
 import { getClassesForCurrentUser } from "../server/actions/classActions";

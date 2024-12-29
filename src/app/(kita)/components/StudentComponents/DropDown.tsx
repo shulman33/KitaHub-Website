@@ -1,11 +1,11 @@
 "use client"
 import React, { useState } from "react";
-import { MenuItem, Select, FormControl, Typography } from "@mui/material";
+import { MenuItem, Select, FormControl, Typography, SelectChangeEvent } from "@mui/material";
 
 const DropdownMenu: React.FC = () => {
   const [selectedValue, setSelectedValue] = useState("Most Recent");
 
-  const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+  const handleChange = (event: SelectChangeEvent<string>) => {
     setSelectedValue(event.target.value as string);
   };
 

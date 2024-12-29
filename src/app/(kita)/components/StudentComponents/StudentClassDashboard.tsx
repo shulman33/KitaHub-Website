@@ -2,7 +2,7 @@ import React from "react";
 import Header from "../Header";
 import DiscussionCard from "./DiscussionCard";
 import DiscussionBoardWidget from "../DiscussionBoardWidget";
-import Assignments from "./courses/Assignments";
+// import Assignments from "./courses/Assignments";
 import Resources from "./courses/Resources";
 import InstructorInformation from "./courses/InstructorInformation";
 import Announcements from "./courses/Announcements";
@@ -188,7 +188,8 @@ export default async function StudentClassDashboard({
       <div className="grid gap-[30px] mt-[30px] md:grid-cols-2">
         <DiscussionBoardWidget messages={messages} />
         <Announcements categories={categoriesData} />
-        <Assignments assignments={assignments} />
+        {/* <Assignments assignments={assignments} /> */}
+        <DiscussionBoardWidget messages={messages} />
         <Resources resources={resourceData} />
       </div>
     </>

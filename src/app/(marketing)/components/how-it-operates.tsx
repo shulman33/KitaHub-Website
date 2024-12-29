@@ -1,3 +1,4 @@
+import Image from "next/image";
 import React from "react";
 
 interface ImageDisplayProps {
@@ -7,7 +8,7 @@ interface ImageDisplayProps {
 
 const ImageDisplay: React.FC<ImageDisplayProps> = ({ src, alt }) => {
   return (
-    <img
+    <Image
       loading="lazy"
       src={src}
       alt={alt}

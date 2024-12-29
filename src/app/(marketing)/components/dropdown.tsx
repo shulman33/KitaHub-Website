@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { DropdownInputProps } from "@/app/(marketing)/lib/types";
+import Image from "next/image";
 
 export default function DropdownInput({
   label,
@@ -29,7 +30,7 @@ export default function DropdownInput({
         aria-expanded={isOpen}
       >
         <span>{selectedOption || label}</span>
-        <img
+        <Image
           src="https://cdn.builder.io/api/v1/image/assets/TEMP/412be722e298b335c0b573aaf1e6eb510b2e7329762b8f3d81149d4aa0f7ec3f?apiKey=94d444df7e334ff786d8d250ab815d08&&apiKey=94d444df7e334ff786d8d250ab815d08"
           alt=""
           className={`w-4 h-2 transition-transform ${
@@ -48,6 +49,7 @@ export default function DropdownInput({
               className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
               onClick={() => handleOptionClick(option)}
               role="option"
+              aria-selected={selectedOption === option}
             >
               {option}
             </li>

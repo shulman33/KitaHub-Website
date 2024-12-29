@@ -71,7 +71,7 @@ export default function TopNavBar({ setSidebarOpen, userNavigation }: Props) {
               ) : error ? (
                 <PlaceholderIcon />
               ) : user?.picture ? (
-                <img
+                <Image
                   alt={user.name ?? "User Avatar"}
                   src={user.picture}
                   className="h-8 w-8 rounded-full bg-gray-50"
