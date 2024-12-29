@@ -36,3 +36,5 @@ export default async function ClassDashboard({ params }: ClassDashboardProps) {
     </div>
   );
 };
+
+export const getServerSideProps = withPageAuthRequired();
