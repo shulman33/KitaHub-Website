@@ -11,7 +11,7 @@ interface ClassDashboardProps {
   };
 }
 
-export default async function ClassDashboard({ params }: ClassDashboardProps) {
+export default async function Page({ params }: { params: Promise<{ classId: string }> }) {
   const session = await getSession();
 
   if (!session || !session.user) {
@@ -20,7 +20,8 @@ export default async function ClassDashboard({ params }: ClassDashboardProps) {
 
   const { name } = session.user;
 
-  const classData = await getClassById(params.classId);
+  const classId = (await params).classId;
+  const classData = await getClassById(classId);
   if (!classData) notFound();
 
   const role = await getUserRole(session.user.sub);

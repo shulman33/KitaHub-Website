@@ -8,8 +8,13 @@ interface Props {
   };
 }
 
-const DiscussionDetailPage = ({ params }: Props) => {
-    console.log("messageId", params.messageId);
+const Page = async ({
+  params,
+}: {
+  params: Promise<{ messageId: string }>;
+}) => {
+  const messageId = (await params).messageId;
+  console.log("messageId", messageId);
   // Dummy Data - In real app, fetch based on messageId
   const instructorQuestion = {
     name: "Prof. Jane Smith",
@@ -44,4 +49,4 @@ const DiscussionDetailPage = ({ params }: Props) => {
   );
 };
 
-export default DiscussionDetailPage;
+export default Page;
