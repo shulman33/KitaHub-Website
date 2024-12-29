@@ -1,0 +1,117 @@
+src/app/(kita)
+├── components
+│   ├── AssignmentWidget.tsx
+│   ├── Badge.tsx
+│   ├── BlankPaperIcon.ts
+│   ├── CoursesWidget.tsx
+│   ├── DesktopSidebar.tsx
+│   ├── DiscussionBoardWidget.tsx
+│   ├── Header.tsx
+│   ├── MobileSidebar.tsx
+│   ├── ProfessorComponents
+│   │   ├── ActiveCourses.tsx
+│   │   ├── Calendar.tsx
+│   │   ├── ProfessorAnnoucments.tsx
+│   │   ├── ProfessorAssignments.tsx
+│   │   ├── StudentsContacts.tsx
+│   │   └── elements
+│   │       ├── CalendarCard.tsx
+│   │       ├── ExamCard.tsx
+│   │       ├── InstructorCard.tsx
+│   │       ├── ProfessorAssignmentCard.tsx
+│   │       ├── ProfessorInfoCard.tsx
+│   │       └── StudentContactCard.tsx
+│   ├── ProfessorDashboard.tsx
+│   ├── QAComponents
+│   │   ├── Answers.tsx
+│   │   ├── InstructorQuestion.tsx
+│   │   └── Question.tsx
+│   ├── StudentComponents
+│   │   ├── AssigmentRow.tsx
+│   │   ├── CalendarComponent.tsx
+│   │   ├── Counter.tsx
+│   │   ├── CourseRow.tsx
+│   │   ├── DiscussionCard.tsx
+│   │   ├── DropDown.tsx
+│   │   ├── SearchBar.tsx
+│   │   ├── SubmissionStatusButton.tsx
+│   │   └── courses
+│   │       ├── AnnoucementCard.tsx
+│   │       ├── Announcements.tsx
+│   │       ├── Assignments.tsx
+│   │       ├── AssignmentsLinkCard.tsx
+│   │       ├── InstructorInfoCard.tsx
+│   │       ├── InstructorInformation.tsx
+│   │       ├── PastAssignmentsCard.tsx
+│   │       ├── ResourceCard.tsx
+│   │       ├── Resources.tsx
+│   │       └── UpcomingAssignmentCard.tsx
+│   ├── StudentDashboard.tsx
+│   ├── SubmissionStatusWidget.tsx
+│   ├── TopNavBar.tsx
+│   ├── UpcomingAssignments.tsx
+│   └── UpcomingDeadlineWidget.tsx
+├── create-class
+│   ├── layout.tsx
+│   └── page.tsx
+├── dashboard
+│   ├── classes
+│   │   └── [classId]
+│   │       └── page.tsx
+│   ├── client-layout.tsx
+│   ├── layout.tsx
+│   ├── not-found.tsx
+│   ├── page.tsx
+│   ├── professor
+│   │   └── course
+│   │       └── page.tsx
+│   ├── qa
+│   │   └── page.tsx
+│   └── student_courses
+│       └── page.tsx
+├── discussion-board
+│   └── [class-id]
+│       ├── create-post
+│       │   └── page.tsx
+│       ├── layout.tsx
+│       ├── page.tsx
+│       └── post
+│           └── [id]
+│               └── page.tsx
+├── interfaces
+│   ├── IUniversityRepository.ts
+│   └── IUserRepository.ts
+├── join-class
+│   ├── layout.tsx
+│   └── page.tsx
+├── lib
+│   ├── api-documentation.yaml
+│   ├── auth.ts
+│   ├── pusher
+│   │   ├── channels.ts
+│   │   └── pusher.ts
+│   ├── testing
+│   │   └── mockClient.ts
+│   ├── types.ts
+│   ├── universities.json
+│   └── utils.ts
+├── repositories
+│   ├── UniversityRepository.ts
+│   └── UserRepository.ts
+├── server
+│   └── actions
+│       ├── announcementActions.ts
+│       ├── assignmentActions.ts
+│       ├── classActions.ts
+│       ├── classEnrollmentActions.ts
+│       ├── gradeActions.ts
+│       ├── messageActions.ts
+│       ├── resourceActions.ts
+│       ├── tagActions.ts
+│       ├── universityActions.ts
+│       └── userActions.ts
+├── services
+│   └── PusherService.ts
+└── theme.ts
+
+29 directories, 86 files

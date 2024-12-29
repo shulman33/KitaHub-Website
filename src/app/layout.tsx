@@ -1,8 +1,8 @@
+// app/layout.tsx
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
-import "./globals.css";
-import NavBar from "@/app/ui/navbar";
-import Footer from "@/app/ui/footer";
+import "@/app/globals.css";
+import { UserProvider } from "@auth0/nextjs-auth0/client";
 
 const mont = Montserrat({ subsets: ["latin"] });
 
@@ -38,11 +38,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={mont.className}>
-        <NavBar />
-        {children}
-        <Footer />
-      </body>
+      <UserProvider>
+        <body className={mont.className}>{children}</body>
+      </UserProvider>
     </html>
   );
 }

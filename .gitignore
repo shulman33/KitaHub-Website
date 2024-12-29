@@ -34,3 +34,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.env
+/src/app/db/migrations
+/src/app/db/migrations/meta
+/src/app/db/migrations/meta

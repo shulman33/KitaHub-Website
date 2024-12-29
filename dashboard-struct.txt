@@ -1,0 +1,22 @@
+src/app/(kita)/dashboard
+├── [...not-found]
+│   └── page.tsx
+├── [classId]
+│   ├── discussions
+│   │   ├── [messageId]
+│   │   │   └── page.tsx
+│   │   └── page.tsx
+│   └── page.tsx
+├── classes
+│   └── [classId]
+│       └── page.tsx
+├── client-layout.tsx
+├── layout.tsx
+├── page.tsx
+├── professor
+│   └── course
+├── qa
+│   └── page.tsx
+└── student_courses
+
+11 directories, 9 files
