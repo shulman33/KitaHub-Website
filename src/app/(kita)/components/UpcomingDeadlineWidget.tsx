@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import React from 'react';
 
 interface UpcomingDeadlineProps {
@@ -28,13 +29,13 @@ const UpcomingDeadline: React.FC<UpcomingDeadlineProps> = ({ month, year }) => {
                 {month} {year}
               </div>
               <div className="flex gap-3 self-start">
-                <img
+                <Image
                   loading="lazy"
                   src="https://cdn.builder.io/api/v1/image/assets/TEMP/ad64beb8-43ff-4a27-ab1c-569751a113f7?placeholderIfAbsent=true&apiKey=94d444df7e334ff786d8d250ab815d08"
                   className="object-contain shrink-0 rounded-xl aspect-square bg-slate-50 h-[22px] w-[22px]"
                   alt=""
                 />
-                <img
+                <Image
                   loading="lazy"
                   src="https://cdn.builder.io/api/v1/image/assets/TEMP/e70040e2-aadf-4647-8905-9dcda4c56212?placeholderIfAbsent=true&apiKey=94d444df7e334ff786d8d250ab815d08"
                   className="object-contain shrink-0 rounded-xl aspect-square bg-slate-50 h-[22px] w-[22px]"

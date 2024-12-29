@@ -68,7 +68,7 @@ const ProfessorAssignments: React.FC<ProfessorAssignmentsProps> = ({
       {/* Content */}
       {hasAssignments ? (
         <div className="space-y-4">
-          {assignments.map((assignment, index) => (
+          {/* {assignments.map((assignment, index) => (
             <ProfessorAssignmentCard
               key={index}
               title={assignment.title}
@@ -77,7 +77,13 @@ const ProfessorAssignments: React.FC<ProfessorAssignmentsProps> = ({
               dueDate={assignment.dueDate}
               status={assignment.status}
             />
-          ))}
+          ))} */}
+          <EmptyState
+            icon={<AssignmentIcon />}
+            title="No Assignments Yet"
+            text="Create your first assignment to get started"
+            buttonText="Create Assignment"
+          />
         </div>
       ) : (
         <div className="mt-[24px]">

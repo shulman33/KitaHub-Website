@@ -2,6 +2,7 @@ import React from 'react';
 import Question from '../../components/QAComponents/Question';
 import InstructorQuestion from '../../components/QAComponents/InstructorQuestion';
 import Answers from '../../components/QAComponents/Answers';
+import Image from 'next/image';
 
 const page = () => {
   // Dummy Data
@@ -65,18 +66,18 @@ const page = () => {
               placeholder="Enter here"
             />
             <div className="bg-darkBlue w-fit p-[9px] rounded-[4px]">
-              <img src="/search2.svg" width={24} height={24} alt="search" />
+              <Image src="/search2.svg" width={24} height={24} alt="search" />
             </div>
           </div>
           <div className="flex justify-end gap-2 mt-[21px] items-center">
-            <img src="/filter.svg" width={20} height={20} alt="filters" />
+            <Image src="/filter.svg" width={20} height={20} alt="filters" />
             <p className="text-[16px] font-bold leading-[19px]">Filter</p>
           </div>
         </div>
         {/* Pinned */}
         <div>
           <div className="flex items-center mb-[16px] pl-[24px] gap-2 mt-[24px]">
-            <img src="/pin.svg" width={16} height={16} alt="no image" />
+            <Image src="/pin.svg" width={16} height={16} alt="no image" />
             <p className="text-[16px] leading-[21px] font-bold text-secondary">
               Pinned
             </p>

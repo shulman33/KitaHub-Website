@@ -1,5 +1,33 @@
 import { SelectMessage, SelectClass, SelectAssignment } from "@/app/db/schema";
 
+export interface QuestionType {
+  title: string;
+  description: string;
+  tags: string[];
+  stats: {
+    messages: number;
+    likes: number;
+  };
+}
+
+export interface InstructorQuestionType {
+  name: string;
+  role: string;
+  question: string;
+  time: string;
+  stats: {
+    messages: number;
+    likes: number;
+  };
+}
+
+export interface AnswerType {
+  name: string;
+  description: string;
+  role: string;
+  time: string;
+}
+
 export interface University {
   name: string;
   domains: string[];
