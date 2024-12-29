@@ -3,8 +3,7 @@ import { drizzle, NeonHttpDatabase } from "drizzle-orm/neon-http";
 import * as schema from "./schema";
 import { neon } from "@neondatabase/serverless";
 import { getSession, getAccessToken } from "@auth0/nextjs-auth0";
-import { sql } from "drizzle-orm";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { user } from "./schema";
 
 config({ path: ".env.local" });
@@ -28,16 +27,8 @@ export async function dbAuth<T>(
         return accessToken.accessToken;
       },
     }),
-    { schema }
+    { schema, logger: true }
   );
-
-  const { rows: authRows } = await db.execute(
-    sql`SELECT auth.user_id() as auth_user_id;`
-  );
-  console.log("auth.user_id():", authRows);
-
-  // const auth0Field = await db.select({ auth0UserId: user.auth0UserId }).from(user);
-  
 
 
   return callback(db);

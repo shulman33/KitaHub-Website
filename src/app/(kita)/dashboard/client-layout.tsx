@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import DesktopSidebar from "@/app/(kita)/components/DesktopSidebar";
 import MobileSidebar from "@/app/(kita)/components/MobileSidebar";
 import TopNavBar from "@/app/(kita)/components/TopNavBar";
+import { usePathname } from "next/navigation"; // Import usePathname hook
 import {
   HomeIcon,
   DocumentTextIcon,
@@ -18,6 +19,10 @@ export default function ClientLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname(); // Get current route
+
+  // Check if the route contains "qa"
+  const isQARoute = pathname.includes("qa");
 
   const navigation = [
     { name: "Dashboard", href: "#", icon: HomeIcon, current: true },
@@ -35,7 +40,11 @@ export default function ClientLayout({
       icon: AcademicCapIcon,
       current: false,
       children: [
-        { name: "Introduction to Algorithms", href: "/dashboard/classes/34554", current: false },
+        {
+          name: "Introduction to Algorithms",
+          href: "/dashboard/classes/34554",
+          current: false,
+        },
         { name: "Systems Programming", href: "#", current: false },
       ],
     },
@@ -78,8 +87,11 @@ export default function ClientLayout({
           setSidebarOpen={setSidebarOpen}
           userNavigation={userNavigation}
         />
-        <main className="bg-[#FAFAFA] py-10">
-          <div className="px-4 sm:px-6 lg:px-8">{children}</div>
+        {/* Conditional Padding for QA Routes */}
+        <main
+          className={`bg-[#FAFAFA] ${isQARoute ? "py-0 px-0" : "py-10 px-[20px] sm:px-6 lg:px-8"}`}
+        >
+          {children}
         </main>
       </div>
     </>

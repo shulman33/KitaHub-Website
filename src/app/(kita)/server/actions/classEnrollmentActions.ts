@@ -1,6 +1,6 @@
 "use server";
 
-import { dbAuth } from "@/app/db/drizzle";
+import { dbAuth, db } from "@/app/db/drizzle";
 import {
   InsertClassEnrollment,
   SelectClassEnrollment,
@@ -8,6 +8,7 @@ import {
   classTable,
 } from "@/app/db/schema";
 import { eq, and } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 
 export async function getEnrollmentsByUserId(userId: string): Promise<SelectClassEnrollment[]> {
   try {
@@ -66,12 +67,11 @@ export async function getEnrollmentByClassName(id: string, className: string) {
 }
 
 export async function createEnrollment(data: InsertClassEnrollment): Promise<SelectClassEnrollment> {
-  try {
-    const result = await dbAuth(async (db) => {
-      return await db.insert(classEnrollment).values(data).returning();
-    })
+  try{
+    const result = await db.insert(classEnrollment).values(data).returning();
+    revalidatePath("/dashboard")
     return result[0];
-  } catch (error) {
+  }catch(error){
     console.error("Error creating enrollment:", error);
     throw new Error("Could not create enrollment");
   }

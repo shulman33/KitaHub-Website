@@ -1,11 +1,11 @@
 {
-  "id": "3195af21-f6cb-4995-88d8-19afec55df9c",
+  "id": "f1378c05-40ca-4bc0-bf9f-ad68e74d9373",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.Announcement": {
-      "name": "Announcement",
+    "public.announcement": {
+      "name": "announcement",
       "schema": "",
       "columns": {
         "id": {
@@ -56,10 +56,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "Announcement_classId_Class_id_fk": {
-          "name": "Announcement_classId_Class_id_fk",
-          "tableFrom": "Announcement",
-          "tableTo": "Class",
+        "announcement_classId_class_id_fk": {
+          "name": "announcement_classId_class_id_fk",
+          "tableFrom": "announcement",
+          "tableTo": "class",
           "columnsFrom": [
             "classId"
           ],
@@ -69,10 +69,10 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "Announcement_userId_User_id_fk": {
-          "name": "Announcement_userId_User_id_fk",
-          "tableFrom": "Announcement",
-          "tableTo": "User",
+        "announcement_userId_user_id_fk": {
+          "name": "announcement_userId_user_id_fk",
+          "tableFrom": "announcement",
+          "tableTo": "user",
           "columnsFrom": [
             "userId"
           ],
@@ -93,7 +93,7 @@
           "to": [
             "authenticated"
           ],
-          "using": "\n        \"Announcement\".\"userId\" = (\n          SELECT u.id\n          FROM \"User\" u\n          WHERE u.\"auth0UserId\" = auth.user_id()\n        )\n        AND EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          WHERE ce.\"userId\" = \"Announcement\".\"userId\"\n            AND ce.\"classId\" = \"Announcement\".\"classId\"\n        )\n      ",
+          "using": "\n        \n  EXISTS (\n    SELECT 1\n    FROM \"class_enrollment\" ce\n    WHERE ce.\"classId\" = $1\n      AND ce.\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n  )\n\n      ",
           "withCheck": ""
         },
         "announcement_insert_policy": {
@@ -103,7 +103,7 @@
           "to": [
             "authenticated"
           ],
-          "using": "\n        \"Announcement\".\"userId\" = (\n          SELECT u.id\n          FROM \"User\" u\n          WHERE u.\"auth0UserId\" = auth.user_id()\n        )\n        AND EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          WHERE ce.\"userId\" = \"Announcement\".\"userId\"\n            AND ce.\"classId\" = \"Announcement\".\"classId\"\n        )\n      ",
+          "using": "\n        \"Announcement\".\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n AND\n        \n  EXISTS (\n    SELECT 1\n    FROM \"class_enrollment\" ce\n    WHERE ce.\"classId\" = $1\n      AND ce.\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n  )\n\n      ",
           "withCheck": ""
         },
         "announcement_update_policy": {
@@ -113,7 +113,7 @@
           "to": [
             "authenticated"
           ],
-          "using": "\n        \"Announcement\".\"userId\" = (\n          SELECT u.id\n          FROM \"User\" u\n          WHERE u.\"auth0UserId\" = auth.user_id()\n        )\n        AND EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          WHERE ce.\"userId\" = \"Announcement\".\"userId\"\n            AND ce.\"classId\" = \"Announcement\".\"classId\"\n        )\n      ",
+          "using": "\n        \"Announcement\".\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n AND\n        \n  EXISTS (\n    SELECT 1\n    FROM \"class_enrollment\" ce\n    WHERE ce.\"classId\" = $1\n      AND ce.\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n  )\n\n      ",
           "withCheck": ""
         },
         "announcement_delete_policy": {
@@ -123,15 +123,15 @@
           "to": [
             "authenticated"
           ],
-          "using": "\n        \"Announcement\".\"userId\" = (\n          SELECT u.id\n          FROM \"User\" u\n          WHERE u.\"auth0UserId\" = auth.user_id()\n        )\n        AND EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          WHERE ce.\"userId\" = \"Announcement\".\"userId\"\n            AND ce.\"classId\" = \"Announcement\".\"classId\"\n        )\n      ",
+          "using": "\n        \"Announcement\".\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n AND\n        \n  EXISTS (\n    SELECT 1\n    FROM \"class_enrollment\" ce\n    WHERE ce.\"classId\" = $1\n      AND ce.\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n  )\n\n      ",
           "withCheck": ""
         }
       },
       "checkConstraints": {},
-      "isRLSEnabled": false
+      "isRLSEnabled": true
     },
-    "public.Assignment": {
-      "name": "Assignment",
+    "public.assignment": {
+      "name": "assignment",
       "schema": "",
       "columns": {
         "id": {
@@ -201,10 +201,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "Assignment_classId_Class_id_fk": {
-          "name": "Assignment_classId_Class_id_fk",
-          "tableFrom": "Assignment",
-          "tableTo": "Class",
+        "assignment_classId_class_id_fk": {
+          "name": "assignment_classId_class_id_fk",
+          "tableFrom": "assignment",
+          "tableTo": "class",
           "columnsFrom": [
             "classId"
           ],
@@ -225,7 +225,7 @@
           "to": [
             "authenticated"
           ],
-          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          WHERE ce.\"classId\" = \"Assignment\".classId\n            AND u.\"auth0UserId\" = auth.user_id()\n        )\n      ",
+          "using": "\n  EXISTS (\n    SELECT 1\n    FROM \"class_enrollment\" ce\n    WHERE ce.\"classId\" = $1\n      AND ce.\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n  )\n",
           "withCheck": ""
         },
         "assignment_insert_policy": {
@@ -235,7 +235,7 @@
           "to": [
             "authenticated"
           ],
-          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          WHERE ce.\"classId\" = \"Assignment\".classId\n            AND u.\"auth0UserId\" = auth.user_id()\n            AND u.\"role\" = 'PROFESSOR'\n        )\n      ",
+          "using": "\n        \n  (\n    SELECT u.role\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n = 'PROFESSOR' AND\n        \n  EXISTS (\n    SELECT 1\n    FROM \"class_enrollment\" ce\n    WHERE ce.\"classId\" = $1\n      AND ce.\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n  )\n\n      ",
           "withCheck": ""
         },
         "assignment_update_policy": {
@@ -245,7 +245,7 @@
           "to": [
             "authenticated"
           ],
-          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          WHERE ce.\"classId\" = \"Assignment\".classId\n            AND u.\"auth0UserId\" = auth.user_id()\n            AND u.\"role\" = 'PROFESSOR'\n        )\n      ",
+          "using": "\n        \n  (\n    SELECT u.role\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n = 'PROFESSOR' AND\n        \n  EXISTS (\n    SELECT 1\n    FROM \"class_enrollment\" ce\n    WHERE ce.\"classId\" = $1\n      AND ce.\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n  )\n\n      ",
           "withCheck": ""
         },
         "assignment_delete_policy": {
@@ -255,15 +255,15 @@
           "to": [
             "authenticated"
           ],
-          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          WHERE ce.\"classId\" = \"Assignment\".classId\n            AND u.\"auth0UserId\" = auth.user_id()\n            AND u.\"role\" = 'PROFESSOR'\n        )\n      ",
+          "using": "\n        \n  (\n    SELECT u.role\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n = 'PROFESSOR' AND\n        \n  EXISTS (\n    SELECT 1\n    FROM \"class_enrollment\" ce\n    WHERE ce.\"classId\" = $1\n      AND ce.\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n  )\n\n      ",
           "withCheck": ""
         }
       },
       "checkConstraints": {},
-      "isRLSEnabled": false
+      "isRLSEnabled": true
     },
-    "public.ClassEnrollment": {
-      "name": "ClassEnrollment",
+    "public.class_enrollment": {
+      "name": "class_enrollment",
       "schema": "",
       "columns": {
         "id": {
@@ -317,10 +317,10 @@
         }
       },
       "foreignKeys": {
-        "ClassEnrollment_userId_User_id_fk": {
-          "name": "ClassEnrollment_userId_User_id_fk",
-          "tableFrom": "ClassEnrollment",
-          "tableTo": "User",
+        "class_enrollment_userId_user_id_fk": {
+          "name": "class_enrollment_userId_user_id_fk",
+          "tableFrom": "class_enrollment",
+          "tableTo": "user",
           "columnsFrom": [
             "userId"
           ],
@@ -330,10 +330,10 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "ClassEnrollment_classId_Class_id_fk": {
-          "name": "ClassEnrollment_classId_Class_id_fk",
-          "tableFrom": "ClassEnrollment",
-          "tableTo": "Class",
+        "class_enrollment_classId_class_id_fk": {
+          "name": "class_enrollment_classId_class_id_fk",
+          "tableFrom": "class_enrollment",
+          "tableTo": "class",
           "columnsFrom": [
             "classId"
           ],
@@ -346,12 +346,51 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "policies": {},
+      "policies": {
+        "classEnrollment_select_policy": {
+          "name": "classEnrollment_select_policy",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        \"class_enrollment\".\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n      "
+        },
+        "classEnrollment_insert_policy": {
+          "name": "classEnrollment_insert_policy",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        \"class_enrollment\".\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n      ",
+          "withCheck": "\"class_enrollment\".\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n"
+        },
+        "classEnrollment_update_policy": {
+          "name": "classEnrollment_update_policy",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        \"class_enrollment\".\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n      ",
+          "withCheck": "\"class_enrollment\".\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n"
+        },
+        "classEnrollment_delete_policy": {
+          "name": "classEnrollment_delete_policy",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        \"class_enrollment\".\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n      "
+        }
+      },
       "checkConstraints": {},
-      "isRLSEnabled": false
+      "isRLSEnabled": true
     },
-    "public.Class": {
-      "name": "Class",
+    "public.class": {
+      "name": "class",
       "schema": "",
       "columns": {
         "id": {
@@ -408,10 +447,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "Class_universityId_University_id_fk": {
-          "name": "Class_universityId_University_id_fk",
-          "tableFrom": "Class",
-          "tableTo": "University",
+        "class_universityId_university_id_fk": {
+          "name": "class_universityId_university_id_fk",
+          "tableFrom": "class",
+          "tableTo": "university",
           "columnsFrom": [
             "universityId"
           ],
@@ -432,8 +471,7 @@
           "to": [
             "authenticated"
           ],
-          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          WHERE ce.\"classId\" = \"Class\".id\n            AND u.\"auth0UserId\" = auth.user_id()\n        )\n      ",
-          "withCheck": ""
+          "using": "\n  EXISTS (\n    SELECT 1\n    FROM \"class_enrollment\" ce\n    WHERE ce.\"classId\" = $1\n      AND ce.\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n  )\n"
         },
         "class_insert_policy": {
           "name": "class_insert_policy",
@@ -442,8 +480,8 @@
           "to": [
             "authenticated"
           ],
-          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          WHERE ce.\"classId\" = \"Class\".id\n            AND u.\"auth0UserId\" = auth.user_id() AND u.\"role\" = 'PROFESSOR'\n        )\n      ",
-          "withCheck": ""
+          "using": "\n        \n  (\n    SELECT u.role\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n = 'PROFESSOR'\n      ",
+          "withCheck": "\n  (\n    SELECT u.role\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n = 'PROFESSOR'"
         },
         "class_update_policy": {
           "name": "class_update_policy",
@@ -452,8 +490,8 @@
           "to": [
             "authenticated"
           ],
-          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          WHERE ce.\"classId\" = \"Class\".id\n            AND u.\"auth0UserId\" = auth.user_id() AND u.\"role\" = 'PROFESSOR'\n        )\n      ",
-          "withCheck": ""
+          "using": "\n        \n  (\n    SELECT u.role\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n = 'PROFESSOR'\n      ",
+          "withCheck": "\n  (\n    SELECT u.role\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n = 'PROFESSOR'"
         },
         "class_delete_policy": {
           "name": "class_delete_policy",
@@ -462,15 +500,14 @@
           "to": [
             "authenticated"
           ],
-          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          WHERE ce.\"classId\" = \"Class\".id\n            AND u.\"auth0UserId\" = auth.user_id() AND u.\"role\" = 'PROFESSOR'\n        )\n      ",
-          "withCheck": ""
+          "using": "\n        \n  (\n    SELECT u.role\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n = 'PROFESSOR'\n      "
         }
       },
       "checkConstraints": {},
-      "isRLSEnabled": false
+      "isRLSEnabled": true
     },
-    "public.Grade": {
-      "name": "Grade",
+    "public.grade": {
+      "name": "grade",
       "schema": "",
       "columns": {
         "id": {
@@ -514,10 +551,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "Grade_assignmentId_Assignment_id_fk": {
-          "name": "Grade_assignmentId_Assignment_id_fk",
-          "tableFrom": "Grade",
-          "tableTo": "Assignment",
+        "grade_assignmentId_assignment_id_fk": {
+          "name": "grade_assignmentId_assignment_id_fk",
+          "tableFrom": "grade",
+          "tableTo": "assignment",
           "columnsFrom": [
             "assignmentId"
           ],
@@ -527,10 +564,10 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "Grade_studentId_User_id_fk": {
-          "name": "Grade_studentId_User_id_fk",
-          "tableFrom": "Grade",
-          "tableTo": "User",
+        "grade_studentId_user_id_fk": {
+          "name": "grade_studentId_user_id_fk",
+          "tableFrom": "grade",
+          "tableTo": "user",
           "columnsFrom": [
             "studentId"
           ],
@@ -551,7 +588,7 @@
           "to": [
             "authenticated"
           ],
-          "using": "\n        \"Grade\".\"studentId\" = (\n          SELECT u.id\n          FROM \"User\" u\n          WHERE u.\"auth0UserId\" = auth.user_id()\n        )\n        AND EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          WHERE ce.\"userId\" = \"Grade\".\"studentId\"\n            AND ce.\"classId\" = (\n              SELECT \"classId\"\n              FROM \"Assignment\"\n              WHERE \"Assignment\".id = \"Grade\".\"assignmentId\"\n            )\n        )\n      ",
+          "using": "\n        \"Grade\".\"studentId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n AND\n        EXISTS (\n          SELECT 1\n          FROM \"assignment\"\n          WHERE \"assignment\".id = \"grade\".\"assignmentId\" AND\n                \n  EXISTS (\n    SELECT 1\n    FROM \"class_enrollment\" ce\n    WHERE ce.\"classId\" = $1\n      AND ce.\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n  )\n\n        )\n      ",
           "withCheck": ""
         },
         "grade_insert_policy": {
@@ -561,7 +598,7 @@
           "to": [
             "authenticated"
           ],
-          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          JOIN \"Assignment\" a ON ce.\"classId\" = a.\"classId\"\n          WHERE a.id = \"Grade\".\"assignmentId\"\n            AND u.\"auth0UserId\" = auth.user_id()\n            AND u.\"role\" = 'PROFESSOR'\n        )\n      ",
+          "using": "\n        \n  (\n    SELECT u.role\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n = 'PROFESSOR' AND\n        EXISTS (\n          SELECT 1\n          FROM \"assignment\"\n          WHERE \"assignment\".id = \"grade\".\"assignmentId\" AND\n                \n  EXISTS (\n    SELECT 1\n    FROM \"class_enrollment\" ce\n    WHERE ce.\"classId\" = $1\n      AND ce.\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n  )\n\n        )\n      ",
           "withCheck": ""
         },
         "grade_update_policy": {
@@ -571,7 +608,7 @@
           "to": [
             "authenticated"
           ],
-          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          JOIN \"Assignment\" a ON ce.\"classId\" = a.\"classId\"\n          WHERE a.id = \"Grade\".\"assignmentId\"\n            AND u.\"auth0UserId\" = auth.user_id()\n            AND u.\"role\" = 'PROFESSOR'\n        )\n      ",
+          "using": "\n        \n  (\n    SELECT u.role\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n = 'PROFESSOR' AND\n        EXISTS (\n          SELECT 1\n          FROM \"assignment\"\n          WHERE \"assignment\".id = \"grade\".\"assignmentId\" AND\n                \n  EXISTS (\n    SELECT 1\n    FROM \"class_enrollment\" ce\n    WHERE ce.\"classId\" = $1\n      AND ce.\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n  )\n\n        )\n      ",
           "withCheck": ""
         },
         "grade_delete_policy": {
@@ -581,12 +618,12 @@
           "to": [
             "authenticated"
           ],
-          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          JOIN \"Assignment\" a ON ce.\"classId\" = a.\"classId\"\n          WHERE a.id = \"Grade\".\"assignmentId\"\n            AND u.\"auth0UserId\" = auth.user_id()\n            AND u.\"role\" = 'PROFESSOR'\n        )\n      ",
+          "using": "\n        \n  (\n    SELECT u.role\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n = 'PROFESSOR' AND\n        EXISTS (\n          SELECT 1\n          FROM \"assignment\"\n          WHERE \"assignment\".id = \"grade\".\"assignmentId\" AND\n                \n  EXISTS (\n    SELECT 1\n    FROM \"class_enrollment\" ce\n    WHERE ce.\"classId\" = $1\n      AND ce.\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n  )\n\n        )\n      ",
           "withCheck": ""
         }
       },
       "checkConstraints": {},
-      "isRLSEnabled": false
+      "isRLSEnabled": true
     },
     "public.message": {
       "name": "message",
@@ -646,10 +683,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "message_classId_Class_id_fk": {
-          "name": "message_classId_Class_id_fk",
+        "message_classId_class_id_fk": {
+          "name": "message_classId_class_id_fk",
           "tableFrom": "message",
-          "tableTo": "Class",
+          "tableTo": "class",
           "columnsFrom": [
             "classId"
           ],
@@ -659,10 +696,10 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "message_userId_User_id_fk": {
-          "name": "message_userId_User_id_fk",
+        "message_userId_user_id_fk": {
+          "name": "message_userId_user_id_fk",
           "tableFrom": "message",
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsFrom": [
             "userId"
           ],
@@ -688,12 +725,53 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "policies": {},
+      "policies": {
+        "message_select_policy": {
+          "name": "message_select_policy",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        \n  EXISTS (\n    SELECT 1\n    FROM \"class_enrollment\" ce\n    WHERE ce.\"classId\" = $1\n      AND ce.\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n  )\n\n      ",
+          "withCheck": ""
+        },
+        "message_insert_policy": {
+          "name": "message_insert_policy",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        \"message\".\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n AND\n        \n  EXISTS (\n    SELECT 1\n    FROM \"class_enrollment\" ce\n    WHERE ce.\"classId\" = $1\n      AND ce.\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n  )\n\n      ",
+          "withCheck": ""
+        },
+        "message_update_policy": {
+          "name": "message_update_policy",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        \"message\".\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n AND\n        \n  EXISTS (\n    SELECT 1\n    FROM \"class_enrollment\" ce\n    WHERE ce.\"classId\" = $1\n      AND ce.\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n  )\n\n      ",
+          "withCheck": ""
+        },
+        "message_delete_policy": {
+          "name": "message_delete_policy",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        \"message\".\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n AND\n        \n  EXISTS (\n    SELECT 1\n    FROM \"class_enrollment\" ce\n    WHERE ce.\"classId\" = $1\n      AND ce.\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n  )\n\n      ",
+          "withCheck": ""
+        }
+      },
       "checkConstraints": {},
-      "isRLSEnabled": false
+      "isRLSEnabled": true
     },
-    "public.MessageTags": {
-      "name": "MessageTags",
+    "public.message_tags": {
+      "name": "message_tags",
       "schema": "",
       "columns": {
         "messageId": {
@@ -711,9 +789,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "MessageTags_messageId_message_id_fk": {
-          "name": "MessageTags_messageId_message_id_fk",
-          "tableFrom": "MessageTags",
+        "message_tags_messageId_message_id_fk": {
+          "name": "message_tags_messageId_message_id_fk",
+          "tableFrom": "message_tags",
           "tableTo": "message",
           "columnsFrom": [
             "messageId"
@@ -724,10 +802,10 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "MessageTags_tagId_Tag_id_fk": {
-          "name": "MessageTags_tagId_Tag_id_fk",
-          "tableFrom": "MessageTags",
-          "tableTo": "Tag",
+        "message_tags_tagId_tag_id_fk": {
+          "name": "message_tags_tagId_tag_id_fk",
+          "tableFrom": "message_tags",
+          "tableTo": "tag",
           "columnsFrom": [
             "tagId"
           ],
@@ -739,8 +817,8 @@
         }
       },
       "compositePrimaryKeys": {
-        "MessageTags_messageId_tagId_pk": {
-          "name": "MessageTags_messageId_tagId_pk",
+        "message_tags_messageId_tagId_pk": {
+          "name": "message_tags_messageId_tagId_pk",
           "columns": [
             "messageId",
             "tagId"
@@ -752,8 +830,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.Resource": {
-      "name": "Resource",
+    "public.resource": {
+      "name": "resource",
       "schema": "",
       "columns": {
         "id": {
@@ -810,10 +888,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "Resource_classId_Class_id_fk": {
-          "name": "Resource_classId_Class_id_fk",
-          "tableFrom": "Resource",
-          "tableTo": "Class",
+        "resource_classId_class_id_fk": {
+          "name": "resource_classId_class_id_fk",
+          "tableFrom": "resource",
+          "tableTo": "class",
           "columnsFrom": [
             "classId"
           ],
@@ -823,10 +901,10 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "Resource_assignmentId_Assignment_id_fk": {
-          "name": "Resource_assignmentId_Assignment_id_fk",
-          "tableFrom": "Resource",
-          "tableTo": "Assignment",
+        "resource_assignmentId_assignment_id_fk": {
+          "name": "resource_assignmentId_assignment_id_fk",
+          "tableFrom": "resource",
+          "tableTo": "assignment",
           "columnsFrom": [
             "assignmentId"
           ],
@@ -836,10 +914,10 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "Resource_userId_User_id_fk": {
-          "name": "Resource_userId_User_id_fk",
-          "tableFrom": "Resource",
-          "tableTo": "User",
+        "resource_userId_user_id_fk": {
+          "name": "resource_userId_user_id_fk",
+          "tableFrom": "resource",
+          "tableTo": "user",
           "columnsFrom": [
             "userId"
           ],
@@ -860,7 +938,7 @@
           "to": [
             "authenticated"
           ],
-          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          WHERE ce.\"classId\" = \"Resource\".classId\n            AND u.\"auth0UserId\" = auth.user_id()\n        )\n      ",
+          "using": "\n        \n  EXISTS (\n    SELECT 1\n    FROM \"class_enrollment\" ce\n    WHERE ce.\"classId\" = $1\n      AND ce.\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n  )\n\n      ",
           "withCheck": ""
         },
         "resource_insert_policy": {
@@ -870,8 +948,8 @@
           "to": [
             "authenticated"
           ],
-          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          WHERE ce.\"classId\" = \"Resource\".classId\n            AND u.\"auth0UserId\" = auth.user_id()\n            AND u.\"role\" = 'PROFESSOR'\n        )\n      ",
-          "withCheck": ""
+          "using": "\n        \n  (\n    SELECT u.role\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n = 'PROFESSOR' AND\n        \n  EXISTS (\n    SELECT 1\n    FROM \"class_enrollment\" ce\n    WHERE ce.\"classId\" = $1\n      AND ce.\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n  )\n\n      ",
+          "withCheck": "\n        \n  (\n    SELECT u.role\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n = 'PROFESSOR' AND\n        \n  EXISTS (\n    SELECT 1\n    FROM \"class_enrollment\" ce\n    WHERE ce.\"classId\" = $1\n      AND ce.\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n  )\n\n      "
         },
         "resource_update_policy": {
           "name": "resource_update_policy",
@@ -880,8 +958,8 @@
           "to": [
             "authenticated"
           ],
-          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          WHERE ce.\"classId\" = \"Resource\".classId\n            AND u.\"auth0UserId\" = auth.user_id()\n            AND u.\"role\" = 'PROFESSOR'\n        )\n      ",
-          "withCheck": ""
+          "using": "\n        \n  (\n    SELECT u.role\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n = 'PROFESSOR' AND\n        \n  EXISTS (\n    SELECT 1\n    FROM \"class_enrollment\" ce\n    WHERE ce.\"classId\" = $1\n      AND ce.\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n  )\n\n      ",
+          "withCheck": "\n        \n  (\n    SELECT u.role\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n = 'PROFESSOR' AND\n        \n  EXISTS (\n    SELECT 1\n    FROM \"class_enrollment\" ce\n    WHERE ce.\"classId\" = $1\n      AND ce.\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n  )\n\n      "
         },
         "resource_delete_policy": {
           "name": "resource_delete_policy",
@@ -890,15 +968,15 @@
           "to": [
             "authenticated"
           ],
-          "using": "\n        EXISTS (\n          SELECT 1\n          FROM \"ClassEnrollment\" ce\n          JOIN \"User\" u ON ce.\"userId\" = u.id\n          WHERE ce.\"classId\" = \"Resource\".classId\n            AND u.\"auth0UserId\" = auth.user_id()\n            AND u.\"role\" = 'PROFESSOR'\n        )\n      ",
-          "withCheck": ""
+          "using": "\n        \n  (\n    SELECT u.role\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n = 'PROFESSOR' AND\n        \n  EXISTS (\n    SELECT 1\n    FROM \"class_enrollment\" ce\n    WHERE ce.\"classId\" = $1\n      AND ce.\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n  )\n\n      ",
+          "withCheck": "\n        \n  (\n    SELECT u.role\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n = 'PROFESSOR' AND\n        \n  EXISTS (\n    SELECT 1\n    FROM \"class_enrollment\" ce\n    WHERE ce.\"classId\" = $1\n      AND ce.\"userId\" = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n  )\n\n      "
         }
       },
       "checkConstraints": {},
-      "isRLSEnabled": false
+      "isRLSEnabled": true
     },
-    "public.ResourceTags": {
-      "name": "ResourceTags",
+    "public.resource_tags": {
+      "name": "resource_tags",
       "schema": "",
       "columns": {
         "resourceId": {
@@ -916,10 +994,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "ResourceTags_resourceId_Resource_id_fk": {
-          "name": "ResourceTags_resourceId_Resource_id_fk",
-          "tableFrom": "ResourceTags",
-          "tableTo": "Resource",
+        "resource_tags_resourceId_resource_id_fk": {
+          "name": "resource_tags_resourceId_resource_id_fk",
+          "tableFrom": "resource_tags",
+          "tableTo": "resource",
           "columnsFrom": [
             "resourceId"
           ],
@@ -929,10 +1007,10 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "ResourceTags_tagId_Tag_id_fk": {
-          "name": "ResourceTags_tagId_Tag_id_fk",
-          "tableFrom": "ResourceTags",
-          "tableTo": "Tag",
+        "resource_tags_tagId_tag_id_fk": {
+          "name": "resource_tags_tagId_tag_id_fk",
+          "tableFrom": "resource_tags",
+          "tableTo": "tag",
           "columnsFrom": [
             "tagId"
           ],
@@ -944,8 +1022,8 @@
         }
       },
       "compositePrimaryKeys": {
-        "ResourceTags_resourceId_tagId_pk": {
-          "name": "ResourceTags_resourceId_tagId_pk",
+        "resource_tags_resourceId_tagId_pk": {
+          "name": "resource_tags_resourceId_tagId_pk",
           "columns": [
             "resourceId",
             "tagId"
@@ -957,8 +1035,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.Tag": {
-      "name": "Tag",
+    "public.tag": {
+      "name": "tag",
       "schema": "",
       "columns": {
         "id": {
@@ -999,8 +1077,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.University": {
-      "name": "University",
+    "public.university": {
+      "name": "university",
       "schema": "",
       "columns": {
         "id": {
@@ -1036,8 +1114,8 @@
         }
       },
       "indexes": {
-        "University_name_index": {
-          "name": "University_name_index",
+        "university_name_index": {
+          "name": "university_name_index",
           "columns": [
             {
               "expression": "name",
@@ -1059,8 +1137,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.User": {
-      "name": "User",
+    "public.user": {
+      "name": "user",
       "schema": "",
       "columns": {
         "id": {
@@ -1214,10 +1292,10 @@
         }
       },
       "foreignKeys": {
-        "User_universityId_University_id_fk": {
-          "name": "User_universityId_University_id_fk",
-          "tableFrom": "User",
-          "tableTo": "University",
+        "user_universityId_university_id_fk": {
+          "name": "user_universityId_university_id_fk",
+          "tableFrom": "user",
+          "tableTo": "university",
           "columnsFrom": [
             "universityId"
           ],
@@ -1230,7 +1308,28 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "policies": {},
+      "policies": {
+        "user_select_policy": {
+          "name": "user_select_policy",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        select \"user\".id = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n      ",
+          "withCheck": ""
+        },
+        "user_update_policy": {
+          "name": "user_update_policy",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        select \"user\".id = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n      ",
+          "withCheck": "\n        select \"user\".id = \n  (\n    SELECT u.id\n    FROM \"user\" u\n    WHERE u.\"auth0UserId\" = auth.user_id()\n  )\n\n      "
+        }
+      },
       "checkConstraints": {},
       "isRLSEnabled": false
     }

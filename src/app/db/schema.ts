@@ -14,20 +14,21 @@ import {
   pgRole,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
-import { crudPolicy } from "drizzle-orm/neon";
 
 export const authenticatedRole = pgRole("authenticated").existing();
 export const anonymousRole = pgRole("anonymous").existing();
 
 // Enums
-export const roleEnum = pgEnum("role", ["STUDENT", "PROFESSOR"]);
+export const genderEnum = pgEnum("gender", ["MALE", "FEMALE", "OTHER"]);
 export const resourceTypeEnum = pgEnum("resource_type", [
   "SLIDE_DECK",
   "ARTICLE",
   "VIDEO",
   "OTHER",
 ]);
-export const genderEnum = pgEnum("gender", ["MALE", "FEMALE", "OTHER"]);
+export const roleEnum = pgEnum("role", ["STUDENT", "PROFESSOR"]);
+
+
 export const semesterEnum = pgEnum("semester", [
   "FALL",
   "WINTER",
@@ -37,7 +38,7 @@ export const semesterEnum = pgEnum("semester", [
 
 // University Table
 export const university = pgTable(
-  "University",
+  "university",
   {
     id: uuid().primaryKey().defaultRandom(),
     name: varchar({ length: 255 }).notNull(),
@@ -52,9 +53,35 @@ export const university = pgTable(
   }
 );
 
+// helper functions
+const currentUserId = sql`
+  (
+    SELECT u.id
+    FROM "user" u
+    WHERE u."auth0UserId" = auth.user_id()
+  )
+`;
+
+const currentUserRole = sql`
+  (
+    SELECT u.role
+    FROM "user" u
+    WHERE u."auth0UserId" = auth.user_id()
+  )
+`;
+
+const isEnrolledInClass = (classIdColumn: string) => sql`
+  EXISTS (
+    SELECT 1
+    FROM "class_enrollment" ce
+    WHERE ce."classId" = ${classIdColumn}
+      AND ce."userId" = ${currentUserId}
+  )
+`;
+
 // User Table
 export const user = pgTable(
-  "User",
+  "user",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     auth0UserId: varchar({ length: 255 }).notNull(),
@@ -70,47 +97,44 @@ export const user = pgTable(
     phoneNumber: varchar({ length: 255 }),
     email: varchar({ length: 255 }),
     schoolEmail: varchar({ length: 255 }).notNull(),
-    gender: genderEnum(),
+    gender: genderEnum('gender'),
     createdAt: timestamp().defaultNow().notNull(),
     updatedAt: timestamp().defaultNow().notNull(),
     dataSharingOptIn: boolean().default(false).notNull(),
   },
   (table) => [
-    // Select Policy: Allow the authenticated user to select their own user row
     pgPolicy("user_select_policy", {
       as: "permissive",
       to: "authenticated",
       for: "select",
       using: sql`
-        "User"."auth0UserId" = auth.user_id()
+        select "user".id = ${currentUserId}
       `,
       withCheck: sql``,
     }),
 
-    // Update Policy (optional): Allow the authenticated user to update their own user row
     pgPolicy("user_update_policy", {
       as: "permissive",
       to: "authenticated",
       for: "update",
       using: sql`
-        "User"."auth0UserId" = auth.user_id()
+        select "user".id = ${currentUserId}
       `,
       withCheck: sql`
-        "User"."auth0UserId" = auth.user_id()
+        select "user".id = ${currentUserId}
       `,
     }),
+    
 
-    // Return any existing indexes or constraints
     uniqueIndex("user_phone_number_unique").on(table.phoneNumber),
     uniqueIndex("user_email_unique").on(table.email),
     uniqueIndex("user_school_email_unique").on(table.schoolEmail),
   ]
 );
 
-
 // Class Table
 export const classTable = pgTable(
-  "Class",
+  "class",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     universityId: uuid()
@@ -118,83 +142,18 @@ export const classTable = pgTable(
       .references(() => university.id),
     className: varchar({ length: 255 }).notNull(),
     description: varchar({ length: 255 }),
-    code: integer().notNull(),
+    enrollmentCode: varchar({ length: 6 }),
+    code: integer(),
+    courseCode: varchar({ length: 255 }),
     semester: semesterEnum().notNull(),
-    // make this defualt to the current year
     year: integer().notNull(),
     isActive: boolean().default(true).notNull(),
   },
-  (table) => [
-    // Select Policy
-    pgPolicy("class_select_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "select",
-      using: sql`
-        EXISTS (
-          SELECT 1
-          FROM "ClassEnrollment" ce
-          JOIN "User" u ON ce."userId" = u.id
-          WHERE ce."classId" = "Class".id
-            AND u."auth0UserId" = auth.user_id()
-        )
-      `,
-      withCheck: sql``,
-    }),
-    // Insert Policy
-    pgPolicy("class_insert_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "insert",
-      using: sql`
-        EXISTS (
-          SELECT 1
-          FROM "ClassEnrollment" ce
-          JOIN "User" u ON ce."userId" = u.id
-          WHERE ce."classId" = "Class".id
-            AND u."auth0UserId" = auth.user_id() AND u."role" = 'PROFESSOR'
-        )
-      `,
-      withCheck: sql``,
-    }),
-    // Update Policy
-    pgPolicy("class_update_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "update",
-      using: sql`
-        EXISTS (
-          SELECT 1
-          FROM "ClassEnrollment" ce
-          JOIN "User" u ON ce."userId" = u.id
-          WHERE ce."classId" = "Class".id
-            AND u."auth0UserId" = auth.user_id() AND u."role" = 'PROFESSOR'
-        )
-      `,
-      withCheck: sql``,
-    }),
-    // Delete Policy
-    pgPolicy("class_delete_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "delete",
-      using: sql`
-        EXISTS (
-          SELECT 1
-          FROM "ClassEnrollment" ce
-          JOIN "User" u ON ce."userId" = u.id
-          WHERE ce."classId" = "Class".id
-            AND u."auth0UserId" = auth.user_id() AND u."role" = 'PROFESSOR'
-        )
-      `,
-      withCheck: sql``,
-    }),
-  ]
-);
+)
 
 // ClassEnrollment Table (Join Table)
 export const classEnrollment = pgTable(
-  "ClassEnrollment",
+  "class_enrollment",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     userId: uuid()
@@ -206,69 +165,17 @@ export const classEnrollment = pgTable(
     role: roleEnum().notNull(),
   },
   (table) => [
-    pgPolicy("classEnrollment_select_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "select",
-      using: sql`
-        "ClassEnrollment"."userId" = (
-          SELECT u.id
-          FROM "User" u
-          WHERE u."auth0UserId" = auth.user_id()
-        )
-      `,
-      withCheck: sql``,
-    }),
-    pgPolicy("classEnrollment_insert_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "insert",
-      using: sql`
-        "ClassEnrollment"."userId" = (
-          SELECT u.id
-          FROM "User" u
-          WHERE u."auth0UserId" = auth.user_id() 
-        )
-      `,
-      withCheck: sql``,
-    }),
-    pgPolicy("classEnrollment_update_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "update",
-      using: sql`
-        "ClassEnrollment"."userId" = (
-          SELECT u.id
-          FROM "User" u
-          WHERE u."auth0UserId" = auth.user_id() 
-        )
-      `,
-      withCheck: sql``,
-    }),
-    pgPolicy("classEnrollment_delete_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "delete",
-      using: sql`
-        "ClassEnrollment"."userId" = (
-          SELECT u.id
-          FROM "User" u
-          WHERE u."auth0UserId" = auth.user_id()
-        )
-      `,
-      withCheck: sql``,
-    }),
+
     uniqueIndex("class_enrollment_user_class_unique").on(
       table.userId,
       table.classId
     ),
   ]
-);
-
+)
 
 // Assignment Table
 export const assignment = pgTable(
-  "Assignment",
+  "assignment",
   {
     id: uuid().primaryKey().defaultRandom(),
     classId: uuid()
@@ -282,81 +189,12 @@ export const assignment = pgTable(
     url: varchar({ length: 255 }),
     isGraded: boolean().default(false).notNull(),
     isPublished: boolean().default(false).notNull(),
-  },
-  (table) => [
-    // Select Policy
-    pgPolicy("assignment_select_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "select",
-      using: sql`
-        EXISTS (
-          SELECT 1
-          FROM "ClassEnrollment" ce
-          JOIN "User" u ON ce."userId" = u.id
-          WHERE ce."classId" = "Assignment".classId
-            AND u."auth0UserId" = auth.user_id()
-        )
-      `,
-      withCheck: sql``,
-    }),
-    // Insert Policy
-    pgPolicy("assignment_insert_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "insert",
-      using: sql`
-        EXISTS (
-          SELECT 1
-          FROM "ClassEnrollment" ce
-          JOIN "User" u ON ce."userId" = u.id
-          WHERE ce."classId" = "Assignment".classId
-            AND u."auth0UserId" = auth.user_id()
-            AND u."role" = 'PROFESSOR'
-        )
-      `,
-      withCheck: sql``,
-    }),
-    // Update Policy
-    pgPolicy("assignment_update_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "update",
-      using: sql`
-        EXISTS (
-          SELECT 1
-          FROM "ClassEnrollment" ce
-          JOIN "User" u ON ce."userId" = u.id
-          WHERE ce."classId" = "Assignment".classId
-            AND u."auth0UserId" = auth.user_id()
-            AND u."role" = 'PROFESSOR'
-        )
-      `,
-      withCheck: sql``,
-    }),
-    // Delete Policy
-    pgPolicy("assignment_delete_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "delete",
-      using: sql`
-        EXISTS (
-          SELECT 1
-          FROM "ClassEnrollment" ce
-          JOIN "User" u ON ce."userId" = u.id
-          WHERE ce."classId" = "Assignment".classId
-            AND u."auth0UserId" = auth.user_id()
-            AND u."role" = 'PROFESSOR'
-        )
-      `,
-      withCheck: sql``,
-    }),
-  ]
-);
+  }
+)
 
 // Grade Table
 export const grade = pgTable(
-  "Grade",
+  "grade",
   {
     id: uuid().primaryKey().defaultRandom(),
     assignmentId: uuid()
@@ -369,91 +207,11 @@ export const grade = pgTable(
     gradedAt: timestamp().defaultNow().notNull(),
     feedback: varchar({ length: 255 }),
   },
-  (t) => [
-    // Select Policy
-    pgPolicy("grade_select_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "select",
-      using: sql`
-        "Grade"."studentId" = (
-          SELECT u.id
-          FROM "User" u
-          WHERE u."auth0UserId" = auth.user_id()
-        )
-        AND EXISTS (
-          SELECT 1
-          FROM "ClassEnrollment" ce
-          WHERE ce."userId" = "Grade"."studentId"
-            AND ce."classId" = (
-              SELECT "classId"
-              FROM "Assignment"
-              WHERE "Assignment".id = "Grade"."assignmentId"
-            )
-        )
-      `,
-      withCheck: sql``,
-    }),
-    // Insert Policy
-    pgPolicy("grade_insert_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "insert",
-      using: sql`
-        EXISTS (
-          SELECT 1
-          FROM "ClassEnrollment" ce
-          JOIN "User" u ON ce."userId" = u.id
-          JOIN "Assignment" a ON ce."classId" = a."classId"
-          WHERE a.id = "Grade"."assignmentId"
-            AND u."auth0UserId" = auth.user_id()
-            AND u."role" = 'PROFESSOR'
-        )
-      `,
-      withCheck: sql``,
-    }),
-    // Update Policy
-    pgPolicy("grade_update_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "update",
-      using: sql`
-        EXISTS (
-          SELECT 1
-          FROM "ClassEnrollment" ce
-          JOIN "User" u ON ce."userId" = u.id
-          JOIN "Assignment" a ON ce."classId" = a."classId"
-          WHERE a.id = "Grade"."assignmentId"
-            AND u."auth0UserId" = auth.user_id()
-            AND u."role" = 'PROFESSOR'
-        )
-      `,
-      withCheck: sql``,
-    }),
-    // Delete Policy
-    pgPolicy("grade_delete_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "delete",
-      using: sql`
-        EXISTS (
-          SELECT 1
-          FROM "ClassEnrollment" ce
-          JOIN "User" u ON ce."userId" = u.id
-          JOIN "Assignment" a ON ce."classId" = a."classId"
-          WHERE a.id = "Grade"."assignmentId"
-            AND u."auth0UserId" = auth.user_id()
-            AND u."role" = 'PROFESSOR'
-        )
-      `,
-      withCheck: sql``,
-    }),
-  ]
-);
+)
 
 // Resource Table
 export const resource = pgTable(
-  "Resource",
+  "resource",
   {
     id: uuid().primaryKey().defaultRandom(),
     classId: uuid().references(() => classTable.id),
@@ -464,80 +222,11 @@ export const resource = pgTable(
     url: varchar({ length: 255 }).notNull(),
     uploadedAt: timestamp().defaultNow().notNull(),
   },
-  (t) => [
-    // Select Policy
-    pgPolicy("resource_select_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "select",
-      using: sql`
-        EXISTS (
-          SELECT 1
-          FROM "ClassEnrollment" ce
-          JOIN "User" u ON ce."userId" = u.id
-          WHERE ce."classId" = "Resource".classId
-            AND u."auth0UserId" = auth.user_id()
-        )
-      `,
-      withCheck: sql``,
-    }),
-    // Insert Policy
-    pgPolicy("resource_insert_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "insert",
-      using: sql`
-        EXISTS (
-          SELECT 1
-          FROM "ClassEnrollment" ce
-          JOIN "User" u ON ce."userId" = u.id
-          WHERE ce."classId" = "Resource".classId
-            AND u."auth0UserId" = auth.user_id()
-            AND u."role" = 'PROFESSOR'
-        )
-      `,
-      withCheck: sql``,
-    }),
-    // Update Policy
-    pgPolicy("resource_update_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "update",
-      using: sql`
-        EXISTS (
-          SELECT 1
-          FROM "ClassEnrollment" ce
-          JOIN "User" u ON ce."userId" = u.id
-          WHERE ce."classId" = "Resource".classId
-            AND u."auth0UserId" = auth.user_id()
-            AND u."role" = 'PROFESSOR'
-        )
-      `,
-      withCheck: sql``,
-    }),
-    // Delete Policy
-    pgPolicy("resource_delete_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "delete",
-      using: sql`
-        EXISTS (
-          SELECT 1
-          FROM "ClassEnrollment" ce
-          JOIN "User" u ON ce."userId" = u.id
-          WHERE ce."classId" = "Resource".classId
-            AND u."auth0UserId" = auth.user_id()
-            AND u."role" = 'PROFESSOR'
-        )
-      `,
-      withCheck: sql``,
-    }),
-  ]
-);
+  
+)
 
-// Announcement Table
 export const announcement = pgTable(
-  "Announcement",
+  "announcement",
   {
     id: uuid().primaryKey().defaultRandom(),
     classId: uuid()
@@ -551,89 +240,7 @@ export const announcement = pgTable(
     createdAt: timestamp().defaultNow().notNull(),
     updatedAt: timestamp().defaultNow().notNull(),
   },
-  (t) => [
-    // Select Policy
-    pgPolicy("announcement_select_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "select",
-      using: sql`
-        "Announcement"."userId" = (
-          SELECT u.id
-          FROM "User" u
-          WHERE u."auth0UserId" = auth.user_id()
-        )
-        AND EXISTS (
-          SELECT 1
-          FROM "ClassEnrollment" ce
-          WHERE ce."userId" = "Announcement"."userId"
-            AND ce."classId" = "Announcement"."classId"
-        )
-      `,
-      withCheck: sql``,
-    }),
-    // Insert Policy
-    pgPolicy("announcement_insert_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "insert",
-      using: sql`
-        "Announcement"."userId" = (
-          SELECT u.id
-          FROM "User" u
-          WHERE u."auth0UserId" = auth.user_id()
-        )
-        AND EXISTS (
-          SELECT 1
-          FROM "ClassEnrollment" ce
-          WHERE ce."userId" = "Announcement"."userId"
-            AND ce."classId" = "Announcement"."classId"
-        )
-      `,
-      withCheck: sql``,
-    }),
-    // Update Policy
-    pgPolicy("announcement_update_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "update",
-      using: sql`
-        "Announcement"."userId" = (
-          SELECT u.id
-          FROM "User" u
-          WHERE u."auth0UserId" = auth.user_id()
-        )
-        AND EXISTS (
-          SELECT 1
-          FROM "ClassEnrollment" ce
-          WHERE ce."userId" = "Announcement"."userId"
-            AND ce."classId" = "Announcement"."classId"
-        )
-      `,
-      withCheck: sql``,
-    }),
-    // Delete Policy
-    pgPolicy("announcement_delete_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "delete",
-      using: sql`
-        "Announcement"."userId" = (
-          SELECT u.id
-          FROM "User" u
-          WHERE u."auth0UserId" = auth.user_id()
-        )
-        AND EXISTS (
-          SELECT 1
-          FROM "ClassEnrollment" ce
-          WHERE ce."userId" = "Announcement"."userId"
-            AND ce."classId" = "Announcement"."classId"
-        )
-      `,
-      withCheck: sql``,
-    }),
-  ]
-);
+)
 
 // Message Table
 export const message = pgTable(
@@ -653,94 +260,17 @@ export const message = pgTable(
     updatedAt: timestamp().defaultNow().notNull(),
   },
   (table) => [
-    pgPolicy("message_select_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "select",
-      using: sql`
-        "message"."userId" = (
-          SELECT u.id
-          FROM "User" u
-          WHERE u."auth0UserId" = auth.user_id()
-        )
-        AND EXISTS (
-          SELECT 1
-          FROM "ClassEnrollment" ce
-          WHERE ce."userId" = "message"."userId"
-            AND ce."classId" = "message"."classId"
-        )
-      `,
-      withCheck: sql``,
-    }),
-    pgPolicy("message_insert_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "insert",
-      using: sql`
-        "message"."userId" = (
-          SELECT u.id
-          FROM "User" u
-          WHERE u."auth0UserId" = auth.user_id()
-        )
-        AND EXISTS (
-          SELECT 1
-          FROM "ClassEnrollment" ce
-          WHERE ce."userId" = "message"."userId"
-            AND ce."classId" = "message"."classId"
-        )
-      `,
-      withCheck: sql``,
-    }),
-    pgPolicy("message_update_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "update",
-      using: sql`
-        "message"."userId" = (
-          SELECT u.id
-          FROM "User" u
-          WHERE u."auth0UserId" = auth.user_id()
-        )
-        AND EXISTS (
-          SELECT 1
-          FROM "ClassEnrollment" ce
-          WHERE ce."userId" = "message"."userId"
-            AND ce."classId" = "message"."classId"
-        )
-      `,
-      withCheck: sql``,
-    }),
-    pgPolicy("message_delete_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "delete",
-      using: sql`
-        "message"."userId" = (
-          SELECT u.id
-          FROM "User" u
-          WHERE u."auth0UserId" = auth.user_id()
-        )
-        AND EXISTS (
-          SELECT 1
-          FROM "ClassEnrollment" ce
-          WHERE ce."userId" = "message"."userId"
-            AND ce."classId" = "message"."classId"
-        )
-      `,
-      withCheck: sql``,
-    }),
     foreignKey({
       columns: [table.parentMessageId],
       foreignColumns: [table.id],
       name: "parentMessageId",
     }),
   ]
-);
-
+)
 
 // Tag Table
 export const tag = pgTable(
-  "Tag",
+  "tag",
   {
     id: uuid().primaryKey().defaultRandom(),
     name: varchar({ length: 255 }).notNull(),
@@ -754,7 +284,7 @@ export const tag = pgTable(
 
 // MessageTags Join Table (Many-to-Many between Message and Tag)
 export const messageTags = pgTable(
-  "MessageTags",
+  "message_tags",
   {
     messageId: uuid()
       .notNull()
@@ -763,115 +293,12 @@ export const messageTags = pgTable(
       .notNull()
       .references(() => tag.id),
   },
-  (table) => [
-    pgPolicy("tag_select_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "select",
-      using: sql`
-        EXISTS (
-          SELECT 1
-          FROM "MessageTags" mt
-          JOIN "Message" m ON mt."messageId" = m.id
-          JOIN "User" u ON m."userId" = u.id
-          WHERE mt."tagId" = "Tag".id
-            AND u."auth0UserId" = auth.user_id()
-        )
-        OR
-        EXISTS (
-          SELECT 1
-          FROM "ResourceTags" rt
-          JOIN "Resource" r ON rt."resourceId" = r.id
-          JOIN "User" u ON r."userId" = u.id
-          WHERE rt."tagId" = "Tag".id
-            AND u."auth0UserId" = auth.user_id()
-        )
-      `,
-      withCheck: sql``,
-    }),
-    pgPolicy("tag_insert_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "insert",
-      using: sql`
-        EXISTS (
-          SELECT 1
-          FROM "MessageTags" mt
-          JOIN "Message" m ON mt."messageId" = m.id
-          JOIN "User" u ON m."userId" = u.id
-          WHERE mt."tagId" = "Tag".id
-            AND u."auth0UserId" = auth.user_id()
-        )
-        OR
-        EXISTS (
-          SELECT 1
-          FROM "ResourceTags" rt
-          JOIN "Resource" r ON rt."resourceId" = r.id
-          JOIN "User" u ON r."userId" = u.id
-          WHERE rt."tagId" = "Tag".id
-            AND u."auth0UserId" = auth.user_id()
-        )
-      `,
-      withCheck: sql``,
-    }),
-    pgPolicy("tag_update_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "update",
-      using: sql`
-        EXISTS (
-          SELECT 1
-          FROM "MessageTags" mt
-          JOIN "Message" m ON mt."messageId" = m.id
-          JOIN "User" u ON m."userId" = u.id
-          WHERE mt."tagId" = "Tag".id
-            AND u."auth0UserId" = auth.user_id()
-        )
-        OR
-        EXISTS (
-          SELECT 1
-          FROM "ResourceTags" rt
-          JOIN "Resource" r ON rt."resourceId" = r.id
-          JOIN "User" u ON r."userId" = u.id
-          WHERE rt."tagId" = "Tag".id
-            AND u."auth0UserId" = auth.user_id()
-        )
-      `,
-      withCheck: sql``,
-    }),
-    pgPolicy("tag_delete_policy", {
-      as: "permissive",
-      to: "authenticated",
-      for: "delete",
-      using: sql`
-        EXISTS (
-          SELECT 1
-          FROM "MessageTags" mt
-          JOIN "Message" m ON mt."messageId" = m.id
-          JOIN "User" u ON m."userId" = u.id
-          WHERE mt."tagId" = "Tag".id
-            AND u."auth0UserId" = auth.user_id()
-        )
-        OR
-        EXISTS (
-          SELECT 1
-          FROM "ResourceTags" rt
-          JOIN "Resource" r ON rt."resourceId" = r.id
-          JOIN "User" u ON r."userId" = u.id
-          WHERE rt."tagId" = "Tag".id
-            AND u."auth0UserId" = auth.user_id()
-        )
-      `,
-      withCheck: sql``,
-    }),
-    primaryKey(table.messageId, table.tagId),
-  ]
+  (table) => [primaryKey(table.messageId, table.tagId)]
 );
-
 
 // ResourceTags Join Table (Many-to-Many between Resource and Tag)
 export const resourceTags = pgTable(
-  "ResourceTags",
+  "resource_tags",
   {
     resourceId: uuid()
       .notNull()

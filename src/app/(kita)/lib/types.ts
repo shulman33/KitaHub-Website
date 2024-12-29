@@ -1,4 +1,32 @@
-import { SelectMessage, SelectClass } from "@/app/db/schema";
+import { SelectMessage, SelectClass, SelectAssignment } from "@/app/db/schema";
+
+export interface QuestionType {
+  title: string;
+  description: string;
+  tags: string[];
+  stats: {
+    messages: number;
+    likes: number;
+  };
+}
+
+export interface InstructorQuestionType {
+  name: string;
+  role: string;
+  question: string;
+  time: string;
+  stats: {
+    messages: number;
+    likes: number;
+  };
+}
+
+export interface AnswerType {
+  name: string;
+  description: string;
+  role: string;
+  time: string;
+}
 
 export interface University {
   name: string;
@@ -21,14 +49,17 @@ export interface ExtendedClass {
   universityId: string;
   className: string;
   description: string | null;
-  code: number;
+  code: number | null;
+  courseCode: string | null;
   semester: string;
   year: number;
   isActive: boolean;
+  enrollmentCode?: string;
 
   professorFirstName: string;
   professorLastName: string;
   professorProfilePicture: string | null;
+  professorName: string;
 }
 
 
@@ -53,6 +84,25 @@ export interface Message {
   profilePic?: string;
 }
 
+export type ExtendedSelectMessage = SelectMessage & {
+  userFirstName: string;
+  userLastName: string;
+  userProfilePicture: string | null;
+  className: string;
+  createdAtRelative: string;
+};
+
+export interface TimeUntilDeadline {
+  days: number;
+  hours: number;
+  minutes: number;
+}
+
+export type ExtendedSelectAssignment = SelectAssignment & {
+  className: string;
+  timeToDeadlineObject: TimeUntilDeadline;
+};
+
 export interface ExtendedMessage {
   id: string;
   classId: string;
@@ -71,9 +121,23 @@ export interface ExtendedMessage {
 }
 
 export interface MessageWidgetProps {
-  messages: ExtendedMessage[];
+  messages: ExtendedSelectMessage[];
 }
 
+export interface ExtendedInstructor {
+  firstName: string;
+  lastName: string;
+  email: string | null;
+  profilePicture: string | null;
+  className: string;
+}
+
+export interface ExtendedStudent {
+  firstName: string;
+  lastName: string;
+  email: string | null;
+  profilePicture: string | null;
+}
 
 
 

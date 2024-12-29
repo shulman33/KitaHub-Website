@@ -1,43 +1,76 @@
-import SubmissionStatusWidget from "@/app/(kita)/components/SubmissionStatusWidget";
 import DiscussionBoardWidget from "@/app/(kita)/components/DiscussionBoardWidget";
 import Header from "@/app/(kita)/components/Header";
-import Grid from "@mui/material/Grid2";
-import UpcomingAssignmentsStudent from "../components/UpcomingAssignments";
+import { getClassesForCurrentUser } from "../server/actions/classActions";
+import {
+  getMessagesByCurrentUser,
+  getMessagesByUserId,
+} from "../server/actions/messageActions";
+import CalendarComponent from "./StudentComponents/CalendarComponent";
+import AssignmentWidget from "./AssignmentWidget";
 import CoursesWidget from "./CoursesWidget";
-import { getClassesByUserId } from "../server/actions/ClassActions";
-import { getMessagesByUserId } from "../server/actions/MessageActions";
+import { getCurrentUserAssignment } from "../server/actions/assignmentActions";
+import { getSession } from "@auth0/nextjs-auth0";
 
 interface StudentDashboardProps {
   name: string;
+  isStudent: boolean;
 }
 
+// const dummyAssignments = [
+//   {
+//     name: "Mathematics III",
+//     title: "Answer Writing",
+//     dueDate: "02:40:55",
+//     status: "In Progress",
+//   },
+//   {
+//     name: "Physics II",
+//     title: "Quiz Preparation",
+//     dueDate: "01:20:15",
+//     status: "Submitted",
+//   },
+//   {
+//     name: "Chemistry I",
+//     title: "Lab Report",
+//     dueDate: "03:10:00",
+//     status: "Not Started",
+//   },
+//   {
+//     name: "History II",
+//     title: "Essay Submission",
+//     dueDate: "04:30:45",
+//     status: "In Progress",
+//   },
+// ];
 
 
-const StudentDashboard = async ({ name }: StudentDashboardProps) => {
-  const messages = await getMessagesByUserId(
-    "321c5abe-d519-48fa-8ed3-54f5263b5990"
-  );
-  console.log("messages", messages);
-  const courses = await getClassesByUserId();
-  console.log("courses", courses);
+const StudentDashboard = async ({ name, isStudent }: StudentDashboardProps) => {
+  const messages = await getMessagesByCurrentUser();
+  // console.log("messages", messages);
+  const courses = await getClassesForCurrentUser();
+  // console.log("courses", courses);
+  const assignments = await getCurrentUserAssignment();
+  const session = await getSession();
+  if (!session || !session.user) {
+    throw new Error("User is not authenticated");
+  }
+
+  const { sub } = session.user;
+  console.log("user id", sub);
   return (
     <>
       <Header name={name} />
-      <div className="mx-auto max-w-full sm:max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, sm: 7 }}>
-            <CoursesWidget courses={courses} />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 5 }}>
-            <DiscussionBoardWidget messages={messages} />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <SubmissionStatusWidget />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 8 }}>
-            <UpcomingAssignmentsStudent />
-          </Grid>
-        </Grid>
+      <div className=" py-16">
+        <div className="grid md:grid-cols-2 gap-[30px]">
+          {/* <AssignmentWidget courses={dummyAssignments} /> */}
+          <CoursesWidget courses={courses} isStudent={isStudent} auth0UserId={sub} />
+          <DiscussionBoardWidget messages={messages} />
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-[40%,auto] mt-[30px] w-full gap-[30px]">
+          <CalendarComponent />
+          <AssignmentWidget courses={assignments} />
+        </div>
       </div>
     </>
   );

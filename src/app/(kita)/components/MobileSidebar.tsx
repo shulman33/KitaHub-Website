@@ -9,6 +9,7 @@ import {
 } from "@headlessui/react";
 import { XMarkIcon, Cog6ToothIcon } from "@heroicons/react/24/outline";
 import { useUser } from "@auth0/nextjs-auth0/client";
+import Image from "next/image";
 
 type NavigationItem = {
   name: string;
@@ -60,7 +61,7 @@ export default function MobileSidebar({
           {/* Sidebar content */}
           <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-primary px-6 pb-4">
             <div className="flex h-16 shrink-0 items-center">
-              <img
+              <Image
                 alt="Your Company"
                 src="/sidenav-logo.png"
                 className="h-8 w-auto"
