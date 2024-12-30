@@ -14,17 +14,19 @@ interface ClassDashboardProps {
 export default async function Page({ params }: { params: Promise<{ classId: string }> }) {
   const session = await getSession();
 
-  if (!session || !session.user) {
-    throw new Error("User is not authenticated");
-  }
+  // if (!session || !session.user) {
+  //   // throw new Error("User is not authenticated");
+  //   console.log("User is not authenticated");
+  //   return;
+  // }
 
-  const { name, id } = session.user;
+  const { name, id } = session!.user;
 
   const classId = (await params).classId;
   const classData = await getClassById(classId, id);
   if (!classData) notFound();
 
-  const role = await getUserRole(session.user.sub);
+  const role = await getUserRole(session!.user.sub);
   const isStudent = role === "Student";
 
   return (
