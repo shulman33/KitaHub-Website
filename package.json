@@ -9,7 +9,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate",
+    "postinstall": "drizzle-kit push",
     "seed": "npx tsx src/app/db/seed.ts"
   },
   "dependencies": {
