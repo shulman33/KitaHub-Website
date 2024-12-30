@@ -138,11 +138,14 @@ export async function getCurrentUserAssignment(
       .where(
         and(
           isEnrolledInClassSubquery(classEnrollment.classId, auth0UserId),
-          db
-            .select({ id: user.id })
-            .from(user)
-            .where(eq(user.auth0UserId, auth0UserId))
-            .limit(1)
+          eq(
+            classEnrollment.userId,
+            db
+              .select({ id: user.id })
+              .from(user)
+              .where(eq(user.auth0UserId, auth0UserId))
+              .limit(1)
+          )
           // eq(classEnrollment.userId, userIdSubquery(auth0UserId))
         )
       );
