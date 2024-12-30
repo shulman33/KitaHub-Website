@@ -1,7 +1,6 @@
 "use server";
 
 import { db } from "@/app/db/drizzle";
-import { sql } from "drizzle-orm";
 import {
   InsertAssignment,
   SelectAssignment,
@@ -11,7 +10,11 @@ import {
 } from "@/app/db/schema";
 import { eq, and } from "drizzle-orm";
 import { ExtendedSelectAssignment, TimeUntilDeadline } from "../../lib/types";
-import { isEnrolledInClass, currentUserId } from "../../lib/utils";
+import {
+  isEnrolledInClassSubquery,
+  currentUserId,
+  userIdSubquery,
+} from "../../lib/utils";
 import { intervalToDuration, formatDuration } from "date-fns";
 
 /**
@@ -84,7 +87,7 @@ export async function getAssignmentsByClassId(
       .where(
         and(
           eq(classEnrollment.classId, classId),
-          isEnrolledInClass(classEnrollment.userId, authUserId)
+          isEnrolledInClassSubquery(classEnrollment.userId, authUserId)
         )
       );
 
@@ -130,16 +133,13 @@ export async function getCurrentUserAssignment(
         classEnrollment,
         eq(assignment.classId, classEnrollment.classId)
       )
-      .innerJoin(classTable, eq(assignment.classId, classTable.id)).where(sql`
-        ${classEnrollment.userId} = ${currentUserId(auth0UserId)}
-        AND ${isEnrolledInClass(assignment.classId, auth0UserId)}
-      `);
-      // .where(
-      //   and(
-      //     isEnrolledInClass(classEnrollment.classId, auth0UserId),
-      //     eq(classEnrollment.userId, currentUserId(auth0UserId))
-      //   )
-      // );
+      .innerJoin(classTable, eq(assignment.classId, classTable.id))
+      .where(
+        and(
+          isEnrolledInClassSubquery(classEnrollment.classId, auth0UserId),
+          eq(classEnrollment.userId, userIdSubquery(auth0UserId))
+        )
+      );
 
     const extendedAssignments = assignments.map((assignment) => {
       const timeToDeadlineObject = getTimeUntilDeadline(assignment.dueDate);
@@ -184,7 +184,7 @@ export async function getAssignmentById(
       .where(
         and(
           eq(assignment.id, id),
-          isEnrolledInClass(assignment.classId, authUserId)
+          isEnrolledInClassSubquery(assignment.classId, authUserId)
         )
       );
 

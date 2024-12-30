@@ -9,9 +9,9 @@ import {
   SelectMessage,
   classEnrollment,
 } from "@/app/db/schema";
-import { eq, sql, inArray } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { ExtendedSelectMessage } from "../../lib/types";
-import { isEnrolledInClass, currentUserId } from "../../lib/utils";
+import { isEnrolledInClassSubquery, currentUserId } from "../../lib/utils";
 import { desc, and } from "drizzle-orm";
 import { formatDistanceToNow } from "date-fns";
 import { revalidatePath } from "next/cache";
@@ -126,7 +126,7 @@ export async function getMessagesByClassId(
   authUserId: string
 ): Promise<ExtendedSelectMessage[]> {
   const filters = and(
-    isEnrolledInClass(message.classId, authUserId),
+    isEnrolledInClassSubquery(message.classId, authUserId),
     eq(message.classId, classId)
   );
 
@@ -155,7 +155,7 @@ export async function getMessagesByClassId(
 export async function getMessagesByCurrentUser(
   authUserId: string
 ): Promise<ExtendedSelectMessage[] | []> {
-  const filters = isEnrolledInClass(message.classId, authUserId);
+  const filters = isEnrolledInClassSubquery(message.classId, authUserId);
 
   const limit = 4;
 
@@ -186,7 +186,7 @@ export async function getRepliesByMessageId(
   authUserId: string
 ): Promise<ExtendedSelectMessage[]> {
   const filters = and(
-    isEnrolledInClass(message.classId, authUserId),
+    isEnrolledInClassSubquery(message.classId, authUserId),
     eq(message.parentMessageId, messageId)
   );
 
@@ -219,7 +219,7 @@ export async function getMessageById(
   authUserId: string
 ): Promise<ExtendedSelectMessage | null> {
   const filters = and(
-    isEnrolledInClass(message.classId, authUserId),
+    isEnrolledInClassSubquery(message.classId, authUserId),
     eq(message.id, messageId)
   );
 
@@ -425,7 +425,7 @@ export async function deleteMessage(
 
     await db.delete(message).where(
       and(
-        isEnrolledInClass(message.classId, authUserId),
+        isEnrolledInClassSubquery(message.classId, authUserId),
         eq(message.id, id),
         eq(message.userId, currentUserId(authUserId)) // Ensure user is the author
       )

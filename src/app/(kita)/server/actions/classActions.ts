@@ -9,23 +9,23 @@ import {
   classEnrollment,
   semesterEnum,
 } from "@/app/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, and } from "drizzle-orm";
 import {
   ExtendedClass,
   ExtendedInstructor,
   ExtendedStudent,
 } from "../../lib/types";
-import {
-  currentUserId,
-  isEnrolledInClass,
-} from "../../lib/utils";
+import { currentUserId, isEnrolledInClassSubquery } from "../../lib/utils";
 import { revalidatePath } from "next/cache";
 
 // This function fetches a class by its ID
 // it should return all the fields from the class table
 // and the professor's first name, last name, and profile picture
 // it should only return the class if the current user is enrolled in it
-export async function getClassById(classId: string, authUserId: string): Promise<ExtendedClass | null> {
+export async function getClassById(
+  classId: string,
+  authUserId: string
+): Promise<ExtendedClass | null> {
   try {
     const classes = await db
       .select({
@@ -61,12 +61,10 @@ export async function getClassById(classId: string, authUserId: string): Promise
           )`,
       })
       .from(classTable)
-      .where(
-        sql`${classTable.id} = ${classId} AND ${isEnrolledInClass(
-          classTable.id,
-          authUserId
-        )}`
-      );
+      .where(and(
+        eq(classTable.id, classId),
+        isEnrolledInClassSubquery(classTable.id, authUserId)
+      ))
 
     if (!classes.length) return null;
 
@@ -86,25 +84,27 @@ export async function getClassById(classId: string, authUserId: string): Promise
 // it should return all the fields from the class table
 // and the professor's first name, last name, and profile picture
 // it should only return the class if the current user is enrolled in it
-export async function getClassesForCurrentUser(authUserId: string): Promise<ExtendedClass[]> {
+export async function getClassesForCurrentUser(
+  authUserId: string
+): Promise<ExtendedClass[]> {
   try {
-      // Fetch classes where the current user is enrolled
-      const classes = await db
-        .select({
-          // Selecting fields from the Class table
-          id: classTable.id,
-          universityId: classTable.universityId,
-          className: classTable.className,
-          description: classTable.description,
-          enrollmentCode: classTable.enrollmentCode,
-          code: classTable.code,
-          courseCode: classTable.courseCode,
-          semester: classTable.semester,
-          year: classTable.year,
-          isActive: classTable.isActive,
+    // Fetch classes where the current user is enrolled
+    const classes = await db
+      .select({
+        // Selecting fields from the Class table
+        id: classTable.id,
+        universityId: classTable.universityId,
+        className: classTable.className,
+        description: classTable.description,
+        enrollmentCode: classTable.enrollmentCode,
+        code: classTable.code,
+        courseCode: classTable.courseCode,
+        semester: classTable.semester,
+        year: classTable.year,
+        isActive: classTable.isActive,
 
-          // Selecting fields from the Professor's User table using subqueries
-          professorFirstName: sql`(
+        // Selecting fields from the Professor's User table using subqueries
+        professorFirstName: sql`(
             SELECT u."firstName"
             FROM "class_enrollment" ce
             JOIN "user" u ON ce."userId" = u.id
@@ -112,7 +112,7 @@ export async function getClassesForCurrentUser(authUserId: string): Promise<Exte
             LIMIT 1
           )`,
 
-          professorLastName: sql`(
+        professorLastName: sql`(
             SELECT u."lastName"
             FROM "class_enrollment" ce
             JOIN "user" u ON ce."userId" = u.id
@@ -120,40 +120,39 @@ export async function getClassesForCurrentUser(authUserId: string): Promise<Exte
             LIMIT 1
           )`,
 
-          professorProfilePicture: sql`(
+        professorProfilePicture: sql`(
             SELECT u."profilePicture"
             FROM "class_enrollment" ce
             JOIN "user" u ON ce."userId" = u.id
             WHERE ce."classId" = "class"."id" AND ce."role" = 'PROFESSOR'
             LIMIT 1
           )`,
-        })
-        .from(classTable)
-        .innerJoin(classEnrollment, eq(classTable.id, classEnrollment.classId))
-        // **Important:** Filter classes where the current user is enrolled
-        .where(sql`class_enrollment."userId" = ${currentUserId(authUserId)}`);
+      })
+      .from(classTable)
+      .innerJoin(classEnrollment, eq(classTable.id, classEnrollment.classId))
+      // **Important:** Filter classes where the current user is enrolled
+      .where(eq(classEnrollment.userId, currentUserId(authUserId)));
 
-      // Map the result to the ExtendedClass type
-      const extendedClasses: ExtendedClass[] = classes.map((cls) => ({
-        id: cls.id,
-        universityId: cls.universityId,
-        className: cls.className,
-        description: cls.description,
-        code: cls.code,
-        courseCode: cls.courseCode,
-        enrollmentCode: cls.enrollmentCode as string | undefined,
-        semester: cls.semester,
-        year: cls.year,
-        isActive: cls.isActive,
-        professorFirstName: cls.professorFirstName as string,
-        professorLastName: cls.professorLastName as string,
-        professorName: `${cls.professorFirstName} ${cls.professorLastName}`,
-        professorProfilePicture: cls.professorProfilePicture as string | null,
-      }));
+    // Map the result to the ExtendedClass type
+    const extendedClasses: ExtendedClass[] = classes.map((cls) => ({
+      id: cls.id,
+      universityId: cls.universityId,
+      className: cls.className,
+      description: cls.description,
+      code: cls.code,
+      courseCode: cls.courseCode,
+      enrollmentCode: cls.enrollmentCode as string | undefined,
+      semester: cls.semester,
+      year: cls.year,
+      isActive: cls.isActive,
+      professorFirstName: cls.professorFirstName as string,
+      professorLastName: cls.professorLastName as string,
+      professorName: `${cls.professorFirstName} ${cls.professorLastName}`,
+      professorProfilePicture: cls.professorProfilePicture as string | null,
+    }));
 
-      console.log("extendedClasses", extendedClasses);
-      return extendedClasses;
-
+    console.log("extendedClasses", extendedClasses);
+    return extendedClasses;
   } catch (error) {
     console.error("Error fetching classes for current user:", error);
     return [];
@@ -168,25 +167,24 @@ export async function getInstructorsByClassId(
   authUserId: string
 ): Promise<ExtendedInstructor[]> {
   try {
-      const instructors = await db
-        .select({
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          profilePicture: user.profilePicture,
-          className: classTable.className,
-        })
-        .from(classEnrollment)
-        .innerJoin(user, eq(classEnrollment.userId, user.id))
-        .innerJoin(classTable, eq(classEnrollment.classId, classTable.id))
-        .where(
-          sql`${classEnrollment.classId} = ${classId} 
-              AND ${classEnrollment.role} = 'PROFESSOR'
-              AND ${isEnrolledInClass(classTable.id, authUserId)}`
-        );
+    const instructors = await db
+      .select({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        profilePicture: user.profilePicture,
+        className: classTable.className,
+      })
+      .from(classEnrollment)
+      .innerJoin(user, eq(classEnrollment.userId, user.id))
+      .innerJoin(classTable, eq(classEnrollment.classId, classTable.id))
+      .where(and(
+        eq(classEnrollment.classId, classId),
+        eq(classEnrollment.role, "PROFESSOR"),
+        isEnrolledInClassSubquery(classTable.id, authUserId)
+      ))
 
-      return instructors;
-
+    return instructors;
   } catch (error) {
     console.error("Error fetching instructors for class:", error);
     throw new Error("Error fetching instructors for class");
@@ -201,23 +199,22 @@ export async function getStudentsByClassId(
   authUserId: string
 ): Promise<ExtendedStudent[]> {
   try {
-      const students = await db
-        .select({
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          profilePicture: user.profilePicture,
-        })
-        .from(classEnrollment)
-        .innerJoin(user, eq(classEnrollment.userId, user.id))
-        .where(
-          sql`${classEnrollment.classId} = ${classId} 
-              AND ${classEnrollment.role} = 'STUDENT'
-              AND ${isEnrolledInClass(classEnrollment.classId, authUserId)}`
-        );
+    const students = await db
+      .select({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        profilePicture: user.profilePicture,
+      })
+      .from(classEnrollment)
+      .innerJoin(user, eq(classEnrollment.userId, user.id))
+      .where(and(
+        eq(classEnrollment.classId, classId),
+        eq(classEnrollment.role, "STUDENT"),
+        isEnrolledInClassSubquery(classEnrollment.classId, authUserId)
+      ));
 
-      return students;
-
+    return students;
   } catch (error) {
     console.error("Error fetching students for class:", error);
     throw new Error("Error fetching students for class");
@@ -230,13 +227,12 @@ export async function getClassesByUniversityId(
   universityId: string
 ): Promise<SelectClass[]> {
   try {
-      const classes = await db
-        .select()
-        .from(classTable)
-        .where(eq(classTable.universityId, universityId));
+    const classes = await db
+      .select()
+      .from(classTable)
+      .where(eq(classTable.universityId, universityId));
 
-      return classes;
-
+    return classes;
   } catch (error) {
     console.error("Error fetching classes by university ID:", error);
     throw new Error("Error fetching classes by university ID");
@@ -246,13 +242,12 @@ export async function getClassesByUniversityId(
 // This function fetches all active classes
 export async function getActiveClasses(): Promise<SelectClass[]> {
   try {
-      const classes = await db
-        .select()
-        .from(classTable)
-        .where(eq(classTable.isActive, true));
+    const classes = await db
+      .select()
+      .from(classTable)
+      .where(eq(classTable.isActive, true));
 
-      return classes;
-
+    return classes;
   } catch (error) {
     console.error("Error fetching active classes:", error);
     throw new Error("Error fetching active classes");
@@ -266,7 +261,7 @@ export async function getClassByEnrollmentCode(
     const classResult = await db
       .select()
       .from(classTable)
-      .where(sql`${classTable.enrollmentCode} = ${enrollmentCode}`);
+      .where(eq(classTable.enrollmentCode, enrollmentCode));
     console.log("classResult", classResult);
     return classResult[0];
   } catch (error) {
@@ -297,7 +292,10 @@ function generateEnrollmentCode(): string {
   ).join("");
 }
 
-export async function createClass(formData: CreateClassFormData, authUserId: string) {
+export async function createClass(
+  formData: CreateClassFormData,
+  authUserId: string
+) {
   console.log("Called createClass with:", formData);
   try {
     if (
@@ -316,7 +314,7 @@ export async function createClass(formData: CreateClassFormData, authUserId: str
         universityId: user.universityId,
       })
       .from(user)
-      .where(sql`${user.auth0UserId} = ${authUserId}`);
+      .where(eq(user.auth0UserId, authUserId));
 
     if (!userResult.length) {
       throw new Error("User not found");
@@ -380,25 +378,25 @@ export async function updateClass(
   data: Partial<InsertClass>
 ): Promise<SelectClass> {
   try {
-      // Check if user is an enrolled professor
-      const enrollment = await db.select().from(classEnrollment).where(sql`
-          ${classEnrollment.classId} = ${classId} AND 
-          ${classEnrollment.userId} = ${currentUserId(authUserId)} AND 
-          ${classEnrollment.role} = 'PROFESSOR'
-        `);
+    // Check if user is an enrolled professor
+    const enrollment = await db.select().from(classEnrollment)
+    .where(and(
+      eq(classEnrollment.classId, classId),
+      eq(classEnrollment.userId, currentUserId(authUserId)),
+      eq(classEnrollment.role, "PROFESSOR")
+    ));
 
-      if (!enrollment.length) {
-        throw new Error("Only enrolled professors can update classes");
-      }
+    if (!enrollment.length) {
+      throw new Error("Only enrolled professors can update classes");
+    }
 
-      const [updatedClass] = await db
-        .update(classTable)
-        .set(data)
-        .where(eq(classTable.id, classId))
-        .returning();
+    const [updatedClass] = await db
+      .update(classTable)
+      .set(data)
+      .where(eq(classTable.id, classId))
+      .returning();
 
-      return updatedClass;
-
+    return updatedClass;
   } catch (error) {
     console.error("Error updating class:", error);
     throw new Error("Error updating class");
@@ -407,24 +405,30 @@ export async function updateClass(
 
 // This function deletes a class by its ID
 // it should only allow professors who are enrolled in the class to delete classes
-export async function deleteClass(classId: string, authUserId: string): Promise<void> {
+export async function deleteClass(
+  classId: string,
+  authUserId: string
+): Promise<void> {
   try {
-      // Check if user is an enrolled professor
-      const enrollment = await db.select().from(classEnrollment).where(sql`
-          ${classEnrollment.classId} = ${classId} AND 
-          ${classEnrollment.userId} = ${currentUserId(authUserId)} AND 
-          ${classEnrollment.role} = 'PROFESSOR'
-        `);
+    // Check if user is an enrolled professor
+    const enrollment = await db.select().from(classEnrollment)
+    .where(and(
+      eq(classEnrollment.classId, classId),
+      eq(classEnrollment.userId, currentUserId(authUserId)),
+      eq(classEnrollment.role, "PROFESSOR")
+    ))
 
-      if (!enrollment.length) {
-        throw new Error("Only enrolled professors can delete classes");
-      }
+    if (!enrollment.length) {
+      throw new Error("Only enrolled professors can delete classes");
+    }
 
-      // Delete all related enrollments first
-      await db.delete(classEnrollment).where(eq(classEnrollment.classId, classId));
+    // Delete all related enrollments first
+    await db
+      .delete(classEnrollment)
+      .where(eq(classEnrollment.classId, classId));
 
-      // Then delete the class
-      await db.delete(classTable).where(eq(classTable.id, classId));
+    // Then delete the class
+    await db.delete(classTable).where(eq(classTable.id, classId));
   } catch (error) {
     console.error("Error deleting class:", error);
     throw new Error("Error deleting class");

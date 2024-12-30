@@ -1,6 +1,11 @@
-import universities from "./universities.json"
-import { University, UniversityResult } from "./types"
-import { AnyColumn, sql } from "drizzle-orm";
+import universities from "./universities.json";
+import { University, UniversityResult } from "./types";
+import { AnyColumn, sql, exists, and } from "drizzle-orm";
+import { db } from "@/app/db/drizzle";
+import { user } from "@/app/db/schema";
+import { eq } from "drizzle-orm";
+import { classEnrollment } from "@/app/db/schema";
+import { get } from "http";
 
 export function findUniversityByEmail(email: string): UniversityResult | null {
   const emailDomain = email.split("@")[1].toLowerCase();
@@ -28,6 +33,16 @@ export const currentUserId = (authUserId: string) => sql`
     WHERE u."auth0UserId" = ${authUserId}
 `;
 
+export const userIdSubquery = (authUserId: string) => {
+  const userId = db
+    .select({ userId: user.id })
+    .from(user)
+    .where(eq(user.auth0UserId, authUserId))
+    .as("userId");
+
+  return userId;
+};
+
 export const currentUserRole = sql`
   (
     SELECT u.role
@@ -45,21 +60,42 @@ export const currentUserRole = sql`
 //   )
 // `;
 
-export const isEnrolledInClass = (
+// export const isEnrolledInClass = (
+//   classIdColumn: AnyColumn,
+//   authUserId: string
+// ) => sql`
+//   EXISTS (
+//     SELECT 1
+//     FROM "class_enrollment" ce
+//     WHERE ce."classId" = ${classIdColumn}
+//       AND ce."userId" = (
+//         SELECT u.id
+//         FROM "user" u
+//         WHERE u."auth0UserId" = ${authUserId}
+//       )
+//   )
+// `;
+
+
+export const isEnrolledInClassSubquery = (
   classIdColumn: AnyColumn,
   authUserId: string
-) => sql`
-  EXISTS (
-    SELECT 1
-    FROM "class_enrollment" ce
-    WHERE ce."classId" = ${classIdColumn}
-      AND ce."userId" = (
-        SELECT u.id
-        FROM "user" u
-        WHERE u."auth0UserId" = ${authUserId}
+) => {
+  const isEnrolled = exists(
+    db
+      .select({ field: sql`1` })
+      .from(classEnrollment)
+      .innerJoin(user, eq(classEnrollment.userId, user.id))
+      .where(
+        and(
+          eq(classEnrollment.classId, classIdColumn),
+          eq(classEnrollment.userId, userIdSubquery(authUserId))
+        )
       )
-  )
-`;
+  ).as("isEnrolled");
+
+  return isEnrolled;
+};
 
 export const validateEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
