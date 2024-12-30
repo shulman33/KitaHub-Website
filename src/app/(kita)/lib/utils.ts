@@ -34,13 +34,14 @@ export const currentUserId = (authUserId: string) => sql`
 `;
 
 export const userIdSubquery = (authUserId: string) => {
-  const userId = db
-    .select({ userId: user.id })
+  return db
+    .select({ id: user.id })
     .from(user)
     .where(eq(user.auth0UserId, authUserId))
-    .as("userId");
+    .limit(1);
+  // .as("userId");
 
-  return userId;
+  // return userId;
 };
 
 export const currentUserRole = sql`
@@ -76,12 +77,11 @@ export const currentUserRole = sql`
 //   )
 // `;
 
-
 export const isEnrolledInClassSubquery = (
   classIdColumn: AnyColumn,
   authUserId: string
 ) => {
-  const isEnrolled = exists(
+  return exists(
     db
       .select({ field: sql`1` })
       .from(classEnrollment)
@@ -92,9 +92,9 @@ export const isEnrolledInClassSubquery = (
           eq(classEnrollment.userId, userIdSubquery(authUserId))
         )
       )
-  ).as("isEnrolled");
+  );
 
-  return isEnrolled;
+  // return isEnrolled;
 };
 
 export const validateEmail = (email: string): boolean => {

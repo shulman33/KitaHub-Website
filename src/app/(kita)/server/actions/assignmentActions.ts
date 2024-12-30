@@ -7,6 +7,7 @@ import {
   assignment,
   classEnrollment,
   classTable,
+  user
 } from "@/app/db/schema";
 import { eq, and } from "drizzle-orm";
 import { ExtendedSelectAssignment, TimeUntilDeadline } from "../../lib/types";
@@ -137,7 +138,12 @@ export async function getCurrentUserAssignment(
       .where(
         and(
           isEnrolledInClassSubquery(classEnrollment.classId, auth0UserId),
-          eq(classEnrollment.userId, userIdSubquery(auth0UserId))
+          db
+            .select({ id: user.id })
+            .from(user)
+            .where(eq(user.auth0UserId, auth0UserId))
+            .limit(1)
+          // eq(classEnrollment.userId, userIdSubquery(auth0UserId))
         )
       );
 
