@@ -1,6 +1,6 @@
 "use server";
 
-import { dbAuth } from "@/app/db/drizzle";
+import { db } from "@/app/db/drizzle";
 import {
   message,
   user,
@@ -11,13 +11,12 @@ import {
 } from "@/app/db/schema";
 import { eq, sql, inArray } from "drizzle-orm";
 import { ExtendedSelectMessage } from "../../lib/types";
-import { isEnrolledInClass } from "../../lib/utils";
+import { isEnrolledInClass, currentUserId } from "../../lib/utils";
 import { desc, and } from "drizzle-orm";
 import { formatDistanceToNow } from "date-fns";
 import { revalidatePath } from "next/cache";
 import { pusherServer } from "../../lib/pusher/pusher";
 import { EVENT_TYPES, getChannelNames } from "../../lib/pusher/pusher";
-import { currentUserId } from "../../lib/utils";
 
 /**
  * Fetches messages from the database based on provided filters and limit.
@@ -42,69 +41,62 @@ async function fetchMessages(
   limit: number
 ): Promise<ExtendedSelectMessage[] | []> {
   try {
-    const messages = await dbAuth(async (db) => {
-      // First get unique message IDs
-      const uniqueMessageIds = await db
-        .select({ id: message.id })
-        .from(message)
-        .innerJoin(
-          classEnrollment,
-          eq(message.classId, classEnrollment.classId)
+    // First get unique message IDs
+    const uniqueMessageIds = await db
+      .select({ id: message.id })
+      .from(message)
+      .innerJoin(classEnrollment, eq(message.classId, classEnrollment.classId))
+      .where(filters)
+      .groupBy(message.id)
+      .orderBy(desc(message.id))
+      .limit(limit);
+
+    // Then get full message details for these IDs
+    const result = await db
+      .select({
+        id: message.id,
+        classId: message.classId,
+        userId: message.userId,
+        parentMessageId: message.parentMessageId,
+        title: message.title,
+        content: message.content,
+        createdAt: message.createdAt,
+        updatedAt: message.updatedAt,
+        userFirstName: user.firstName,
+        userLastName: user.lastName,
+        userProfilePicture: user.profilePicture,
+        className: classTable.className,
+      })
+      .from(message)
+      .innerJoin(user, eq(message.userId, user.id))
+      .innerJoin(classTable, eq(message.classId, classTable.id))
+      .where(
+        inArray(
+          message.id,
+          uniqueMessageIds.map((m) => m.id)
         )
-        .where(filters)
-        .groupBy(message.id)
-        .orderBy(desc(message.id))
-        .limit(limit);
+      )
+      .orderBy(desc(message.createdAt));
 
-      // Then get full message details for these IDs
-      const result = await db
-        .select({
-          id: message.id,
-          classId: message.classId,
-          userId: message.userId,
-          parentMessageId: message.parentMessageId,
-          title: message.title,
-          content: message.content,
-          createdAt: message.createdAt,
-          updatedAt: message.updatedAt,
-          userFirstName: user.firstName,
-          userLastName: user.lastName,
-          userProfilePicture: user.profilePicture,
-          className: classTable.className,
-        })
-        .from(message)
-        .innerJoin(user, eq(message.userId, user.id))
-        .innerJoin(classTable, eq(message.classId, classTable.id))
-        .where(
-          inArray(
-            message.id,
-            uniqueMessageIds.map((m) => m.id)
-          )
-        )
-        .orderBy(desc(message.createdAt));
+    const selectMessages: ExtendedSelectMessage[] = result.map((msg) => ({
+      id: msg.id,
+      classId: msg.classId,
+      userId: msg.userId,
+      parentMessageId: msg.parentMessageId,
+      title: msg.title,
+      content: msg.content,
+      createdAt: msg.createdAt,
+      createdAtRelative: formatDistanceToNow(new Date(msg.createdAt), {
+        addSuffix: true,
+      }),
+      updatedAt: msg.updatedAt,
+      userFirstName: msg.userFirstName,
+      userLastName: msg.userLastName,
+      userProfilePicture: msg.userProfilePicture,
+      className: msg.className,
+    }));
 
-      const selectMessages: ExtendedSelectMessage[] = result.map((msg) => ({
-        id: msg.id,
-        classId: msg.classId,
-        userId: msg.userId,
-        parentMessageId: msg.parentMessageId,
-        title: msg.title,
-        content: msg.content,
-        createdAt: msg.createdAt,
-        createdAtRelative: formatDistanceToNow(new Date(msg.createdAt), {
-          addSuffix: true,
-        }),
-        updatedAt: msg.updatedAt,
-        userFirstName: msg.userFirstName,
-        userLastName: msg.userLastName,
-        userProfilePicture: msg.userProfilePicture,
-        className: msg.className,
-      }));
-
-      return selectMessages;
-    });
-
-    return messages;
+    return selectMessages;
   } catch (error) {
     console.error("Error fetching messages:", error);
     return [];
@@ -130,10 +122,11 @@ async function fetchMessages(
  * const classMessages = await getMessagesByClassId(classId);
  */
 export async function getMessagesByClassId(
-  classId: string
+  classId: string,
+  authUserId: string
 ): Promise<ExtendedSelectMessage[]> {
   const filters = and(
-    isEnrolledInClass(message.classId),
+    isEnrolledInClass(message.classId, authUserId),
     eq(message.classId, classId)
   );
 
@@ -159,10 +152,10 @@ export async function getMessagesByClassId(
  * @example
  * const userMessages = await getMessagesByCurrentUser();
  */
-export async function getMessagesByCurrentUser(): Promise<
-  ExtendedSelectMessage[] | []
-> {
-  const filters = isEnrolledInClass(message.classId);
+export async function getMessagesByCurrentUser(
+  authUserId: string
+): Promise<ExtendedSelectMessage[] | []> {
+  const filters = isEnrolledInClass(message.classId, authUserId);
 
   const limit = 4;
 
@@ -189,10 +182,11 @@ export async function getMessagesByCurrentUser(): Promise<
  */
 
 export async function getRepliesByMessageId(
-  messageId: string
+  messageId: string,
+  authUserId: string
 ): Promise<ExtendedSelectMessage[]> {
   const filters = and(
-    isEnrolledInClass(message.classId),
+    isEnrolledInClass(message.classId, authUserId),
     eq(message.parentMessageId, messageId)
   );
 
@@ -221,10 +215,11 @@ export async function getRepliesByMessageId(
  * const message = await getMessageById(messageId);
  */
 export async function getMessageById(
-  messageId: string
+  messageId: string,
+  authUserId: string
 ): Promise<ExtendedSelectMessage | null> {
   const filters = and(
-    isEnrolledInClass(message.classId),
+    isEnrolledInClass(message.classId, authUserId),
     eq(message.id, messageId)
   );
 
@@ -284,47 +279,43 @@ export async function getMessagesByUserId(
  * const newMessage = await createMessage(newMessageData);
  */
 export async function createMessage(
-  data: InsertMessage
+  data: InsertMessage,
+  authUserId: string
 ): Promise<SelectMessage> {
   try {
-    const result = await dbAuth(async (db) => {
-      // Check if user is enrolled in the class
-      const enrollment = await db
-        .select()
-        .from(classEnrollment)
-        .where(
-          and(
-            eq(classEnrollment.classId, data.classId),
-            eq(classEnrollment.userId, currentUserId)
-          )
-        );
+    // Check if user is enrolled in the class
+    const enrollment = await db
+      .select()
+      .from(classEnrollment)
+      .where(
+        and(
+          eq(classEnrollment.classId, data.classId),
+          eq(classEnrollment.userId, currentUserId(authUserId))
+        )
+      );
 
-      if (!enrollment.length) {
-        throw new Error(
-          "User must be enrolled in the class to create messages"
-        );
-      }
+    if (!enrollment.length) {
+      throw new Error("User must be enrolled in the class to create messages");
+    }
 
-      const newMessage = await db.insert(message).values(data).returning();
-      return newMessage[0];
-    });
+    const newMessage = await db.insert(message).values(data).returning();
 
     // Pusher triggers remain the same
     await pusherServer.trigger(
-      getChannelNames.classDiscussion(result.classId),
+      getChannelNames.classDiscussion(newMessage[0].classId),
       EVENT_TYPES.NEW_MESSAGE,
-      result
+      newMessage[0]
     );
 
-    if (result.parentMessageId) {
+    if (newMessage[0].parentMessageId) {
       await pusherServer.trigger(
-        getChannelNames.messageThread(result.parentMessageId),
+        getChannelNames.messageThread(newMessage[0].parentMessageId),
         EVENT_TYPES.NEW_MESSAGE,
-        result
+        newMessage[0]
       );
     }
     // revalidatePath("/api/messages");
-    return result;
+    return newMessage[0];
   } catch (error) {
     console.error("Error creating message:", error);
     throw new Error("Could not create message");
@@ -354,44 +345,45 @@ export async function createMessage(
  * };
  * const updatedMessage = await updateMessage(messageId, updatedData);
  */
-export async function updateMessage(id: string, data: InsertMessage) {
+export async function updateMessage(
+  id: string,
+  authUserId: string,
+  data: InsertMessage
+) {
   try {
-    const result = await dbAuth(async (db) => {
-      // First get the existing message
-      const existingMessage = await db
-        .select()
-        .from(message)
-        .where(eq(message.id, id));
+    // First get the existing message
+    const existingMessage = await db
+      .select()
+      .from(message)
+      .where(eq(message.id, id));
 
-      if (!existingMessage.length) {
-        throw new Error("Message not found");
-      }
+    if (!existingMessage.length) {
+      throw new Error("Message not found");
+    }
 
-      // Check if user is enrolled and is the author
-      const canUpdate = await db
-        .select()
-        .from(classEnrollment)
-        .where(
-          and(
-            eq(classEnrollment.classId, existingMessage[0].classId),
-            eq(classEnrollment.userId, currentUserId),
-            eq(message.userId, currentUserId)
-          )
-        );
+    // Check if user is enrolled and is the author
+    const canUpdate = await db
+      .select()
+      .from(classEnrollment)
+      .where(
+        and(
+          eq(classEnrollment.classId, existingMessage[0].classId),
+          eq(classEnrollment.userId, currentUserId(authUserId)),
+          eq(message.userId, currentUserId(authUserId))
+        )
+      );
 
-      if (!canUpdate.length) {
-        throw new Error("Not authorized to update this message");
-      }
+    if (!canUpdate.length) {
+      throw new Error("Not authorized to update this message");
+    }
 
-      const updatedMessage = await db
-        .update(message)
-        .set(data)
-        .where(eq(message.id, id))
-        .returning();
+    const updatedMessage = await db
+      .update(message)
+      .set(data)
+      .where(eq(message.id, id))
+      .returning();
 
-      return updatedMessage[0];
-    });
-    return result;
+    return updatedMessage[0];
   } catch (error) {
     console.error("Error updating message:", error);
     throw new Error("Could not update message");
@@ -416,27 +408,28 @@ export async function updateMessage(id: string, data: InsertMessage) {
  * const messageId = "123e4567-e89b-12d3-a456-426614174000";
  * await deleteMessage(messageId);
  */
-export async function deleteMessage(id: string): Promise<void> {
+export async function deleteMessage(
+  id: string,
+  authUserId: string
+): Promise<void> {
   try {
-    await dbAuth(async (db) => {
-      // First get the message to check ownership
-      const existingMessage = await db
-        .select()
-        .from(message)
-        .where(eq(message.id, id));
+    // First get the message to check ownership
+    const existingMessage = await db
+      .select()
+      .from(message)
+      .where(eq(message.id, id));
 
-      if (!existingMessage.length) {
-        throw new Error("Message not found");
-      }
+    if (!existingMessage.length) {
+      throw new Error("Message not found");
+    }
 
-      await db.delete(message).where(
-        and(
-          isEnrolledInClass(message.classId),
-          eq(message.id, id),
-          eq(message.userId, currentUserId) // Ensure user is the author
-        )
-      );
-    });
+    await db.delete(message).where(
+      and(
+        isEnrolledInClass(message.classId, authUserId),
+        eq(message.id, id),
+        eq(message.userId, currentUserId(authUserId)) // Ensure user is the author
+      )
+    );
   } catch (error) {
     console.error("Error deleting message:", error);
     throw new Error("Could not delete message");

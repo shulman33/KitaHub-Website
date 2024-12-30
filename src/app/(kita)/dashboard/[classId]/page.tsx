@@ -8,7 +8,7 @@ import { getClassById } from "../../server/actions/classActions";
 interface ClassDashboardProps {
   params: {
     classId: string;
-  };
+  }; 
 }
 
 export default async function Page({ params }: { params: Promise<{ classId: string }> }) {
@@ -18,10 +18,10 @@ export default async function Page({ params }: { params: Promise<{ classId: stri
     throw new Error("User is not authenticated");
   }
 
-  const { name } = session.user;
+  const { name, id } = session.user;
 
   const classId = (await params).classId;
-  const classData = await getClassById(classId);
+  const classData = await getClassById(classId, id);
   if (!classData) notFound();
 
   const role = await getUserRole(session.user.sub);
@@ -30,9 +30,9 @@ export default async function Page({ params }: { params: Promise<{ classId: stri
   return (
     <div>
       {isStudent ? (
-        <StudentClassDashboard name={name} classData={classData} />
+        <StudentClassDashboard name={name} classData={classData} authUserId={id} />
       ) : (
-        <ProfessorClassDashboard name={name} classData={classData} />
+        <ProfessorClassDashboard name={name} classData={classData} authUserId={id} />
       )}
     </div>
   );

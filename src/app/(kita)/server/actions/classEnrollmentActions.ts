@@ -1,6 +1,6 @@
 "use server";
 
-import { dbAuth, db } from "@/app/db/drizzle";
+import { db } from "@/app/db/drizzle";
 import {
   InsertClassEnrollment,
   SelectClassEnrollment,
@@ -10,34 +10,32 @@ import {
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
-export async function getEnrollmentsByUserId(userId: string): Promise<SelectClassEnrollment[]> {
+export async function getEnrollmentsByUserId(
+  userId: string
+): Promise<SelectClassEnrollment[]> {
   try {
-    const result = await dbAuth(async (db) => {
-      const enrollments = await db
-        .select()
-        .from(classEnrollment)
-        .where(eq(classEnrollment.userId, userId));
+    const enrollments = await db
+      .select()
+      .from(classEnrollment)
+      .where(eq(classEnrollment.userId, userId));
 
-      return enrollments;
-    });
-    return result;
+    return enrollments;
   } catch (error) {
     console.error("Error fetching enrollments by user ID:", error);
     throw new Error("Could not fetch enrollments");
   }
 }
 
-export async function getEnrollmentsByClassId(classId: string): Promise<SelectClassEnrollment[]> {
+export async function getEnrollmentsByClassId(
+  classId: string
+): Promise<SelectClassEnrollment[]> {
   try {
-    const result = await dbAuth(async (db) => {
-      const enrollments = await db
-        .select()
-        .from(classEnrollment)
-        .where(eq(classEnrollment.classId, classId));
+    const enrollments = await db
+      .select()
+      .from(classEnrollment)
+      .where(eq(classEnrollment.classId, classId));
 
-      return enrollments;
-    })
-    return result;
+    return enrollments;
   } catch (error) {
     console.error("Error fetching enrollments by class ID:", error);
     throw new Error("Could not fetch enrollments");
@@ -46,42 +44,46 @@ export async function getEnrollmentsByClassId(classId: string): Promise<SelectCl
 
 export async function getEnrollmentByClassName(id: string, className: string) {
   try {
-    const result = await dbAuth(async (db) => {
-      const enrollment = await db
-        .select()
-        .from(classEnrollment)
-        .innerJoin(classTable, eq(classEnrollment.classId, classTable.id))
-        .where(
-          and(
-            eq(classTable.universityId, id),
-            eq(classTable.className, className)
-          )
+    const enrollment = await db
+      .select()
+      .from(classEnrollment)
+      .innerJoin(classTable, eq(classEnrollment.classId, classTable.id))
+      .where(
+        and(
+          eq(classTable.universityId, id),
+          eq(classTable.className, className)
         )
-      return enrollment[0];
-    })
-    return result;
+      );
+    return enrollment[0];
   } catch (error) {
     console.error("Error fetching enrollment by class name:", error);
     throw new Error("Could not fetch enrollment");
   }
 }
 
-export async function createEnrollment(data: InsertClassEnrollment): Promise<SelectClassEnrollment> {
-  try{
+export async function createEnrollment(
+  data: InsertClassEnrollment
+): Promise<SelectClassEnrollment> {
+  try {
     const result = await db.insert(classEnrollment).values(data).returning();
-    revalidatePath("/dashboard")
+    revalidatePath("/dashboard");
     return result[0];
-  }catch(error){
+  } catch (error) {
     console.error("Error creating enrollment:", error);
     throw new Error("Could not create enrollment");
   }
 }
 
-export async function updateEnrollment(id: string, data: InsertClassEnrollment): Promise<SelectClassEnrollment> {
+export async function updateEnrollment(
+  id: string,
+  data: InsertClassEnrollment
+): Promise<SelectClassEnrollment> {
   try {
-    const result = await dbAuth(async (db) => {
-      return await db.update(classEnrollment).set(data).where(eq(classEnrollment.id, id)).returning();
-    })
+    const result = await db
+      .update(classEnrollment)
+      .set(data)
+      .where(eq(classEnrollment.id, id))
+      .returning();
     return result[0];
   } catch (error) {
     console.error("Error updating enrollment:", error);
@@ -91,12 +93,9 @@ export async function updateEnrollment(id: string, data: InsertClassEnrollment):
 
 export async function deleteEnrollment(id: string): Promise<void> {
   try {
-    await dbAuth(async (db) => {
-      await db.delete(classEnrollment).where(eq(classEnrollment.id, id));
-    })
+    await db.delete(classEnrollment).where(eq(classEnrollment.id, id));
   } catch (error) {
     console.error("Error deleting enrollment:", error);
     throw new Error("Could not delete enrollment");
   }
 }
-

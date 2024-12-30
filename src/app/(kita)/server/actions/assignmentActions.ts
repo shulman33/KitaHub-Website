@@ -1,6 +1,6 @@
 "use server";
 
-import { dbAuth } from "@/app/db/drizzle";
+import { db } from "@/app/db/drizzle";
 import {
   InsertAssignment,
   SelectAssignment,
@@ -55,49 +55,47 @@ function getTimeUntilDeadline(
 // and the class name
 // it should only return assignments for classes the current user is enrolled in
 export async function getAssignmentsByClassId(
-  classId: string
+  classId: string,
+  authUserId: string
 ): Promise<ExtendedSelectAssignment[]> {
   try {
-    const result = await dbAuth(async (db) => {
-      const assignments = await db
-        .select({
-          id: assignment.id,
-          title: assignment.title,
-          description: assignment.description,
-          dueDate: assignment.dueDate,
-          classId: assignment.classId,
-          totalPoints: assignment.totalPoints,
-          isUploaded: assignment.isUploaded,
-          url: assignment.url,
-          isGraded: assignment.isGraded,
-          isPublished: assignment.isPublished,
+    const assignments = await db
+      .select({
+        id: assignment.id,
+        title: assignment.title,
+        description: assignment.description,
+        dueDate: assignment.dueDate,
+        classId: assignment.classId,
+        totalPoints: assignment.totalPoints,
+        isUploaded: assignment.isUploaded,
+        url: assignment.url,
+        isGraded: assignment.isGraded,
+        isPublished: assignment.isPublished,
 
-          className: classTable.className,
-        })
-        .from(assignment)
-        .innerJoin(
-          classEnrollment,
-          eq(assignment.classId, classEnrollment.classId)
+        className: classTable.className,
+      })
+      .from(assignment)
+      .innerJoin(
+        classEnrollment,
+        eq(assignment.classId, classEnrollment.classId)
+      )
+      .innerJoin(classTable, eq(assignment.classId, classTable.id))
+      .where(
+        and(
+          eq(classEnrollment.classId, classId),
+          isEnrolledInClass(classEnrollment.userId, authUserId)
         )
-        .innerJoin(classTable, eq(assignment.classId, classTable.id))
-        .where(
-          and(
-            eq(classEnrollment.classId, classId),
-            isEnrolledInClass(classEnrollment.userId)
-          )
-        );
+      );
 
-      const extendedAssignments = assignments.map((assignment) => {
-        const timeToDeadlineObject = getTimeUntilDeadline(assignment.dueDate);
-        return {
-          ...assignment,
-          timeToDeadlineObject,
-        };
-      });
-
-      return extendedAssignments;
+    const extendedAssignments = assignments.map((assignment) => {
+      const timeToDeadlineObject = getTimeUntilDeadline(assignment.dueDate);
+      return {
+        ...assignment,
+        timeToDeadlineObject,
+      };
     });
-    return result;
+
+    return extendedAssignments;
   } catch (error) {
     console.error("Error fetching assignments by class ID:", error);
     throw new Error("Error fetching assignments by class ID");
@@ -108,48 +106,47 @@ export async function getAssignmentsByClassId(
 // it should return all the fields from the assignment table
 // and the class name
 // it should only return assignments for classes the current user is enrolled in
-export async function getCurrentUserAssignment(): Promise<ExtendedSelectAssignment[]> {
-  try{
-    const result = await dbAuth(async (db) => {
-      const assignments = await db
-        .select({
-          id: assignment.id,
-          title: assignment.title,
-          description: assignment.description,
-          dueDate: assignment.dueDate,
-          classId: assignment.classId,
-          totalPoints: assignment.totalPoints,
-          isUploaded: assignment.isUploaded,
-          url: assignment.url,
-          isGraded: assignment.isGraded,
-          isPublished: assignment.isPublished,
-          className: classTable.className,
-        })
-        .from(assignment)
-        .innerJoin(
-          classEnrollment,
-          eq(assignment.classId, classEnrollment.classId)
+export async function getCurrentUserAssignment(
+  auth0UserId: string
+): Promise<ExtendedSelectAssignment[]> {
+  try {
+    const assignments = await db
+      .select({
+        id: assignment.id,
+        title: assignment.title,
+        description: assignment.description,
+        dueDate: assignment.dueDate,
+        classId: assignment.classId,
+        totalPoints: assignment.totalPoints,
+        isUploaded: assignment.isUploaded,
+        url: assignment.url,
+        isGraded: assignment.isGraded,
+        isPublished: assignment.isPublished,
+        className: classTable.className,
+      })
+      .from(assignment)
+      .innerJoin(
+        classEnrollment,
+        eq(assignment.classId, classEnrollment.classId)
+      )
+      .innerJoin(classTable, eq(assignment.classId, classTable.id))
+      .where(
+        and(
+          isEnrolledInClass(classEnrollment.classId, auth0UserId),
+          eq(classEnrollment.userId, currentUserId(auth0UserId))
         )
-        .innerJoin(classTable, eq(assignment.classId, classTable.id))
-        .where(
-          and(
-            isEnrolledInClass(classEnrollment.classId),
-            eq(classEnrollment.userId, currentUserId)
-          )
-        );
+      );
 
-      const extendedAssignments = assignments.map((assignment) => {
-        const timeToDeadlineObject = getTimeUntilDeadline(assignment.dueDate);
-        return {
-          ...assignment,
-          timeToDeadlineObject,
-        };
-      });
-
-      return extendedAssignments;
+    const extendedAssignments = assignments.map((assignment) => {
+      const timeToDeadlineObject = getTimeUntilDeadline(assignment.dueDate);
+      return {
+        ...assignment,
+        timeToDeadlineObject,
+      };
     });
-    return result;
-  }catch(error){
+
+    return extendedAssignments;
+  } catch (error) {
     console.error("Error fetching current user assignments:", error);
     throw new Error("Error fetching current user assignments");
   }
@@ -160,41 +157,42 @@ export async function getCurrentUserAssignment(): Promise<ExtendedSelectAssignme
 // and the class name
 // it should only return the assignment if the current user is enrolled in the class
 export async function getAssignmentById(
-  id: string
+  id: string,
+  authUserId: string
 ): Promise<ExtendedSelectAssignment> {
   try {
-    const result = await dbAuth(async (db) => {
-      const assignments = await db
-        .select({
-          id: assignment.id,
-          title: assignment.title,
-          description: assignment.description,
-          dueDate: assignment.dueDate,
-          classId: assignment.classId,
-          totalPoints: assignment.totalPoints,
-          isUploaded: assignment.isUploaded,
-          url: assignment.url,
-          isGraded: assignment.isGraded,
-          isPublished: assignment.isPublished,
-          className: classTable.className,
-        })
-        .from(assignment)
-        .innerJoin(classTable, eq(assignment.classId, classTable.id))
-        .where(
-          and(eq(assignment.id, id), isEnrolledInClass(assignment.classId))
-        );
+    const assignments = await db
+      .select({
+        id: assignment.id,
+        title: assignment.title,
+        description: assignment.description,
+        dueDate: assignment.dueDate,
+        classId: assignment.classId,
+        totalPoints: assignment.totalPoints,
+        isUploaded: assignment.isUploaded,
+        url: assignment.url,
+        isGraded: assignment.isGraded,
+        isPublished: assignment.isPublished,
+        className: classTable.className,
+      })
+      .from(assignment)
+      .innerJoin(classTable, eq(assignment.classId, classTable.id))
+      .where(
+        and(
+          eq(assignment.id, id),
+          isEnrolledInClass(assignment.classId, authUserId)
+        )
+      );
 
-      if (!assignments.length) {
-        throw new Error("Assignment not found or not authorized");
-      }
+    if (!assignments.length) {
+      throw new Error("Assignment not found or not authorized");
+    }
 
-      const timeToDeadlineObject = getTimeUntilDeadline(assignments[0].dueDate);
-      return {
-        ...assignments[0],
-        timeToDeadlineObject,
-      };
-    });
-    return result;
+    const timeToDeadlineObject = getTimeUntilDeadline(assignments[0].dueDate);
+    return {
+      ...assignments[0],
+      timeToDeadlineObject,
+    };
   } catch (error) {
     console.error("Error fetching assignment by ID:", error);
     throw new Error("Error fetching assignment by ID");
@@ -205,36 +203,34 @@ export async function getAssignmentById(
 // it should return the newly created assignment
 // it should only create the assignment if the current user is a professor for the class
 export async function createAssignment(
+  authUserId: string,
   data: InsertAssignment
 ): Promise<SelectAssignment> {
   try {
-    const result = await dbAuth(async (db) => {
-      // Check if user is a professor for this class
-      const enrollment = await db
-        .select()
-        .from(classEnrollment)
-        .where(
-          and(
-            eq(classEnrollment.classId, data.classId),
-            eq(classEnrollment.userId, currentUserId),
-            eq(classEnrollment.role, "PROFESSOR")
-          )
-        );
+    // Check if user is a professor for this class
+    const enrollment = await db
+      .select()
+      .from(classEnrollment)
+      .where(
+        and(
+          eq(classEnrollment.classId, data.classId),
+          eq(classEnrollment.userId, currentUserId(authUserId)),
+          eq(classEnrollment.role, "PROFESSOR")
+        )
+      );
 
-      if (!enrollment.length) {
-        throw new Error(
-          "Only professors can create assignments for their classes"
-        );
-      }
+    if (!enrollment.length) {
+      throw new Error(
+        "Only professors can create assignments for their classes"
+      );
+    }
 
-      const [newAssignment] = await db
-        .insert(assignment)
-        .values(data)
-        .returning();
+    const [newAssignment] = await db
+      .insert(assignment)
+      .values(data)
+      .returning();
 
-      return newAssignment;
-    });
-    return result;
+    return newAssignment;
   } catch (error) {
     console.error("Error creating assignment:", error);
     throw new Error("Could not create assignment");
@@ -246,47 +242,45 @@ export async function createAssignment(
 // it should only update the assignment if the current user is a professor for the class
 export async function updateAssignment(
   id: string,
+  authUserId: string,
   data: Partial<InsertAssignment>
 ): Promise<SelectAssignment> {
   try {
-    const result = await dbAuth(async (db) => {
-      // First get the assignment to check the classId
-      const existingAssignment = await db
-        .select()
-        .from(assignment)
-        .where(eq(assignment.id, id));
+    // First get the assignment to check the classId
+    const existingAssignment = await db
+      .select()
+      .from(assignment)
+      .where(eq(assignment.id, id));
 
-      if (!existingAssignment.length) {
-        throw new Error("Assignment not found");
-      }
+    if (!existingAssignment.length) {
+      throw new Error("Assignment not found");
+    }
 
-      // Check if user is a professor for this class
-      const enrollment = await db
-        .select()
-        .from(classEnrollment)
-        .where(
-          and(
-            eq(classEnrollment.classId, existingAssignment[0].classId),
-            eq(classEnrollment.userId, currentUserId),
-            eq(classEnrollment.role, "PROFESSOR")
-          )
-        );
+    // Check if user is a professor for this class
+    const enrollment = await db
+      .select()
+      .from(classEnrollment)
+      .where(
+        and(
+          eq(classEnrollment.classId, existingAssignment[0].classId),
+          eq(classEnrollment.userId, currentUserId(authUserId)),
+          eq(classEnrollment.role, "PROFESSOR")
+        )
+      );
 
-      if (!enrollment.length) {
-        throw new Error(
-          "Only professors can update assignments for their classes"
-        );
-      }
+    if (!enrollment.length) {
+      throw new Error(
+        "Only professors can update assignments for their classes"
+      );
+    }
 
-      const [updatedAssignment] = await db
-        .update(assignment)
-        .set(data)
-        .where(eq(assignment.id, id))
-        .returning();
+    const [updatedAssignment] = await db
+      .update(assignment)
+      .set(data)
+      .where(eq(assignment.id, id))
+      .returning();
 
-      return updatedAssignment;
-    });
-    return result;
+    return updatedAssignment;
   } catch (error) {
     console.error("Error updating assignment:", error);
     throw new Error("Could not update assignment");
@@ -295,39 +289,40 @@ export async function updateAssignment(
 
 // this function deletes an assignment by its ID
 // it should only delete the assignment if the current user is a professor for the class
-export async function deleteAssignment(id: string): Promise<void> {
+export async function deleteAssignment(
+  id: string,
+  authUserId: string
+): Promise<void> {
   try {
-    await dbAuth(async (db) => {
-      // First get the assignment to check the classId
-      const existingAssignment = await db
-        .select()
-        .from(assignment)
-        .where(eq(assignment.id, id));
+    // First get the assignment to check the classId
+    const existingAssignment = await db
+      .select()
+      .from(assignment)
+      .where(eq(assignment.id, id));
 
-      if (!existingAssignment.length) {
-        throw new Error("Assignment not found");
-      }
+    if (!existingAssignment.length) {
+      throw new Error("Assignment not found");
+    }
 
-      // Check if user is a professor for this class
-      const enrollment = await db
-        .select()
-        .from(classEnrollment)
-        .where(
-          and(
-            eq(classEnrollment.classId, existingAssignment[0].classId),
-            eq(classEnrollment.userId, currentUserId),
-            eq(classEnrollment.role, "PROFESSOR")
-          )
-        );
+    // Check if user is a professor for this class
+    const enrollment = await db
+      .select()
+      .from(classEnrollment)
+      .where(
+        and(
+          eq(classEnrollment.classId, existingAssignment[0].classId),
+          eq(classEnrollment.userId, currentUserId(authUserId)),
+          eq(classEnrollment.role, "PROFESSOR")
+        )
+      );
 
-      if (!enrollment.length) {
-        throw new Error(
-          "Only professors can delete assignments for their classes"
-        );
-      }
+    if (!enrollment.length) {
+      throw new Error(
+        "Only professors can delete assignments for their classes"
+      );
+    }
 
-      await db.delete(assignment).where(eq(assignment.id, id));
-    });
+    await db.delete(assignment).where(eq(assignment.id, id));
   } catch (error) {
     console.error("Error deleting assignment:", error);
     throw new Error("Could not delete assignment");

@@ -14,6 +14,7 @@ import { getSession } from "@auth0/nextjs-auth0";
 interface StudentDashboardProps {
   name: string;
   isStudent: boolean;
+  authUserId: string;
 }
 
 // const dummyAssignments = [
@@ -44,12 +45,12 @@ interface StudentDashboardProps {
 // ];
 
 
-const StudentDashboard = async ({ name, isStudent }: StudentDashboardProps) => {
-  const messages = await getMessagesByCurrentUser();
+const StudentDashboard = async ({ name, isStudent, authUserId }: StudentDashboardProps) => {
+  const messages = await getMessagesByCurrentUser(authUserId);
   // console.log("messages", messages);
-  const courses = await getClassesForCurrentUser();
+  const courses = await getClassesForCurrentUser(authUserId);
   // console.log("courses", courses);
-  const assignments = await getCurrentUserAssignment();
+  const assignments = await getCurrentUserAssignment(authUserId);
   const session = await getSession();
   if (!session || !session.user) {
     throw new Error("User is not authenticated");

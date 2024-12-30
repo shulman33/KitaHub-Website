@@ -167,15 +167,17 @@ const resourceData: Resource[] = [
 interface StudentClassDashboardProps {
   classData: ExtendedClass;
   name: string;
+  authUserId: string;
 }
 
 export default async function StudentClassDashboard({
   classData,
   name,
+  authUserId
 }: StudentClassDashboardProps) {
-  const assignments = await getAssignmentsByClassId(classData.id);
-  const messages = await getMessagesByClassId(classData.id);
-  const instructors = await getInstructorsByClassId(classData.id);
+  const assignments = await getAssignmentsByClassId(classData.id, authUserId);
+  const messages = await getMessagesByClassId(classData.id, authUserId);
+  const instructors = await getInstructorsByClassId(classData.id, authUserId);
   return (
     <>
       <div className="grid  md:grid-cols-2 lg:grid-cols-[60%,auto] gap-[30px]">

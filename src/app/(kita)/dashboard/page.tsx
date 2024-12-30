@@ -10,16 +10,16 @@ export default withPageAuthRequired(async function MainDashboard() {
     throw new Error("User is not authenticated");
   }
 
-  const { name } = session.user;
+  const { name, id } = session.user;
   const role = await getUserRole(session.user.sub);
   const isStudent = role === "Student";
 
   return (
     <main>
       {isStudent ? (
-        <StudentDashboard name={name} isStudent={isStudent} />
+        <StudentDashboard name={name} isStudent={isStudent} authUserId={id} />
       ) : (
-        <ProfessorDashboard name={name} isStudent={isStudent} />
+        <ProfessorDashboard name={name} isStudent={isStudent} authUserId={id} />
       )}
     </main>
   );

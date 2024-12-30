@@ -151,11 +151,12 @@ const events = [
 interface ProfessorDashboardProps {
   name: string;
   isStudent: boolean;
+  authUserId: string;
 }
-const ProfessorDashboard = async ({name, isStudent}: ProfessorDashboardProps) => {
-  const messages = await getMessagesByCurrentUser();
-  const assignments = await getCurrentUserAssignment();
-  const courses = await getClassesForCurrentUser();
+const ProfessorDashboard = async ({name, isStudent, authUserId}: ProfessorDashboardProps) => {
+  const messages = await getMessagesByCurrentUser(authUserId);
+  const assignments = await getCurrentUserAssignment(authUserId);
+  const courses = await getClassesForCurrentUser(authUserId);
   const session = await getSession();
   if (!session || !session.user) {
     throw new Error("User is not authenticated");

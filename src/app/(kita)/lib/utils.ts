@@ -22,10 +22,10 @@ export function findUniversityByEmail(email: string): UniversityResult | null {
   return null;
 }
 
-export const currentUserId = sql`(
+export const currentUserId = (authUserId: string) => sql`(
     SELECT u.id
     FROM "user" u
-    WHERE u."auth0UserId" = auth.user_id()
+    WHERE u."auth0UserId" = ${authUserId}
   )`;
 
 export const currentUserRole = sql`
@@ -36,12 +36,12 @@ export const currentUserRole = sql`
   )
 `;
 
-export const isEnrolledInClass = (classIdColumn: AnyColumn) => sql`
+export const isEnrolledInClass = (classIdColumn: AnyColumn, authUserId: string) => sql`
   EXISTS (
     SELECT 1
     FROM "class_enrollment" ce
     WHERE ce."classId" = ${classIdColumn}
-      AND ce."userId" = ${currentUserId}
+      AND ce."userId" = ${currentUserId(authUserId)}
   )
 `;
 

@@ -164,15 +164,17 @@ const events = [
 interface ProfessorClassDashboardProps {
   classData: ExtendedClass;
   name: string;
+  authUserId: string;
 }
 
 export default async function ProfessorClassDashboard({
   classData,
-  name
+  name,
+  authUserId,
 }: ProfessorClassDashboardProps) {
-  const assignments = await getAssignmentsByClassId(classData.id);
-  const messages = await getMessagesByClassId(classData.id);
-  const students = await getStudentsByClassId(classData.id);
+  const assignments = await getAssignmentsByClassId(classData.id, authUserId);
+  const messages = await getMessagesByClassId(classData.id, authUserId);
+  const students = await getStudentsByClassId(classData.id, authUserId);
   return (
     <div>
       <Header name={name} />
