@@ -9,7 +9,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "drizzle-kit push",
+    "postinstall": "drizzle-kit push --force",
     "seed": "npx tsx src/app/db/seed.ts"
   },
   "dependencies": {
