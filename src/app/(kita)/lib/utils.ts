@@ -22,11 +22,11 @@ export function findUniversityByEmail(email: string): UniversityResult | null {
   return null;
 }
 
-export const currentUserId = (authUserId: string) => sql`(
+export const currentUserId = (authUserId: string) => sql`
     SELECT u.id
     FROM "user" u
     WHERE u."auth0UserId" = ${authUserId}
-  )`;
+`;
 
 export const currentUserRole = sql`
   (
