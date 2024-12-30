@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/app/db/drizzle";
+import { sql } from "drizzle-orm";
 import {
   InsertAssignment,
   SelectAssignment,
@@ -129,13 +130,16 @@ export async function getCurrentUserAssignment(
         classEnrollment,
         eq(assignment.classId, classEnrollment.classId)
       )
-      .innerJoin(classTable, eq(assignment.classId, classTable.id))
-      .where(
-        and(
-          isEnrolledInClass(classEnrollment.classId, auth0UserId),
-          eq(classEnrollment.userId, currentUserId(auth0UserId))
-        )
-      );
+      .innerJoin(classTable, eq(assignment.classId, classTable.id)).where(sql`
+        ${classEnrollment.userId} = ${currentUserId(auth0UserId)}
+        AND ${isEnrolledInClass(assignment.classId, auth0UserId)}
+      `);
+      // .where(
+      //   and(
+      //     isEnrolledInClass(classEnrollment.classId, auth0UserId),
+      //     eq(classEnrollment.userId, currentUserId(auth0UserId))
+      //   )
+      // );
 
     const extendedAssignments = assignments.map((assignment) => {
       const timeToDeadlineObject = getTimeUntilDeadline(assignment.dueDate);
