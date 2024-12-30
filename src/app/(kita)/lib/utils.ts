@@ -36,12 +36,28 @@ export const currentUserRole = sql`
   )
 `;
 
-export const isEnrolledInClass = (classIdColumn: AnyColumn, authUserId: string) => sql`
+// export const isEnrolledInClass = (classIdColumn: AnyColumn, authUserId: string) => sql`
+//   EXISTS (
+//     SELECT 1
+//     FROM "class_enrollment" ce
+//     WHERE ce."classId" = ${classIdColumn}
+//       AND ce."userId" = ${currentUserId(authUserId)}
+//   )
+// `;
+
+export const isEnrolledInClass = (
+  classIdColumn: AnyColumn,
+  authUserId: string
+) => sql`
   EXISTS (
     SELECT 1
     FROM "class_enrollment" ce
     WHERE ce."classId" = ${classIdColumn}
-      AND ce."userId" = ${currentUserId(authUserId)}
+      AND ce."userId" = (
+        SELECT u.id
+        FROM "user" u
+        WHERE u."auth0UserId" = ${authUserId}
+      )
   )
 `;
 
