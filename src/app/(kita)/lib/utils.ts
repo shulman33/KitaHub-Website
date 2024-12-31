@@ -62,8 +62,8 @@ export const userIdSubquery = (authUserId: string) => {
     .select({ id: user.id })
     .from(user)
     .where(eq(user.auth0UserId, authUserId))
-    .limit(1);
-  // .as("userId");
+    .limit(1)
+    .as("userSubquery");
 
   // return userId;
 };

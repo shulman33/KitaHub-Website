@@ -15,7 +15,7 @@ import {
   ExtendedInstructor,
   ExtendedStudent,
 } from "../../lib/types";
-import { currentUserId, isEnrolledInClassSubquery, professorDataSubquery } from "../../lib/utils";
+import { currentUserId, isEnrolledInClassSubquery, professorDataSubquery, userIdSubquery } from "../../lib/utils";
 import { revalidatePath } from "next/cache";
 
 // This function fetches a class by its ID
@@ -92,7 +92,7 @@ export async function getClassesForCurrentUser(
         professorDataSubquery,
         eq(classTable.id, professorDataSubquery.classId)
       )
-      .where(eq(classEnrollment.userId, authUserId));
+      .where(eq(classEnrollment.userId, userIdSubquery(authUserId).id));
 
     const extendedClasses: ExtendedClass[] = classes.map((cls) => ({
       id: cls.id,
