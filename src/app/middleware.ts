@@ -1,7 +1,25 @@
-import { withMiddlewareAuthRequired } from "@auth0/nextjs-auth0/edge";
+import { NextResponse, type NextRequest } from 'next/server';
+import { getSession } from '@auth0/nextjs-auth0/edge'; // Note the /edge import
 
-export default withMiddlewareAuthRequired();
+export async function middleware(req: NextRequest) {
+  const res = new NextResponse();
+  const session = await getSession(req, res);
+  if (!session || !session.user) {
+    return NextResponse.redirect(
+      new URL("/api/auth/login?returnTo=/dashboard", req.url)
+    );
+  }
+
+  return NextResponse.next();
+}
 
 export const config = {
-  matcher: ["/(kita)/dashboard/:path*"],
+  matcher: ["/dashboard/:path*"],
 };
+
+
+// import { withMiddlewareAuthRequired } from "@auth0/nextjs-auth0/edge";
+
+// export default withMiddlewareAuthRequired();
+
+
