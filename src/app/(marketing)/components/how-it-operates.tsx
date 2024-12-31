@@ -12,6 +12,8 @@ const ImageDisplay: React.FC<ImageDisplayProps> = ({ src, alt }) => {
       loading="lazy"
       src={src}
       alt={alt}
+      width={1067}
+      height={960}
       className="object-contain w-full rounded-none aspect-[0.9] max-w-[1067px] max-md:max-w-full"
     />
   );

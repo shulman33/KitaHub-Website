@@ -33,6 +33,8 @@ export default function DropdownInput({
         <Image
           src="https://cdn.builder.io/api/v1/image/assets/TEMP/412be722e298b335c0b573aaf1e6eb510b2e7329762b8f3d81149d4aa0f7ec3f?apiKey=94d444df7e334ff786d8d250ab815d08&&apiKey=94d444df7e334ff786d8d250ab815d08"
           alt=""
+          width={16}
+          height={8}
           className={`w-4 h-2 transition-transform ${
             isOpen ? "rotate-180" : ""
           }`}

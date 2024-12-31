@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { getSession } from '@auth0/nextjs-auth0/edge'; // Note the /edge import
 
 export async function middleware(req: NextRequest) {
+  console.log("middleware");
   const res = new NextResponse();
   const session = await getSession(req, res);
   if (!session || !session.user) {
@@ -16,10 +17,5 @@ export async function middleware(req: NextRequest) {
 export const config = {
   matcher: ["/dashboard/:path*"],
 };
-
-
-// import { withMiddlewareAuthRequired } from "@auth0/nextjs-auth0/edge";
-
-// export default withMiddlewareAuthRequired();
 
 
