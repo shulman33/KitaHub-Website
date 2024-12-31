@@ -41,27 +41,6 @@ export async function getClassById(
         professorFirstName: professorDataSubquery.professorFirstName,
         professorLastName: professorDataSubquery.professorLastName,
         professorProfilePicture: professorDataSubquery.professorProfilePicture,
-        // professorFirstName: sql<string>`(
-        //     SELECT u."firstName"
-        //     FROM "class_enrollment" ce
-        //     JOIN "user" u ON ce."userId" = u.id
-        //     WHERE ce."classId" = ${classId} AND ce."role" = 'PROFESSOR'
-        //     LIMIT 1
-        //   )`,
-        // professorLastName: sql<string>`(
-        //     SELECT u."lastName"
-        //     FROM "class_enrollment" ce
-        //     JOIN "user" u ON ce."userId" = u.id
-        //     WHERE ce."classId" = ${classId} AND ce."role" = 'PROFESSOR'
-        //     LIMIT 1
-        //   )`,
-        // professorProfilePicture: sql<string | null>`(
-        //     SELECT u."profilePicture"
-        //     FROM "class_enrollment" ce
-        //     JOIN "user" u ON ce."userId" = u.id
-        //     WHERE ce."classId" = ${classId} AND ce."role" = 'PROFESSOR'
-        //     LIMIT 1
-        //   )`,
       })
       .from(classTable)
       .where(and(
@@ -94,7 +73,6 @@ export async function getClassesForCurrentUser(
     // Fetch classes where the current user is enrolled
     const classes = await db
       .select({
-        // Selecting fields from the Class table
         id: classTable.id,
         universityId: classTable.universityId,
         className: classTable.className,
@@ -108,36 +86,13 @@ export async function getClassesForCurrentUser(
         professorFirstName: professorDataSubquery.professorFirstName,
         professorLastName: professorDataSubquery.professorLastName,
         professorProfilePicture: professorDataSubquery.professorProfilePicture,
-
-        // Selecting fields from the Professor's User table using subqueries
-        // swap out to use utility function
-        // keep everything drizzle-orm
-        // professorFirstName: sql`(
-        //     SELECT u."firstName"
-        //     FROM "class_enrollment" ce
-        //     JOIN "user" u ON ce."userId" = u.id
-        //     WHERE ce."classId" = "class"."id" AND ce."role" = 'PROFESSOR'
-        //     LIMIT 1
-        //   )`,
-
-        // professorLastName: sql`(
-        //     SELECT u."lastName"
-        //     FROM "class_enrollment" ce
-        //     JOIN "user" u ON ce."userId" = u.id
-        //     WHERE ce."classId" = "class"."id" AND ce."role" = 'PROFESSOR'
-        //     LIMIT 1
-        //   )`,
-
-        // professorProfilePicture: sql`(
-        //     SELECT u."profilePicture"
-        //     FROM "class_enrollment" ce
-        //     JOIN "user" u ON ce."userId" = u.id
-        //     WHERE ce."classId" = "class"."id" AND ce."role" = 'PROFESSOR'
-        //     LIMIT 1
-        //   )`,
       })
       .from(classTable)
       .innerJoin(classEnrollment, eq(classTable.id, classEnrollment.classId))
+      .leftJoin(
+        professorDataSubquery,
+        eq(classTable.id, professorDataSubquery.classId)
+      )
       .where(eq(classEnrollment.userId, currentUserId(authUserId)));
 
     // Map the result to the ExtendedClass type

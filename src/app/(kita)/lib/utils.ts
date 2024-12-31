@@ -32,14 +32,12 @@ export const professorDataSubquery = db
     professorFirstName: user.firstName,
     professorLastName: user.lastName,
     professorProfilePicture: user.profilePicture,
+    classId: classEnrollment.classId,
   })
   .from(classEnrollment)
   .innerJoin(user, eq(user.id, classEnrollment.userId))
-  .where(
-    and(eq(classEnrollment.classId, classTable.id), eq(user.role, "PROFESSOR"))
-  )
-  .limit(1)
-  .as("user");
+  .where(eq(user.role, "PROFESSOR"))
+  .as("professorData");
 
 export const currentUserId = (authUserId: string) => sql`
     SELECT u.id
