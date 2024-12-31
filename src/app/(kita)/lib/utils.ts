@@ -39,7 +39,7 @@ export const professorDataSubquery = db
     and(eq(classEnrollment.classId, classTable.id), eq(user.role, "PROFESSOR"))
   )
   .limit(1)
-  .as("professorData");
+  .as("user");
 
 export const currentUserId = (authUserId: string) => sql`
     SELECT u.id
