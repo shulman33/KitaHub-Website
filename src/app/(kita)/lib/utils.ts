@@ -2,7 +2,7 @@ import universities from "./universities.json";
 import { University, UniversityResult } from "./types";
 import { AnyColumn, sql, exists, and } from "drizzle-orm";
 import { db } from "@/app/db/drizzle";
-import { user } from "@/app/db/schema";
+import { classTable, user } from "@/app/db/schema";
 import { eq } from "drizzle-orm";
 import { classEnrollment } from "@/app/db/schema";
 import { get } from "http";
@@ -26,6 +26,20 @@ export function findUniversityByEmail(email: string): UniversityResult | null {
   }
   return null;
 }
+
+export const professorDataSubquery = db
+  .select({
+    professorFirstName: user.firstName,
+    professorLastName: user.lastName,
+    professorProfilePicture: user.profilePicture,
+  })
+  .from(classEnrollment)
+  .innerJoin(user, eq(user.id, classEnrollment.userId))
+  .where(
+    and(eq(classEnrollment.classId, classTable.id), eq(user.role, "PROFESSOR"))
+  )
+  .limit(1)
+  .as("professorData");
 
 export const currentUserId = (authUserId: string) => sql`
     SELECT u.id

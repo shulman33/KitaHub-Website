@@ -9,13 +9,13 @@ import {
   classEnrollment,
   semesterEnum,
 } from "@/app/db/schema";
-import { eq, sql, and } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import {
   ExtendedClass,
   ExtendedInstructor,
   ExtendedStudent,
 } from "../../lib/types";
-import { currentUserId, isEnrolledInClassSubquery } from "../../lib/utils";
+import { currentUserId, isEnrolledInClassSubquery, professorDataSubquery } from "../../lib/utils";
 import { revalidatePath } from "next/cache";
 
 // This function fetches a class by its ID
@@ -38,27 +38,30 @@ export async function getClassById(
         semester: classTable.semester,
         year: classTable.year,
         isActive: classTable.isActive,
-        professorFirstName: sql<string>`(
-            SELECT u."firstName"
-            FROM "class_enrollment" ce
-            JOIN "user" u ON ce."userId" = u.id
-            WHERE ce."classId" = ${classId} AND ce."role" = 'PROFESSOR'
-            LIMIT 1
-          )`,
-        professorLastName: sql<string>`(
-            SELECT u."lastName"
-            FROM "class_enrollment" ce
-            JOIN "user" u ON ce."userId" = u.id
-            WHERE ce."classId" = ${classId} AND ce."role" = 'PROFESSOR'
-            LIMIT 1
-          )`,
-        professorProfilePicture: sql<string | null>`(
-            SELECT u."profilePicture"
-            FROM "class_enrollment" ce
-            JOIN "user" u ON ce."userId" = u.id
-            WHERE ce."classId" = ${classId} AND ce."role" = 'PROFESSOR'
-            LIMIT 1
-          )`,
+        professorFirstName: professorDataSubquery.professorFirstName,
+        professorLastName: professorDataSubquery.professorLastName,
+        professorProfilePicture: professorDataSubquery.professorProfilePicture,
+        // professorFirstName: sql<string>`(
+        //     SELECT u."firstName"
+        //     FROM "class_enrollment" ce
+        //     JOIN "user" u ON ce."userId" = u.id
+        //     WHERE ce."classId" = ${classId} AND ce."role" = 'PROFESSOR'
+        //     LIMIT 1
+        //   )`,
+        // professorLastName: sql<string>`(
+        //     SELECT u."lastName"
+        //     FROM "class_enrollment" ce
+        //     JOIN "user" u ON ce."userId" = u.id
+        //     WHERE ce."classId" = ${classId} AND ce."role" = 'PROFESSOR'
+        //     LIMIT 1
+        //   )`,
+        // professorProfilePicture: sql<string | null>`(
+        //     SELECT u."profilePicture"
+        //     FROM "class_enrollment" ce
+        //     JOIN "user" u ON ce."userId" = u.id
+        //     WHERE ce."classId" = ${classId} AND ce."role" = 'PROFESSOR'
+        //     LIMIT 1
+        //   )`,
       })
       .from(classTable)
       .where(and(
@@ -102,35 +105,39 @@ export async function getClassesForCurrentUser(
         semester: classTable.semester,
         year: classTable.year,
         isActive: classTable.isActive,
+        professorFirstName: professorDataSubquery.professorFirstName,
+        professorLastName: professorDataSubquery.professorLastName,
+        professorProfilePicture: professorDataSubquery.professorProfilePicture,
 
         // Selecting fields from the Professor's User table using subqueries
-        professorFirstName: sql`(
-            SELECT u."firstName"
-            FROM "class_enrollment" ce
-            JOIN "user" u ON ce."userId" = u.id
-            WHERE ce."classId" = "class"."id" AND ce."role" = 'PROFESSOR'
-            LIMIT 1
-          )`,
+        // swap out to use utility function
+        // keep everything drizzle-orm
+        // professorFirstName: sql`(
+        //     SELECT u."firstName"
+        //     FROM "class_enrollment" ce
+        //     JOIN "user" u ON ce."userId" = u.id
+        //     WHERE ce."classId" = "class"."id" AND ce."role" = 'PROFESSOR'
+        //     LIMIT 1
+        //   )`,
 
-        professorLastName: sql`(
-            SELECT u."lastName"
-            FROM "class_enrollment" ce
-            JOIN "user" u ON ce."userId" = u.id
-            WHERE ce."classId" = "class"."id" AND ce."role" = 'PROFESSOR'
-            LIMIT 1
-          )`,
+        // professorLastName: sql`(
+        //     SELECT u."lastName"
+        //     FROM "class_enrollment" ce
+        //     JOIN "user" u ON ce."userId" = u.id
+        //     WHERE ce."classId" = "class"."id" AND ce."role" = 'PROFESSOR'
+        //     LIMIT 1
+        //   )`,
 
-        professorProfilePicture: sql`(
-            SELECT u."profilePicture"
-            FROM "class_enrollment" ce
-            JOIN "user" u ON ce."userId" = u.id
-            WHERE ce."classId" = "class"."id" AND ce."role" = 'PROFESSOR'
-            LIMIT 1
-          )`,
+        // professorProfilePicture: sql`(
+        //     SELECT u."profilePicture"
+        //     FROM "class_enrollment" ce
+        //     JOIN "user" u ON ce."userId" = u.id
+        //     WHERE ce."classId" = "class"."id" AND ce."role" = 'PROFESSOR'
+        //     LIMIT 1
+        //   )`,
       })
       .from(classTable)
       .innerJoin(classEnrollment, eq(classTable.id, classEnrollment.classId))
-      // **Important:** Filter classes where the current user is enrolled
       .where(eq(classEnrollment.userId, currentUserId(authUserId)));
 
     // Map the result to the ExtendedClass type
