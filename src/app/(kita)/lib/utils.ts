@@ -27,6 +27,18 @@ export function findUniversityByEmail(email: string): UniversityResult | null {
   return null;
 }
 
+// export const professorDataSubquery = db
+//   .select({
+//     professorFirstName: user.firstName,
+//     professorLastName: user.lastName,
+//     professorProfilePicture: user.profilePicture,
+//     classId: classEnrollment.classId,
+//   })
+//   .from(classEnrollment)
+//   .innerJoin(user, eq(user.id, classEnrollment.userId))
+//   .where(eq(user.role, "PROFESSOR"))
+//   .as("professorData");
+
 export const professorDataSubquery = db
   .select({
     professorFirstName: user.firstName,
@@ -34,8 +46,8 @@ export const professorDataSubquery = db
     professorProfilePicture: user.profilePicture,
     classId: classEnrollment.classId,
   })
-  .from(classEnrollment)
-  .innerJoin(user, eq(user.id, classEnrollment.userId))
+  .from(user)
+  .innerJoin(classEnrollment, eq(classEnrollment.userId, user.id))
   .where(eq(user.role, "PROFESSOR"))
   .as("professorData");
 

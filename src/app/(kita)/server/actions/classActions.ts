@@ -70,7 +70,6 @@ export async function getClassesForCurrentUser(
   authUserId: string
 ): Promise<ExtendedClass[]> {
   try {
-    // Fetch classes where the current user is enrolled
     const classes = await db
       .select({
         id: classTable.id,
@@ -93,9 +92,8 @@ export async function getClassesForCurrentUser(
         professorDataSubquery,
         eq(classTable.id, professorDataSubquery.classId)
       )
-      .where(eq(classEnrollment.userId, currentUserId(authUserId)));
+      .where(eq(classEnrollment.userId, authUserId));
 
-    // Map the result to the ExtendedClass type
     const extendedClasses: ExtendedClass[] = classes.map((cls) => ({
       id: cls.id,
       universityId: cls.universityId,
@@ -113,11 +111,10 @@ export async function getClassesForCurrentUser(
       professorProfilePicture: cls.professorProfilePicture as string | null,
     }));
 
-    console.log("extendedClasses", extendedClasses);
     return extendedClasses;
   } catch (error) {
     console.error("Error fetching classes for current user:", error);
-    return [];
+    throw error; // Re-throw the error instead of returning empty array
   }
 }
 

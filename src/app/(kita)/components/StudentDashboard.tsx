@@ -44,6 +44,10 @@ interface StudentDashboardProps {
 //   },
 // ];
 
+// universityId 1e3d0e31-0299-4543-a8f3-2d969b9bccd5
+// userId 0e5df738-4658-45bd-b526-a0384df34b53
+// classId 2801f9a3-da61-426a-8fc7-0d0d5e50960c
+
 
 const StudentDashboard = async ({ name, isStudent, authUserId }: StudentDashboardProps) => {
   const messages = await getMessagesByCurrentUser(authUserId);
