@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import React from 'react';
 
 interface QuestionProps {
@@ -10,6 +11,7 @@ interface QuestionProps {
 
 const Question: React.FC<QuestionProps> = ({ title, description, tags, stats }) => {
   return (
+    <Link href="/dashboard/something">
     <div className="p-[24px] border-t border-[#0D6CFF14]">
       <div className="mb-[10px] flex gap-2 justify-between items-center">
         <div className="flex items-center gap-2">
@@ -43,6 +45,7 @@ const Question: React.FC<QuestionProps> = ({ title, description, tags, stats }) 
         </div>
       </div>
     </div>
+    </Link>
   );
 };
 

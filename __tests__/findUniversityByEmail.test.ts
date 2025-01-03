@@ -8,8 +8,8 @@ describe("findUniversityByEmail", () => {
     expect(result).toEqual({
       name: "Yeshiva University",
       country: "United States",
-      alpha_two_code: "US",
-      state_province: null,
+      alphaTwoCode: "US",
+      stateProvince: null,
     });
   });
 
@@ -20,8 +20,8 @@ describe("findUniversityByEmail", () => {
     expect(result).toEqual({
       name: "Yeshiva University",
       country: "United States",
-      alpha_two_code: "US",
-      state_province: null,
+      alphaTwoCode: "US",
+      stateProvince: null,
     });
   });
 
@@ -39,8 +39,8 @@ describe("findUniversityByEmail", () => {
     expect(result).toEqual({
       name: "Yeshiva University",
       country: "United States",
-      alpha_two_code: "US",
-      state_province: null,
+      alphaTwoCode: "US",
+      stateProvince: null,
     });
   });
 
@@ -51,8 +51,8 @@ describe("findUniversityByEmail", () => {
     expect(result).toEqual({
       name: "Yeshiva University",
       country: "United States",
-      alpha_two_code: "US",
-      state_province: null,
+      alphaTwoCode: "US",
+      stateProvince: null,
     });
   });
 });

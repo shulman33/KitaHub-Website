@@ -64,6 +64,8 @@ export default function MobileSidebar({
               <Image
                 alt="Your Company"
                 src="/sidenav-logo.png"
+                width={120}
+                height={32}
                 className="h-8 w-auto"
               />
             </div>

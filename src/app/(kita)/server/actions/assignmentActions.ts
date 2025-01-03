@@ -9,7 +9,7 @@ import {
   classTable,
   user
 } from "@/app/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, exists, sql } from "drizzle-orm";
 import { ExtendedSelectAssignment, TimeUntilDeadline } from "../../lib/types";
 import {
   isEnrolledInClassSubquery,
@@ -115,6 +115,16 @@ export async function getCurrentUserAssignment(
   auth0UserId: string
 ): Promise<ExtendedSelectAssignment[]> {
   try {
+
+    const [theUser] = await db
+      .select({ id: user.id })
+      .from(user)
+      .where(eq(user.auth0UserId, auth0UserId))
+      .limit(1);
+
+    if (!theUser) throw new Error("User not found");
+
+
     const assignments = await db
       .select({
         id: assignment.id,
@@ -137,16 +147,18 @@ export async function getCurrentUserAssignment(
       .innerJoin(classTable, eq(assignment.classId, classTable.id))
       .where(
         and(
-          isEnrolledInClassSubquery(classEnrollment.classId, auth0UserId),
-          eq(
-            classEnrollment.userId,
+          exists(
             db
-              .select({ id: user.id })
-              .from(user)
-              .where(eq(user.auth0UserId, auth0UserId))
-              .limit(1)
-          )
-          // eq(classEnrollment.userId, userIdSubquery(auth0UserId))
+              .select({ field: sql`1` })
+              .from(classEnrollment)
+              .where(
+                and(
+                  eq(classEnrollment.classId, assignment.classId),
+                  eq(classEnrollment.userId, theUser.id)
+                )
+              )
+          ),
+          eq(classEnrollment.userId, theUser.id)
         )
       );
 

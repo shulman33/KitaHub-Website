@@ -65,7 +65,6 @@ export const userIdSubquery = (authUserId: string) => {
     .limit(1)
     .as("userSubquery");
 
-  // return userId;
 };
 
 export const currentUserRole = sql`
@@ -113,7 +112,7 @@ export const isEnrolledInClassSubquery = (
       .where(
         and(
           eq(classEnrollment.classId, classIdColumn),
-          eq(classEnrollment.userId, userIdSubquery(authUserId))
+          eq(classEnrollment.userId, userIdSubquery(authUserId).id)
         )
       )
   );

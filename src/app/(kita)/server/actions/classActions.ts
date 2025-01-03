@@ -94,6 +94,8 @@ export async function getClassesForCurrentUser(
       )
       .where(eq(classEnrollment.userId, userIdSubquery(authUserId).id));
 
+    console.log("Classes:", classes);
+
     const extendedClasses: ExtendedClass[] = classes.map((cls) => ({
       id: cls.id,
       universityId: cls.universityId,

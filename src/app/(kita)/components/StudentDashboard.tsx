@@ -44,9 +44,9 @@ interface StudentDashboardProps {
 //   },
 // ];
 
-// universityId 1e3d0e31-0299-4543-a8f3-2d969b9bccd5
-// userId 0e5df738-4658-45bd-b526-a0384df34b53
-// classId 2801f9a3-da61-426a-8fc7-0d0d5e50960c
+// universityId cb6300fd-b410-4f0a-b59c-40ef2fd72bdc
+// userId bb5781de-8fbd-485b-a5d7-ec1c213bb9a7
+// classId 897fd91b-b99c-4638-b260-eddb798551f4
 
 
 const StudentDashboard = async ({ name, isStudent, authUserId }: StudentDashboardProps) => {

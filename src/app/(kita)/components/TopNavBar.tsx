@@ -74,6 +74,8 @@ export default function TopNavBar({ setSidebarOpen, userNavigation }: Props) {
                 <Image
                   alt={user.name ?? "User Avatar"}
                   src={user.picture}
+                  width={32}
+                  height={32}
                   className="h-8 w-8 rounded-full bg-gray-50"
                 />
               ) : (
