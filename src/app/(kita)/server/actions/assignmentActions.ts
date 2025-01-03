@@ -115,6 +115,7 @@ export async function getCurrentUserAssignment(
   auth0UserId: string
 ): Promise<ExtendedSelectAssignment[]> {
   try {
+    console.log("auth0UserId for currentAssignments", auth0UserId);
 
     const [theUser] = await db
       .select({ id: user.id })

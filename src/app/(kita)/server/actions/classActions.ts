@@ -70,6 +70,16 @@ export async function getClassesForCurrentUser(
   authUserId: string
 ): Promise<ExtendedClass[]> {
   try {
+    const [theUser] = await db
+      .select({ id: user.id })
+      .from(user)
+      .where(eq(user.auth0UserId, authUserId))
+      .limit(1);
+
+    if (!theUser) {
+      throw new Error("User not found");
+    }
+
     const classes = await db
       .select({
         id: classTable.id,
@@ -92,7 +102,7 @@ export async function getClassesForCurrentUser(
         professorDataSubquery,
         eq(classTable.id, professorDataSubquery.classId)
       )
-      .where(eq(classEnrollment.userId, userIdSubquery(authUserId).id));
+      .where(eq(classEnrollment.userId, theUser.id));
 
     console.log("Classes:", classes);
 

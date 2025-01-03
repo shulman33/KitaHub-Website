@@ -2,7 +2,7 @@
 const nextConfig = {
   //cdn.builder.io
   images: {
-    domains: ["cdn.builder.io", "s.gravatar.com"],
+    domains: ["cdn.builder.io", "s.gravatar.com", "lh3.googleusercontent.com"],
   },
 };
 
