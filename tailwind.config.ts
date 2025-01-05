@@ -13,6 +13,10 @@ const config: Config = {
         "dark-blue": "rgba(17, 23, 41, 1)",
         "off-white": "#F8F8F8",
         "midnight-blue": "#191235",
+        secondary:"#0B0B2C",
+        lightBlue:"#EFF4FF",
+        darkBlue:"#0D6CFF",
+        lightGray:"#74759A"
       },
     },
   },
