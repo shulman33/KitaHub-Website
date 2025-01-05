@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
         { error: "Invalid university email." },
         { status: 400 }
       );
-    }
+    } 
     console.log("University email is valid.");
 
     const universityRepository = new UniversityRepository();
