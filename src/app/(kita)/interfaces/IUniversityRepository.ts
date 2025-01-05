@@ -1,15 +1,8 @@
-import { University, Prisma } from "@prisma/client";
+import { InsertUniversity, SelectUniversity } from "@/app/db/schema";
 
 export interface IUniversityRepository {
-  getUniversityById(id: string): Promise<University | null>;
-  getAllUniversities(): Promise<University[]>;
-  createUniversity(data: Prisma.UniversityCreateInput): Promise<University>;
+  createUniversity(data: InsertUniversity): Promise<SelectUniversity>;
   getOrCreateUniversity(
-    data: Prisma.UniversityCreateInput
-  ): Promise<University>;
-  updateUniversity(
-    id: string,
-    data: Prisma.UniversityUpdateInput
-  ): Promise<University>;
-  deleteUniversity(id: string): Promise<void>;
+    data: InsertUniversity
+  ): Promise<SelectUniversity>;
 }
