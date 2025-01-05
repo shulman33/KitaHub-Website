@@ -37,6 +37,9 @@ export async function POST(req: NextRequest) {
 
     const userRole = role === "Student" ? "STUDENT" : "PROFESSOR";
 
+    const roleId =
+      userRole === "STUDENT" ? "rol_4oBD1Uz01d9AfMMa" : "rol_dIwjCpO7h7RGqneb";
+
     try {
       await db.insert(user).values({
         auth0UserId: auth0UserId,
@@ -57,7 +60,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { message: "User record created" },
+      { message: "User record created", roleId: roleId },
       { status: 201 }
     );
   } catch (error) {
