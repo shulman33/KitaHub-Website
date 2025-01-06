@@ -2,16 +2,28 @@
 
 import { Dispatch, SetStateAction } from "react";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { BellIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import {
+  BellIcon,
+  ChevronDownIcon,
+  Bars3Icon,
+  Bars3BottomLeftIcon,
+} from "@heroicons/react/24/outline";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import Image from "next/image";
 
 type Props = {
   setSidebarOpen: Dispatch<SetStateAction<boolean>>;
   userNavigation: { name: string; href: string }[];
+  isCollapsed: boolean;
+  setIsCollapsed: Dispatch<SetStateAction<boolean>>;
 };
 
-export default function TopNavBar({ setSidebarOpen, userNavigation }: Props) {
+export default function TopNavBar({
+  setSidebarOpen,
+  userNavigation,
+  isCollapsed,
+  setIsCollapsed,
+}: Props) {
   const { user, error, isLoading } = useUser();
 
   const PlaceholderIcon = () => (
@@ -27,14 +39,9 @@ export default function TopNavBar({ setSidebarOpen, userNavigation }: Props) {
   );
 
   return (
-    <div
-      className="
-        sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 
-        border-b border-gray-200 
-        mobile-gradient-bg sm:bg-white 
-        px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8
-      "
-    >
+    <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 mobile-gradient-bg sm:bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+      
+      {/* Mobile menu button */}
       <button
         type="button"
         onClick={() => setSidebarOpen(true)}
@@ -42,6 +49,22 @@ export default function TopNavBar({ setSidebarOpen, userNavigation }: Props) {
       >
         <span className="sr-only">Open sidebar</span>
         <Image src="/hamburger-icon.png" width={28} height={28} alt="Menu" />
+      </button>
+
+      {/* Desktop collapse button */}
+      <button
+        type="button"
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className="hidden lg:block -m-2.5 p-2.5 text-gray-700 hover:text-gray-900"
+      >
+        <span className="sr-only">
+          {isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        </span>
+        {isCollapsed ? (
+          <Bars3BottomLeftIcon className="h-6 w-6" aria-hidden="true" />
+        ) : (
+          <Bars3Icon className="h-6 w-6" aria-hidden="true" />
+        )}
       </button>
 
       <div className="flex flex-1 gap-x-4 justify-end self-stretch lg:gap-x-6">
@@ -81,14 +104,8 @@ export default function TopNavBar({ setSidebarOpen, userNavigation }: Props) {
               ) : (
                 <PlaceholderIcon />
               )}
-              
+
               <span className="hidden lg:flex lg:items-center">
-                <span
-                  aria-hidden="true"
-                  className="ml-4 text-sm font-semibold leading-6 text-gray-900"
-                >
-                  {user?.nickname}
-                </span>
                 <ChevronDownIcon
                   aria-hidden="true"
                   className="ml-2 h-5 w-5 text-gray-400"

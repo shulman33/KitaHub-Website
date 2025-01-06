@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DesktopSidebar from "@/app/(kita)/components/DesktopSidebar";
 import MobileSidebar from "@/app/(kita)/components/MobileSidebar";
 import TopNavBar from "@/app/(kita)/components/TopNavBar";
-import { usePathname } from "next/navigation"; // Import usePathname hook
+import { ExtendedClass } from "../lib/types";
+import { usePathname } from "next/navigation";
+
 import {
   HomeIcon,
   DocumentTextIcon,
@@ -13,54 +15,78 @@ import {
   AcademicCapIcon,
 } from "@heroicons/react/24/outline";
 
-export default function ClientLayout({
-  children,
-}: {
+type Props = {
   children: React.ReactNode;
-}) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const pathname = usePathname(); // Get current route
+  classes: ExtendedClass[];
+};
 
-  // Check if the route contains "qa"
-  const isQARoute = pathname.includes("qa");
+export default function ClientLayout({ children, classes }: Props) {
+
+  // Helper function to check if path matches discussions pattern
+  const isDiscussionsPath = (path: string) => {
+    console.log("Checking path: ", path);
+    const match = path.match(
+      /\/dashboard\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/discussions/
+    );
+    console.log("Match: ", match);
+    return match !== null;
+  };
+
+  const pathname = usePathname();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(isDiscussionsPath(pathname));
+
+  useEffect(() => {
+    setIsCollapsed(isDiscussionsPath(pathname));
+  }, [pathname]);
 
   const navigation = [
-    { name: "Dashboard", href: "#", icon: HomeIcon, current: true },
-    { name: "Assignments", href: "#", icon: DocumentTextIcon, current: false },
+    {
+      name: "Dashboard",
+      href: "/dashboard",
+      icon: HomeIcon,
+      current: pathname === "/dashboard",
+    },
+    {
+      name: "Assignments",
+      href: "/dashboard/assignments",
+      icon: DocumentTextIcon,
+      current: pathname === "/dashboard/assignments",
+    },
     {
       name: "Discussions",
-      href: "#",
+      href: `/dashboard/${classes[0].id}/discussions`,
       icon: ChatBubbleLeftRightIcon,
-      current: false,
+      current: pathname === "/dashboard/discussions",
     },
-    { name: "Profile", href: "#", icon: UserIcon, current: false },
+    {
+      name: "Profile",
+      href: "/dashboard/profile",
+      icon: UserIcon,
+      current: pathname === "/dashboard/profile",
+    },
     {
       name: "Courses",
       href: "#",
       icon: AcademicCapIcon,
-      current: false,
-      children: [
-        {
-          name: "Introduction to Algorithms",
-          href: "/dashboard/classes/34554",
-          current: false,
-        },
-        { name: "Systems Programming", href: "#", current: false },
-      ],
+      current: pathname.startsWith("/dashboard/classes"),
+      children: classes.map((cls) => ({
+        name: `${cls.className}`,
+        href: `/dashboard/${cls.id}`,
+        current: pathname === `/dashboard/${cls.id}`,
+      })),
     },
   ];
 
+  // Flatten navigation for mobile view
   const mobileNavigation = [
-    { name: "Dashboard", href: "#", icon: HomeIcon, current: true },
-    { name: "Assignments", href: "#", icon: DocumentTextIcon, current: false },
-    {
-      name: "Discussions",
-      href: "#",
-      icon: ChatBubbleLeftRightIcon,
-      current: false,
-    },
-    { name: "Profile", href: "#", icon: UserIcon, current: false },
-    { name: "Courses", href: "#", icon: AcademicCapIcon, current: false },
+    ...navigation.slice(0, -1),
+    ...classes.map((cls) => ({
+      name: `${cls.className}`,
+      href: `/dashboard/${cls.id}`,
+      icon: AcademicCapIcon,
+      current: pathname === `/dashboard/${cls.id}`,
+    })),
     {
       name: "Logout",
       href: "/api/auth/logout",
@@ -70,7 +96,7 @@ export default function ClientLayout({
   ];
 
   const userNavigation = [
-    { name: "Your profile", href: "#" },
+    { name: "Your profile", href: "/dashboard/profile" },
     { name: "Sign out", href: "/api/auth/logout" },
   ];
 
@@ -81,16 +107,19 @@ export default function ClientLayout({
         setSidebarOpen={setSidebarOpen}
         navigation={mobileNavigation}
       />
-      <DesktopSidebar navigation={navigation} />
-      <div className="lg:pl-72">
+      <DesktopSidebar navigation={navigation} isCollapsed={isCollapsed} />
+      <div
+        className={`${
+          isCollapsed ? "lg:pl-20" : "lg:pl-72"
+        } transition-all duration-300`}
+      >
         <TopNavBar
           setSidebarOpen={setSidebarOpen}
           userNavigation={userNavigation}
+          isCollapsed={isCollapsed}
+          setIsCollapsed={setIsCollapsed}
         />
-        {/* Conditional Padding for QA Routes */}
-        <main
-          className={`bg-[#FAFAFA] ${isQARoute ? "py-0 px-0" : "py-10 px-[20px] sm:px-6 lg:px-8"}`}
-        >
+        <main className="bg-[#FAFAFA] py-10 px-[20px] sm:px-6 lg:px-8">
           {children}
         </main>
       </div>
