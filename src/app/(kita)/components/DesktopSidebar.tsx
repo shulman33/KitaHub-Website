@@ -24,15 +24,20 @@ type NavigationItem = {
 
 type Props = {
   navigation: NavigationItem[];
+  isCollapsed: boolean;
 };
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function DesktopSidebar({ navigation }: Props) {
+export default function DesktopSidebar({ navigation, isCollapsed }: Props) {
   return (
-    <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
+    <div
+      className={`hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col transition-all duration-300 ${
+        isCollapsed ? "lg:w-20" : "lg:w-72"
+      }`}
+    >
       <div
         className="flex grow flex-col gap-y-5 overflow-y-auto px-6 pb-4"
         style={{
@@ -47,7 +52,9 @@ export default function DesktopSidebar({ navigation }: Props) {
               width={8}
               height={48}
               src="/white-kh-logo.svg"
-              className="h-12 w-20"
+              className={`h-12 ${
+                isCollapsed ? "w-8" : "w-20"
+              } transition-all duration-300`}
             />
           </Link>
         </div>
@@ -64,8 +71,10 @@ export default function DesktopSidebar({ navigation }: Props) {
                           item.current
                             ? "bg-white text-accent-purple"
                             : "text-white hover:bg-indigo-700 hover:text-white",
-                          "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6"
+                          "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
+                          isCollapsed ? "justify-center" : ""
                         )}
+                        title={isCollapsed ? item.name : undefined}
                       >
                         <item.icon
                           aria-hidden="true"
@@ -76,16 +85,16 @@ export default function DesktopSidebar({ navigation }: Props) {
                             "h-6 w-6 shrink-0"
                           )}
                         />
-                        {item.name}
+                        {!isCollapsed && item.name}
                       </Link>
-                    ) : (
+                    ) : isCollapsed ? null : (
                       <Disclosure as="div">
                         <DisclosureButton
                           className={classNames(
                             item.current
-                              ? "bg-white text-accent-purple"
-                              : "text-white hover:bg-indigo-700 hover:text-white",
-                            "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6"
+                              ? "bg-white text-accent-purple w-full"
+                              : "text-white hover:bg-indigo-700 hover:text-white w-full",
+                            "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 w-full" // Added w-full
                           )}
                         >
                           <ChevronRightIcon
@@ -102,9 +111,9 @@ export default function DesktopSidebar({ navigation }: Props) {
                                 href={subItem.href}
                                 className={classNames(
                                   subItem.current
-                                    ? "bg-white text-accent-purple"
-                                    : "text-white hover:bg-indigo-700 hover:text-white",
-                                  "block rounded-md py-2 pl-9 pr-2 text-sm/6"
+                                    ? "bg-white text-accent-purple w-full"
+                                    : "text-white hover:bg-indigo-700 hover:text-white w-full",
+                                  "block rounded-md py-2 pl-9 pr-2 text-sm/6" // Removed w-full from here since block handles it
                                 )}
                               >
                                 {subItem.name}
@@ -121,13 +130,16 @@ export default function DesktopSidebar({ navigation }: Props) {
             <li className="mt-auto">
               <Link
                 href="#"
-                className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-white hover:bg-indigo-700 hover:text-white"
+                className={`group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-white hover:bg-indigo-700 hover:text-white ${
+                  isCollapsed ? "justify-center" : ""
+                }`}
+                title={isCollapsed ? "Settings" : undefined}
               >
                 <Cog6ToothIcon
                   aria-hidden="true"
                   className="h-6 w-6 shrink-0 text-white group-hover:text-white"
                 />
-                Settings
+                {!isCollapsed && "Settings"}
               </Link>
             </li>
           </ul>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DesktopSidebar from "@/app/(kita)/components/DesktopSidebar";
 import MobileSidebar from "@/app/(kita)/components/MobileSidebar";
 import TopNavBar from "@/app/(kita)/components/TopNavBar";
@@ -21,8 +21,24 @@ type Props = {
 };
 
 export default function ClientLayout({ children, classes }: Props) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Helper function to check if path matches discussions pattern
+  const isDiscussionsPath = (path: string) => {
+    console.log("Checking path: ", path);
+    const match = path.match(
+      /\/dashboard\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/discussions/
+    );
+    console.log("Match: ", match);
+    return match !== null;
+  };
+
   const pathname = usePathname();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(isDiscussionsPath(pathname));
+
+  useEffect(() => {
+    setIsCollapsed(isDiscussionsPath(pathname));
+  }, [pathname]);
 
   const navigation = [
     {
@@ -39,7 +55,7 @@ export default function ClientLayout({ children, classes }: Props) {
     },
     {
       name: "Discussions",
-      href: "/dashboard/discussions",
+      href: `/dashboard/${classes[0].id}/discussions`,
       icon: ChatBubbleLeftRightIcon,
       current: pathname === "/dashboard/discussions",
     },
@@ -91,11 +107,17 @@ export default function ClientLayout({ children, classes }: Props) {
         setSidebarOpen={setSidebarOpen}
         navigation={mobileNavigation}
       />
-      <DesktopSidebar navigation={navigation} />
-      <div className="lg:pl-72">
+      <DesktopSidebar navigation={navigation} isCollapsed={isCollapsed} />
+      <div
+        className={`${
+          isCollapsed ? "lg:pl-20" : "lg:pl-72"
+        } transition-all duration-300`}
+      >
         <TopNavBar
           setSidebarOpen={setSidebarOpen}
           userNavigation={userNavigation}
+          isCollapsed={isCollapsed}
+          setIsCollapsed={setIsCollapsed}
         />
         <main className="bg-[#FAFAFA] py-10 px-[20px] sm:px-6 lg:px-8">
           {children}
