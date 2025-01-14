@@ -54,10 +54,10 @@ export async function GET(req: NextRequest) {
       .where(eq(classEnrollment.userId, userId));
 
     return NextResponse.json(classes);
-  } catch (error) {
+  } catch (error: Error | any) {
     console.error("Error in GET /api/classes", error);
     return NextResponse.json(
-      { error: (error as Error).message },
+      { error: error.message },
       { status: 500 }
     );
   }
