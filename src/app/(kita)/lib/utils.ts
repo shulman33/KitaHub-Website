@@ -100,6 +100,14 @@ export const currentUserRole = sql`
 //   )
 // `;
 
+export function generateEnrollmentCode(): string {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  return Array.from(
+    { length: 6 },
+    () => chars[Math.floor(Math.random() * chars.length)]
+  ).join("");
+}
+
 export const isEnrolledInClassSubquery = (
   classIdColumn: AnyColumn,
   authUserId: string

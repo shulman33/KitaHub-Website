@@ -10,13 +10,20 @@ import {
   semesterEnum,
 } from "@/app/db/schema";
 import { eq, and } from "drizzle-orm";
+import axios from "axios";
 import {
   ExtendedClass,
   ExtendedInstructor,
   ExtendedStudent,
 } from "../../lib/types";
-import { currentUserId, isEnrolledInClassSubquery, professorDataSubquery, userIdSubquery } from "../../lib/utils";
+import {
+  currentUserId,
+  isEnrolledInClassSubquery,
+  professorDataSubquery,
+  userIdSubquery,
+} from "../../lib/utils";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 
 // This function fetches a class by its ID
 // it should return all the fields from the class table
@@ -43,10 +50,12 @@ export async function getClassById(
         professorProfilePicture: professorDataSubquery.professorProfilePicture,
       })
       .from(classTable)
-      .where(and(
-        eq(classTable.id, classId),
-        isEnrolledInClassSubquery(classTable.id, authUserId)
-      ))
+      .where(
+        and(
+          eq(classTable.id, classId),
+          isEnrolledInClassSubquery(classTable.id, authUserId)
+        )
+      );
 
     if (!classes.length) return null;
 
@@ -59,6 +68,28 @@ export async function getClassById(
   } catch (error) {
     console.error("Error fetching class by ID:", error);
     throw new Error("Error fetching class by ID");
+  }
+}
+
+export async function fetchClasses() {
+  try {
+    const cookieStore = cookies();
+    const cookieHeader = cookieStore.toString();
+
+    const response = await axios.get(
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/classes`,
+      {
+        headers: {
+          Cookie: cookieHeader,
+        },
+        withCredentials: true,
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error calling /api/classes:", error);
+    throw new Error("Failed to fetch classes.");
   }
 }
 
@@ -149,11 +180,13 @@ export async function getInstructorsByClassId(
       .from(classEnrollment)
       .innerJoin(user, eq(classEnrollment.userId, user.id))
       .innerJoin(classTable, eq(classEnrollment.classId, classTable.id))
-      .where(and(
-        eq(classEnrollment.classId, classId),
-        eq(classEnrollment.role, "PROFESSOR"),
-        isEnrolledInClassSubquery(classTable.id, authUserId)
-      ))
+      .where(
+        and(
+          eq(classEnrollment.classId, classId),
+          eq(classEnrollment.role, "PROFESSOR"),
+          isEnrolledInClassSubquery(classTable.id, authUserId)
+        )
+      );
 
     return instructors;
   } catch (error) {
@@ -179,11 +212,13 @@ export async function getStudentsByClassId(
       })
       .from(classEnrollment)
       .innerJoin(user, eq(classEnrollment.userId, user.id))
-      .where(and(
-        eq(classEnrollment.classId, classId),
-        eq(classEnrollment.role, "STUDENT"),
-        isEnrolledInClassSubquery(classEnrollment.classId, authUserId)
-      ));
+      .where(
+        and(
+          eq(classEnrollment.classId, classId),
+          eq(classEnrollment.role, "STUDENT"),
+          isEnrolledInClassSubquery(classEnrollment.classId, authUserId)
+        )
+      );
 
     return students;
   } catch (error) {
@@ -255,88 +290,27 @@ export type CreateClassFormData = {
   year: number;
 };
 
-function generateEnrollmentCode(): string {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  return Array.from(
-    { length: 6 },
-    () => chars[Math.floor(Math.random() * chars.length)]
-  ).join("");
-}
 
-export async function createClass(
-  formData: CreateClassFormData,
-  authUserId: string
-) {
-  console.log("Called createClass with:", formData);
+export async function createClass(formData: CreateClassFormData) {
   try {
-    if (
-      !formData.className ||
-      !formData.courseCode ||
-      !formData.semester ||
-      !formData.year
-    ) {
-      return { error: "Missing required fields", success: false };
-    }
+    const cookieStore = cookies();
+    const cookieHeader = cookieStore.toString();
 
-    const userResult = await db
-      .select({
-        id: user.id,
-        role: user.role,
-        universityId: user.universityId,
-      })
-      .from(user)
-      .where(eq(user.auth0UserId, authUserId));
-
-    if (!userResult.length) {
-      throw new Error("User not found");
-    }
-
-    const professor = userResult[0];
-    if (professor.role !== "PROFESSOR") {
-      throw new Error("Only professors can create classes");
-    }
-
-    const enrollmentCode = generateEnrollmentCode();
-
-    const newClass = await db
-      .insert(classTable)
-      .values({
-        className: formData.className,
-        description: formData.description || null,
-        courseCode: formData.courseCode,
-        semester: formData.semester,
-        year: formData.year,
-        universityId: professor.universityId,
-        enrollmentCode,
-        isActive: true,
-      })
-      .returning();
-
-    await db.insert(classEnrollment).values({
-      userId: professor.id,
-      classId: newClass[0].id,
-      role: "PROFESSOR",
-    });
-
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/classes`,
+      formData,
+      {
+        headers: {
+          Cookie: cookieHeader,
+        },
+        withCredentials: true,
+      }
+    );
     revalidatePath("/dashboard");
-    revalidatePath(`/dashboard/${newClass[0].id}`);
-
-    return {
-      data: newClass[0],
-      success: true,
-    };
+    return response.data;
   } catch (error) {
-    console.error("Error in createClass:", error);
-    if (error instanceof Error) {
-      return {
-        error: error.message,
-        success: false,
-      };
-    }
-    return {
-      error: "Failed to create class. Please try again.",
-      success: false,
-    };
+    console.error("Error calling /api/classes:", error);
+    throw new Error("Failed to fetch classes.");
   }
 }
 
@@ -350,12 +324,16 @@ export async function updateClass(
 ): Promise<SelectClass> {
   try {
     // Check if user is an enrolled professor
-    const enrollment = await db.select().from(classEnrollment)
-    .where(and(
-      eq(classEnrollment.classId, classId),
-      eq(classEnrollment.userId, currentUserId(authUserId)),
-      eq(classEnrollment.role, "PROFESSOR")
-    ));
+    const enrollment = await db
+      .select()
+      .from(classEnrollment)
+      .where(
+        and(
+          eq(classEnrollment.classId, classId),
+          eq(classEnrollment.userId, currentUserId(authUserId)),
+          eq(classEnrollment.role, "PROFESSOR")
+        )
+      );
 
     if (!enrollment.length) {
       throw new Error("Only enrolled professors can update classes");
@@ -382,12 +360,16 @@ export async function deleteClass(
 ): Promise<void> {
   try {
     // Check if user is an enrolled professor
-    const enrollment = await db.select().from(classEnrollment)
-    .where(and(
-      eq(classEnrollment.classId, classId),
-      eq(classEnrollment.userId, currentUserId(authUserId)),
-      eq(classEnrollment.role, "PROFESSOR")
-    ))
+    const enrollment = await db
+      .select()
+      .from(classEnrollment)
+      .where(
+        and(
+          eq(classEnrollment.classId, classId),
+          eq(classEnrollment.userId, currentUserId(authUserId)),
+          eq(classEnrollment.role, "PROFESSOR")
+        )
+      );
 
     if (!enrollment.length) {
       throw new Error("Only enrolled professors can delete classes");

@@ -7,7 +7,7 @@ import Calendar from "./ProfessorComponents/Calendar";
 import { getMessagesByCurrentUser } from "../server/actions/messageActions";
 import { getCurrentUserAssignment } from "../server/actions/assignmentActions";
 import CoursesWidget from "./CoursesWidget";
-import { getClassesForCurrentUser } from "../server/actions/classActions";
+import { fetchClasses, getClassesForCurrentUser } from "../server/actions/classActions";
 import { getSession } from "@auth0/nextjs-auth0";
 const dummyMessages = [
   {
@@ -156,7 +156,8 @@ interface ProfessorDashboardProps {
 const ProfessorDashboard = async ({name, isStudent, authUserId}: ProfessorDashboardProps) => {
   const messages = await getMessagesByCurrentUser(authUserId);
   const assignments = await getCurrentUserAssignment(authUserId);
-  const courses = await getClassesForCurrentUser(authUserId);
+  const courses = await fetchClasses();
+  console.log("courses in prof", courses);
   const session = await getSession();
   if (!session || !session.user) {
     throw new Error("User is not authenticated");

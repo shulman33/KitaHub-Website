@@ -283,7 +283,7 @@ const CoursesWidget: React.FC<CoursesWidgetProps> = ({
 
   const handleCreateClass = async (data: CreateClassData) => {
     try {
-      await createClass(data, auth0UserId);
+      await createClass(data)
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error creating class:", error);
@@ -340,7 +340,7 @@ const CoursesWidget: React.FC<CoursesWidgetProps> = ({
               key={course.id}
               id={course.id}
               courseName={course.className}
-              instructor={course.professorName}
+              instructor={`${course.professorFirstName} ${course.professorLastName}`}
               enrollmentCode={course.enrollmentCode}
               isStudent={isStudent}
             />

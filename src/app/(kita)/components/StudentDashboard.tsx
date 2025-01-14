@@ -1,6 +1,6 @@
 import DiscussionBoardWidget from "@/app/(kita)/components/DiscussionBoardWidget";
 import Header from "@/app/(kita)/components/Header";
-import { getClassesForCurrentUser } from "../server/actions/classActions";
+import { fetchClasses, getClassesForCurrentUser } from "../server/actions/classActions";
 import {
   getMessagesByCurrentUser,
   getMessagesByUserId,
@@ -52,7 +52,7 @@ interface StudentDashboardProps {
 const StudentDashboard = async ({ name, isStudent, authUserId }: StudentDashboardProps) => {
   const messages = await getMessagesByCurrentUser(authUserId);
   // console.log("messages", messages);
-  const courses = await getClassesForCurrentUser(authUserId);
+  const courses = await fetchClasses();
   // console.log("courses", courses);
   const assignments = await getCurrentUserAssignment(authUserId);
   const session = await getSession();
