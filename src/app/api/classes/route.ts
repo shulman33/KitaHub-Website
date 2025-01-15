@@ -31,25 +31,14 @@ export async function GET(req: NextRequest) {
 
     const classes = await db
       .select({
-        id: classTable.id,
-        universityId: classTable.universityId,
-        className: classTable.className,
-        description: classTable.description,
-        enrollmentCode: classTable.enrollmentCode,
-        code: classTable.code,
-        courseCode: classTable.courseCode,
-        semester: classTable.semester,
-        year: classTable.year,
-        isActive: classTable.isActive,
-        professorFirstName: user.firstName,
-        professorLastName: user.lastName,
-        professorProfilePicture: user.profilePicture,
+        class: classTable,
+        professorData: user,
       })
       .from(classTable)
       .innerJoin(classEnrollment, eq(classTable.id, classEnrollment.classId))
       .leftJoin(
         user,
-        and(eq(classEnrollment.userId, user.id), eq(user.role, "PROFESSOR"))
+        and(eq(classEnrollment.userId, userId), eq(user.role, "PROFESSOR"))
       )
       .where(eq(classEnrollment.userId, userId));
 
