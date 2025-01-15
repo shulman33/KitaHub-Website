@@ -17,6 +17,43 @@ import { formatDistanceToNow } from "date-fns";
 import { revalidatePath } from "next/cache";
 import { pusherServer } from "../../lib/pusher/pusher";
 import { EVENT_TYPES, getChannelNames } from "../../lib/pusher/pusher";
+import { cookies } from "next/headers";
+import axios from "axios";
+
+export async function getMessages(classId?: string, page?: number, limit?: number) {
+  try {
+    const cookieStore = cookies();
+    const cookieHeader = cookieStore.toString();
+
+    let url = `${process.env.NEXT_PUBLIC_APP_URL}/api/messages`;
+
+    const paramList = [];
+    if (classId) {
+      paramList.push(`classId=${classId}`);
+    }
+    if (page) {
+      paramList.push(`page=${page}`);
+    }
+    if (limit) {
+      paramList.push(`limit=${limit}`);
+    }
+    if (paramList.length) {
+      url += `?${paramList.join("&")}`;
+    }
+
+    const response = await axios.get(url, {
+      headers: {
+        Cookie: cookieHeader,
+      },
+      withCredentials: true,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error calling /api/messages:", error);
+    throw new Error("Failed to fetch Messages.");
+  }
+}
 
 /**
  * Fetches messages from the database based on provided filters and limit.
