@@ -40,43 +40,70 @@ export default function ClientLayout({ children, classes }: Props) {
     setIsCollapsed(isDiscussionsPath(pathname));
   }, [pathname]);
 
-  const navigation = [
-    {
-      name: "Dashboard",
-      href: "/dashboard",
-      icon: HomeIcon,
-      current: pathname === "/dashboard",
-    },
-    {
-      name: "Assignments",
-      href: "/dashboard/assignments",
-      icon: DocumentTextIcon,
-      current: pathname === "/dashboard/assignments",
-    },
-    {
-      name: "Discussions",
-      href: `/dashboard/${classes[0].id}/discussions`,
-      icon: ChatBubbleLeftRightIcon,
-      current: pathname === "/dashboard/discussions",
-    },
-    {
-      name: "Profile",
-      href: "/dashboard/profile",
-      icon: UserIcon,
-      current: pathname === "/dashboard/profile",
-    },
-    {
-      name: "Courses",
-      href: "#",
-      icon: AcademicCapIcon,
-      current: pathname.startsWith("/dashboard/classes"),
-      children: classes.map((cls) => ({
-        name: `${cls.className}`,
-        href: `/dashboard/${cls.id}`,
-        current: pathname === `/dashboard/${cls.id}`,
-      })),
-    },
-  ];
+const navigation = [
+  {
+    name: "Dashboard",
+    href: "/dashboard",
+    icon: HomeIcon,
+    current: pathname === "/dashboard",
+  },
+  {
+    name: "Assignments",
+    href: "/dashboard/assignments",
+    icon: DocumentTextIcon,
+    current: pathname === "/dashboard/assignments",
+  },
+  ...(classes.length > 0
+    ? [
+        {
+          name: "Discussions",
+          href: `/dashboard/${classes[0].id}/discussions`,
+          icon: ChatBubbleLeftRightIcon,
+          current: pathname === "/dashboard/discussions",
+        },
+      ]
+    : [
+        {
+          name: "Discussions",
+          href: `/dashboard`,
+          icon: ChatBubbleLeftRightIcon,
+          current: pathname === "/dashboard/discussions",
+        },
+      ]),
+  {
+    name: "Profile",
+    href: "/dashboard/profile",
+    icon: UserIcon,
+    current: pathname === "/dashboard/profile",
+  },
+  ...(classes.length > 0
+    ? [
+        {
+          name: "Courses",
+          href: "#",
+          icon: AcademicCapIcon,
+          current: pathname.startsWith("/dashboard/classes"),
+          children: classes.map((cls) => ({
+            name: `${cls.className}`,
+            href: `/dashboard/${cls.id}`,
+            current: pathname === `/dashboard/${cls.id}`,
+          })),
+        },
+      ]
+    : [
+        {
+          name: "Courses",
+          href: "#",
+          icon: AcademicCapIcon,
+          current: pathname.startsWith("/dashboard/classes"),
+          children: classes.map((cls) => ({
+            name: "",
+            href: "",
+            current: false,
+          })),
+        },
+      ]),
+];
 
   // Flatten navigation for mobile view
   const mobileNavigation = [

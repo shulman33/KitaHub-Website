@@ -65,3 +65,7 @@ export async function GET(
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+export async function PATCH(request: NextRequest) {}
+
+export async function DELETE(request: NextRequest) {}
